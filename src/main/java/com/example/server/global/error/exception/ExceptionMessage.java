@@ -1,4 +1,4 @@
-package com.example.gaje.global.error.exception;
+package com.example.server.global.error.exception;
 
 import org.springframework.http.HttpStatus;
 

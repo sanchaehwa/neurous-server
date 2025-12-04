@@ -1,4 +1,4 @@
-package com.example.gaje.global.security.config;
+package com.example.server.global.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

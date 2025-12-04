@@ -1,4 +1,4 @@
-package com.example.gaje.global.docs;
+package com.example.server.global.docs;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,9 +24,9 @@ public class OpenApiConfig {
 		return new OpenAPI()
 			.addServersItem(new Server().url(backendBaseUrl))
 			.info(new Info()
-				.title("Gaje API 문서")
+				.title("API 문서")
 				.version("v1.0")
-				.description("뇌세포 프로젝트 Gaje의 Swagger 문서입니다.\n\n"
+				.description("뇌세포 프로젝트 Swagger 문서입니다.\n\n"
 					+ "토큰 인증이 필요한 API는 상단의 Authorize 버튼을 클릭한 뒤, `토큰`만 입력해주세요.\n"
 					+ "\nBearer는 자동으로 붙으므로, eyJhbGciOi... 와 같은 순수 토큰 문자열만 입력하시면 됩니다.")
 			)

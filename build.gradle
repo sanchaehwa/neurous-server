@@ -66,8 +66,8 @@ def findQClassPatterns() {
 
 def createFilteredClassDirectories() {
 	def defaultExcludedPatterns = [
-			'**/GajeApplication.class', '**/dto/**', '**/command/**', '**/result/**',
-			'**/infra/**', '**/config/**', '**/docs/**', '**/com/example/gaje/**/example/**'
+			'**/ServerApplication.class', '**/dto/**', '**/command/**', '**/result/**',
+			'**/infra/**', '**/config/**', '**/docs/**', '**/com/example/server/**/example/**'
 	]
 
 	return sourceSets.main.output.classesDirs.files.collect { dirPath ->

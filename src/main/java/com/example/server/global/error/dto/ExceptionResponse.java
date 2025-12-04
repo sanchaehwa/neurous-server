@@ -1,6 +1,6 @@
-package com.example.gaje.global.error.dto;
+package com.example.server.global.error.dto;
 
-import com.example.gaje.global.error.exception.ExceptionMessage;
+import com.example.server.global.error.exception.ExceptionMessage;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

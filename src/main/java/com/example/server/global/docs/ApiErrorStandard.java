@@ -1,4 +1,4 @@
-package com.example.gaje.global.docs;
+package com.example.server.global.docs;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.example.gaje.global.error.dto.ExceptionResponse;
+import com.example.server.global.error.dto.ExceptionResponse;
 
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;

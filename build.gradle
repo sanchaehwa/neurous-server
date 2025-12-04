@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.8'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
 	id 'checkstyle'
 }
 
@@ -39,9 +40,91 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
 }
 
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// Jacoco Coverage Report
+jacoco {
+	toolVersion = "0.8.13"
+}
+
+// QClass 패턴을 찾는 메서드
+def findQClassPatterns() {
+	def excludedPatterns = []
+	def generatedDir = layout.buildDirectory.dir("generated").get().asFile
+
+	fileTree(generatedDir).include("**/Q*.java")
+			.each { File file ->
+				def className = file.name.replace('.java', '')
+				excludedPatterns.add("**/${className}.class")
+			}
+
+	return excludedPatterns
+}
+
+def createFilteredClassDirectories() {
+	def defaultExcludedPatterns = [
+			'**/GajeApplication.class', '**/dto/**', '**/command/**', '**/result/**',
+			'**/infra/**', '**/config/**', '**/docs/**', '**/com/example/gaje/**/example/**'
+	]
+
+	return sourceSets.main.output.classesDirs.files.collect { dirPath ->
+		fileTree(
+				dir: dirPath,
+				excludes: defaultExcludedPatterns + findQClassPatterns()
+		)
+	}
+}
+
+jacocoTestReport {
+	dependsOn test
+
+	afterEvaluate {
+		classDirectories.setFrom(files(createFilteredClassDirectories()))
+	}
+
+	reports {
+		xml.required = true
+		csv.required = false
+		html.outputLocation = layout.buildDirectory.dir('reports/jacoco/html')
+	}
+
+	finalizedBy jacocoTestCoverageVerification
+}
+
+
+jacocoTestCoverageVerification {
+	afterEvaluate {
+		classDirectories.setFrom(files(createFilteredClassDirectories()))
+	}
+
+	violationRules {
+		rule {
+			element = 'CLASS'
+
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.60
+			}
+
+			limit {
+				counter = 'BRANCH'
+				value = 'COVEREDRATIO'
+				minimum = 0.60
+			}
+
+			limit {
+				counter = 'METHOD'
+				value = 'COVEREDRATIO'
+				minimum = 0.60
+			}
+		}
+	}
+}
+
 
 // check style
 tasks.withType(Checkstyle) {

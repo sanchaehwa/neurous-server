@@ -6,8 +6,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.example.server.global.error.dto.ExceptionResponse;
-
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,56 +21,54 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 		description = "인증되지 않은 사용자 (토큰 누락 또는 만료)",
 		content = @Content(
 			mediaType = "application/json",
-			schema = @Schema(implementation = ExceptionResponse.class),
+			schema = @Schema(ref = "#/components/schemas/ErrorResponse"),
 			examples = @ExampleObject(
 				name = "UnauthorizedError",
 				summary = "인증 실패 예시",
 				value = """
 					{
-						"success": false,
+						"status": 401,
+						"code": "AUTH_UNAUTHORIZED",
 						"message": "인증 정보가 없습니다. 다시 로그인해주세요."
 					}
 					"""
 			)
-		)),
+		)
+	),
 	@ApiResponse(
 		responseCode = "404",
 		description = "리소스를 찾을 수 없습니다",
 		content = @Content(
-			mediaType = "application/json",
-			schema = @Schema(implementation = ExceptionResponse.class),
+			schema = @Schema(ref = "#/components/schemas/ErrorResponse"),
 			examples = @ExampleObject(
 				name = "NotFoundError",
-				summary = "존재하지 않는 리소스 예시",
 				value = """
-						{
-							"success": false,
-							"message": "요청하신 페이지를 찾을 수 없습니다."
-						}
+					{
+						"status": 404,
+						"code": "RESOURCE_NOT_FOUND",
+						"message": "요청하신 리소스를 찾을 수 없습니다."
+					}
 					"""
 			)
-		)),
+		)
+	),
 	@ApiResponse(
 		responseCode = "500",
 		description = "서버 내부 오류",
 		content = @Content(
-			mediaType = "application/json",
-			schema = @Schema(implementation = ExceptionResponse.class),
+			schema = @Schema(ref = "#/components/schemas/ErrorResponse"),
 			examples = @ExampleObject(
 				name = "ServerError",
-				summary = "알 수 없는 서버 오류 예시",
 				value = """
-						{
-							"success": false,
-							"message": "알 수 없는 서버 에러가 발생했습니다."
-						}
+					{
+						"status": 500,
+						"code": "INTERNAL_SERVER_ERROR",
+						"message": "알 수 없는 서버 에러가 발생했습니다."
+					}
 					"""
 			)
-		))
+		)
+	)
 })
 public @interface ApiErrorStandard {
-
-	String summary() default "";
-
-	String description() default "";
 }

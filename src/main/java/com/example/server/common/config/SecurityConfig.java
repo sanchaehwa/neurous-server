@@ -26,7 +26,7 @@ public class SecurityConfig {
 
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final JwtTokenFilter jwtTokenFilter;
-    private final CatsgotogedogAuthenticationEntryPoint catsgotogedogAuthenticationEntryPoint;
+    private final NeurousAuthenticationEntryPoint neurousAuthenticationEntryPoint;
     private final OAuth2AutoLoginFilter oAuth2AutoLoginFilter;
 
     @Value("${allowed.origins.url}")
@@ -58,7 +58,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .exceptionHandling(eh -> eh.authenticationEntryPoint(catsgotogedogAuthenticationEntryPoint))
+                .exceptionHandling(eh -> eh.authenticationEntryPoint(neurousAuthenticationEntryPoint))
                 .addFilterBefore(oAuth2AutoLoginFilter, OAuth2AuthorizationRequestRedirectFilter.class)
                 .oauth2Login(oauth -> oauth
                         .successHandler(oAuth2LoginSuccessHandler))

@@ -77,7 +77,7 @@ public class UserService {
 //				if (!checkResult.passed()) {
 //					log.debug("닉네임 '{}'은(는) 독성 점수 {}로 부적절합니다. 기준치: {}",
 //							newDisplayName, checkResult.toxicityScore(), checkResult.threshold());
-//					throw new CatsgotogedogException(ErrorCode.TOO_TOXIC_DISPLAY_NAME);
+//					throw new NeurousException(ErrorCode.TOO_TOXIC_DISPLAY_NAME);
 //				}
 				user.setDisplayName(newDisplayName);
 				user.setNameUpdateAt(LocalDateTime.now());
@@ -104,7 +104,7 @@ public class UserService {
 //			imageStorageService.delete(user.getImageFilename());
 //			user.setImageFilename(null);
 //		}
-		user.setImageUrl("https://kr.object.ncloudstorage.com/catsgotogedogbucket/profile/default_user_image.png");
+		user.setImageUrl("https://kr.object.ncloudstorage.com/neurousbucket/profile/default_user_image.png");
 		userRepository.save(user);
 	}
 
@@ -133,7 +133,7 @@ public class UserService {
 		user.setProvider("none");
 		user.setProviderId("none");
 		user.setImageFilename(null);
-		user.setImageUrl("https://kr.object.ncloudstorage.com/catsgotogedogbucket/profile/default_user_image.png");
+		user.setImageUrl("https://kr.object.ncloudstorage.com/neurousbucket/profile/default_user_image.png");
 		user.setIsActive(false);
 	}
 

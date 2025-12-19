@@ -1,9 +1,9 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.8'
-	id 'io.spring.dependency-management' version '1.1.7'
-	id 'jacoco'
-	id 'checkstyle'
+    id 'java'
+    id 'org.springframework.boot' version '3.5.8'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
+    id 'checkstyle'
 }
 
 group = 'com.example'
@@ -11,144 +11,149 @@ version = '0.0.1-SNAPSHOT'
 description = 'Demo project for Spring Boot'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.mysql:mysql-connector-j'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	//swagger
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    //swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
 
-	//jwt
-	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-	runtimeOnly   'io.jsonwebtoken:jjwt-impl:0.11.5'
-	runtimeOnly   'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    //jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
-	//oauth2
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
+    //oauth2
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 
 
 }
 
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 // Jacoco Coverage Report
 jacoco {
-	toolVersion = "0.8.13"
+    toolVersion = "0.8.13"
 }
 
 // QClass 패턴을 찾는 메서드
 def findQClassPatterns() {
-	def excludedPatterns = []
-	def generatedDir = layout.buildDirectory.dir("generated").get().asFile
+    def excludedPatterns = []
+    def generatedDir = layout.buildDirectory.dir("generated").get().asFile
 
-	fileTree(generatedDir).include("**/Q*.java")
-			.each { File file ->
-				def className = file.name.replace('.java', '')
-				excludedPatterns.add("**/${className}.class")
-			}
+    fileTree(generatedDir).include("**/Q*.java")
+            .each { File file ->
+                def className = file.name.replace('.java', '')
+                excludedPatterns.add("**/${className}.class")
+            }
 
-	return excludedPatterns
+    return excludedPatterns
 }
 
 def createFilteredClassDirectories() {
-	def defaultExcludedPatterns = [
-			'**/ServerApplication.class', '**/dto/**', '**/command/**', '**/result/**',
-			'**/infra/**', '**/config/**', '**/docs/**', '**/com/example/server/**/example/**'
-	]
+    def defaultExcludedPatterns = [
+            '**/ServerApplication.class', '**/dto/**', '**/command/**', '**/result/**',
+            '**/infra/**', '**/config/**', '**/docs/**', '**/com/example/server/**/example/**'
+    ]
 
-	return sourceSets.main.output.classesDirs.files.collect { dirPath ->
-		fileTree(
-				dir: dirPath,
-				excludes: defaultExcludedPatterns + findQClassPatterns()
-		)
-	}
+    return sourceSets.main.output.classesDirs.files.collect { dirPath ->
+        fileTree(
+                dir: dirPath,
+                excludes: defaultExcludedPatterns + findQClassPatterns()
+        )
+    }
 }
 
 jacocoTestReport {
-	dependsOn test
+    dependsOn test
 
-	afterEvaluate {
-		classDirectories.setFrom(files(createFilteredClassDirectories()))
-	}
+    afterEvaluate {
+        classDirectories.setFrom(files(createFilteredClassDirectories()))
+    }
 
-	reports {
-		xml.required = true
-		csv.required = false
-		html.outputLocation = layout.buildDirectory.dir('reports/jacoco/html')
-	}
+    reports {
+        xml.required = true
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/html')
+    }
 
-	finalizedBy jacocoTestCoverageVerification
+    finalizedBy jacocoTestCoverageVerification
 }
 
 
 jacocoTestCoverageVerification {
-	afterEvaluate {
-		classDirectories.setFrom(files(createFilteredClassDirectories()))
-	}
+    afterEvaluate {
+        classDirectories.setFrom(files(createFilteredClassDirectories()))
+    }
 
-	violationRules {
-		rule {
-			element = 'CLASS'
+    violationRules {
+        rule {
+            element = 'CLASS'
 
-			limit {
-				counter = 'LINE'
-				value = 'COVEREDRATIO'
-				minimum = 0.60
-			}
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.60
+            }
 
-			limit {
-				counter = 'BRANCH'
-				value = 'COVEREDRATIO'
-				minimum = 0.60
-			}
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.60
+            }
 
-			limit {
-				counter = 'METHOD'
-				value = 'COVEREDRATIO'
-				minimum = 0.60
-			}
-		}
-	}
+            limit {
+                counter = 'METHOD'
+                value = 'COVEREDRATIO'
+                minimum = 0.60
+            }
+        }
+    }
 }
 
 
 // check style
 tasks.withType(Checkstyle) {
-	reports {
-		xml.required = true
-		html.required = true
-	}
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }
 
 checkstyleMain.source = fileTree('src/main/java')
 
 checkstyle {
-	configFile = file("checkstyle/naver-checkstyle-rules.xml")
-	configProperties = ["suppressionFile": "checkstyle/naver-checkstyle-suppressions.xml"]
+    configFile = file("checkstyle/naver-checkstyle-rules.xml")
+    configProperties = ["suppressionFile": "checkstyle/naver-checkstyle-suppressions.xml"]
 }
 
 checkstyleTest.enabled = false

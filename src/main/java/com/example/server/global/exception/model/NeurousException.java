@@ -1,14 +1,16 @@
-package com.example.server.global.exception;
+package com.example.server.global.exception.model;
+
+import com.example.server.global.exception.message.ErrorMessage;
 
 import lombok.Getter;
 
 @Getter
-public class NeurousException extends RuntimeException{
+public class NeurousException extends RuntimeException {
 
-	private final ErrorCode errorCode;
+	private final ErrorMessage errorMessage;
 
-	public NeurousException(ErrorCode errorCode) {
-		super(errorCode.getMessage());
-		this.errorCode = errorCode;
+	public NeurousException(ErrorMessage errorMessage) {
+		super(errorMessage.getMessage());
+		this.errorMessage = errorMessage;
 	}
 }

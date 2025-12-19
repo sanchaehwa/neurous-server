@@ -1,4 +1,4 @@
-package com.example.server.global;
+package com.example.server.global.domain;
 
 import java.time.LocalDateTime;
 

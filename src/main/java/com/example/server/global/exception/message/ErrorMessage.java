@@ -27,7 +27,10 @@ public enum ErrorMessage {
 	JWT_TOKEN_EXPIRED(401, "AUTH2004", "JWT 토큰이 만료되었습니다."),
 
 	// 서버 에러
-	INTERNAL_SERVER_ERROR(500, "INT5000", "서버 내부 오류가 발생했습니다.");
+	INTERNAL_SERVER_ERROR(500, "INT5000", "서버 내부 오류가 발생했습니다."),
+
+	//User 관련
+	USER_NOT_FOUND(404, "USER3001", "유저를 찾을 수 없습니다");
 
 	private final int status;
 	private final String code;

@@ -73,6 +73,7 @@ public class SecurityConfig {
 		//익명 인증 비활성화
 		http.anonymous(anonymous -> anonymous.disable());
 
+		return http.build();
 	}
 
 }

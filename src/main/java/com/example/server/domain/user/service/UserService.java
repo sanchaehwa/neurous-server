@@ -28,6 +28,10 @@ public class UserService {
 	private static final int SIGNUP_DELAY = 50;
 	private static final double SIGNUP_MULTIPLIER = 2.0;
 
+	private static final int GENERAL_MAX_ATTEMPTS = 3;
+	private static final int GENERAL_DELAY = 100;
+	private static final double GENERAL_MULTIPLIER = 2.0;
+
 	@Retryable(
 		retryFor = {OptimisticLockException.class, ObjectOptimisticLockingFailureException.class},
 		maxAttempts = SIGNUP_MAX_ATTEMPTS,
@@ -75,6 +79,29 @@ public class UserService {
 		}
 	}
 
-	//toDo: 회원 탈퇴 로직 + 난이도 및 관심여부 설정
+	@Transactional(readOnly = true)
+	public Optional<User> findByUserKey(String userKey) {
+		return userRepository.findByUserKey(userKey);
+	}
+
+	@Transactional(readOnly = true)
+	public Optional<User> findActiveByUserKey(String userKey) {
+		return userRepository.findBy
+	}
+
+	@Retryable(
+		retryFor = {OptimisticLockException.class, ObjectOptimisticLockingFailureException.class},
+		maxAttempts = GENERAL_MAX_ATTEMPTS,
+		backoff = @Backoff(delay = GENERAL_DELAY, multiplier = GENERAL_MULTIPLIER, random = true)
+	)
+	public void updateOAuth2Info(String userKey, String name, String email) {
+		userRepository.findByUserKey(userKey)
+			.ifPresent(user -> {
+				user.updateOAuth2Info(name, email);
+				log.debug("OAuth2 사용자 정보 업데이트 완료: {}", userKey);
+			});
+	}
+
+	//Todo: 회원 탈퇴 로직 + 난이도 및 관심여부 설정
 
 }

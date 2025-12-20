@@ -1,10 +1,12 @@
 package com.example.server.domain.user.entity;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.example.server.domain.user.entity.vo.Level;
 import com.example.server.domain.user.entity.vo.UserField;
+import com.example.server.domain.user.entity.vo.UserStatus;
 import com.example.server.domain.user.entity.vo.UserType;
 import com.example.server.global.domain.BaseTimeEntity;
 
@@ -54,6 +56,9 @@ public class User extends BaseTimeEntity {
 	private String email;
 
 	@Enumerated(EnumType.STRING)
+	private UserStatus status = UserStatus.NORMAL;
+
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, length = 25)
 	private UserType userType = UserType.USER;
 
@@ -76,9 +81,17 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false, name = "notification_status")
 	private boolean notification_status = false; //알람 여부 미설정
 
+	private LocalDateTime lastLoginAt;
+
 	//알림 여부 변경
 	public void toggleNotification() {
 		this.notification_status = !this.notification_status;
+	}
+
+	public void updateOAuth2Info(String name, String email) {
+		this.name = name;
+		this.email = email;
+		this.lastLoginAt = LocalDateTime.now();
 	}
 
 }

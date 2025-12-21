@@ -56,4 +56,13 @@ public class ContentController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/history")
+    public ResponseEntity<List<ContentResponse>> getReadHistory(
+            @AuthenticationPrincipal int userId,
+            @RequestParam(value = "page", defaultValue = "0") int page
+    ) {
+        List<ContentResponse> result = contentService.getReadHistory(userId, page);
+
+        return ResponseEntity.ok(result);
+    }
 }

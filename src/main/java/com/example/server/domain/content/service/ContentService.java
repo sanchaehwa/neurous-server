@@ -138,4 +138,22 @@ public class ContentService {
                 .map(ContentResponse::from)
                 .toList();
     }
+
+    /**
+     * 읽은 내역 조회
+     */
+    public List<ContentResponse> getReadHistory(int userId, int page) {
+
+        int size = 10;
+
+        List<Content> contents = readContentRepository.findReadContentsByUserId(
+                userId,
+                PageRequest.of(page, size)
+        );
+
+        return contents.stream()
+                .map(ContentResponse::from)
+                .toList();
+    }
+
 }

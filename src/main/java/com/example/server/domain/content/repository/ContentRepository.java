@@ -45,5 +45,14 @@ public interface ContentRepository extends JpaRepository<Content, Integer> {
             LIMIT 1
             """, nativeQuery = true)
     Optional<Content> findRandomUnreadByContentDiffAndCategoryExcludeIds(int userId, String ContentDiff, String category, List<Integer> excludedIds);
+
+    @Query(value = """
+            SELECT *
+            FROM content c
+            WHERE c.content_diff = :contentDiff
+              AND LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            ORDER BY c.content_id DESC
+            """, nativeQuery = true)
+    List<Content> searchByTitle(String contentDiff, String keyword, Pageable pageable);
 }
 

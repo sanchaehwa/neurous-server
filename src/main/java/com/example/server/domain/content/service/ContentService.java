@@ -114,4 +114,28 @@ public class ContentService {
 
         return ContentResponse.from(content);
     }
+
+    /**
+     * 검색 기능(title 기반)
+    */
+    public List<ContentResponse> search(String keyword, int page) {
+
+        String k = (keyword == null) ? "" : keyword.trim();
+        if (k.isEmpty()) {
+            return List.of();
+        }
+
+        int size = 10;
+
+        String diff = userRepository.findContentDiffByUserId(userId).orElse("초급");
+
+        return contentRepository.searchByTitle(
+                        diff,
+                        k,
+                        PageRequest.of(page, size)
+                )
+                .stream()
+                .map(ContentResponse::from)
+                .toList();
+    }
 }

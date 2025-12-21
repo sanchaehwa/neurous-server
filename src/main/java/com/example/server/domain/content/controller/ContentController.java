@@ -46,4 +46,14 @@ public class ContentController {
 
         return ResponseEntity.ok(contentResponse);
     }
+
+    @GetMapping("/serach")
+    public ResponseEntity<List<ContentResponse>> searchContent(
+            @RequestParam("keyword") String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page){
+        List<ContentResponse> result = contentService.search(keyword, page);
+
+        return ResponseEntity.ok(result);
+    }
+
 }

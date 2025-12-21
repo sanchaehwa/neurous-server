@@ -31,4 +31,12 @@ public class ContentController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/today")
+    public ResponseEntity<List<ContentResponse>> getTodayContent(
+            @AuthenticationPrincipal int userId
+    ){
+        List<ContentResponse> result = contentService.getTodayContent(userId);
+
+        return ResponseEntity.ok(result);
+    }
 }

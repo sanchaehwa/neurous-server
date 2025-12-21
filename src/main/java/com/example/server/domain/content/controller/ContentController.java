@@ -31,4 +31,38 @@ public class ContentController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/today")
+    public ResponseEntity<List<ContentResponse>> getTodayContent(
+            @AuthenticationPrincipal int userId
+    ){
+        List<ContentResponse> result = contentService.getTodayContent(userId);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<ContentResponse> getContentDetail(@RequestParam("contentId") int contentId){
+        ContentResponse contentResponse = contentService.getContentDetail(contentId);
+
+        return ResponseEntity.ok(contentResponse);
+    }
+
+    @GetMapping("/serach")
+    public ResponseEntity<List<ContentResponse>> searchContent(
+            @RequestParam("keyword") String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page){
+        List<ContentResponse> result = contentService.search(keyword, page);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<ContentResponse>> getReadHistory(
+            @AuthenticationPrincipal int userId,
+            @RequestParam(value = "page", defaultValue = "0") int page
+    ) {
+        List<ContentResponse> result = contentService.getReadHistory(userId, page);
+
+        return ResponseEntity.ok(result);
+    }
 }

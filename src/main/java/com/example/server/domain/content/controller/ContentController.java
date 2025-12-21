@@ -39,4 +39,11 @@ public class ContentController {
 
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/detail")
+    public ResponseEntity<ContentResponse> getContentDetail(@RequestParam("contentId") int contentId){
+        ContentResponse contentResponse = contentService.getContentDetail(contentId);
+
+        return ResponseEntity.ok(contentResponse);
+    }
 }

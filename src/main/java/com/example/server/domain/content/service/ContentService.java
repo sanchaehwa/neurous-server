@@ -105,4 +105,13 @@ public class ContentService {
         return contentRepository.findRandomUnreadByContentDiffAndCategoryExcludeIds(userId, difficulty, category, excludedIds).orElse(null);
     }
 
+    /**
+     * 컨텐츠 상세 정보 조회
+    */
+    public ContentResponse getContentDetail(int contentId){
+        Content content = contentRepository.findById(contentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 컨텐츠입니다."));
+
+        return ContentResponse.from(content);
+    }
 }

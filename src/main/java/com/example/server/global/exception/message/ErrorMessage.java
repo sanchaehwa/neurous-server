@@ -22,13 +22,16 @@ public enum ErrorMessage {
 	ACCESS_DENIED(403, "AUTH1003", "접근이 거부되었습니다"),
 	SESSION_EXPIRED(401, "AUTH1004", "세션이 만료되었습니다. 다시 로그인해주세요"),
 	UNSUPPORTED_LOGIN_METHOD(400, "AUTH1005", "지원하지않는 로그인 방식입니다"),
-
+	TOKEN_DECODE_FAILED(400, "AUTH1006", "토큰 디코딩에 실패했습니다"),
+	TOKEN_PARSE_FAILED(400, "AUTH1006", "토큰 파싱에 실패했습니다"),
+	//JWT
+	INVALID_JWT_STRUCTURE(400, "AUTH1007", "JWT 구조가 올바르지 않습니다"),
 	// OAuth2 관련
 	OAUTH2_PROVIDER_MISSING(400, "OAUTH2006", "로그인 방식이 전달되지 않았습니다"),
-	OAUTH2_KAKAO_API_ERROR(500, "OAUTH2006", "카카오 API 호출에 실패했습니다."),
-	OAUTH2_GOOGLE_API_ERROR(500, "OAUTH2007", "구글 API 호출에 실패했습니다."),
-	OAUTH2_APPLE_API_ERROR(500, "OAUTH2008", "애플 API 호출에 실패했습니다."),
-	OAUTH2_NAVER_API_ERROR(500, "OAUTH2008", "네이버 API 호출에 실패했습니다."),
+	OAUTH2_KAKAO_API_ERROR(500, "OAUTH2007", "카카오 API 호출에 실패했습니다."),
+	OAUTH2_GOOGLE_API_ERROR(500, "OAUTH2008", "구글 API 호출에 실패했습니다."),
+	OAUTH2_APPLE_API_ERROR(500, "OAUTH2009", "애플 API 호출에 실패했습니다."),
+	OAUTH2_NAVER_API_ERROR(500, "OAUTH2010", "네이버 API 호출에 실패했습니다."),
 
 	//User 관련
 	USER_NOT_FOUND(404, "USER3001", "유저를 찾을 수 없습니다"),

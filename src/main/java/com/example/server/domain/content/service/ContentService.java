@@ -1,7 +1,10 @@
 package com.example.server.domain.content.service;
 
 import com.example.server.domain.content.dto.ContentResponse;
+import com.example.server.domain.content.dto.ContentDifficultyRequest;
 import com.example.server.domain.content.entity.Content;
+import com.example.server.domain.content.entity.ContentDifficultyEvaluation;
+import com.example.server.domain.content.repository.ContentDifficultyEvaluationRepository;
 import com.example.server.domain.content.repository.ContentRepository;
 import com.example.server.domain.content.repository.ReadContentRepository;
 import com.example.server.domain.content.repository.UserInterestRepository;
@@ -22,6 +25,7 @@ public class ContentService {
     private final UserRepository userRepository;
     private final UserInterestRepository userInterestRepository;
     private final ReadContentRepository readContentRepository;
+    private final ContentDifficultyEvaluationRepository contentDifficultyEvaluationRepository;
 
     private static final List<String> CATEGORIES = List.of("정치", "경제", "사회", "생활/문화", "IT/과학", "세계");
     private static final int RESULT_SIZE = 3;
@@ -154,6 +158,21 @@ public class ContentService {
         return contents.stream()
                 .map(ContentResponse::from)
                 .toList();
+    }
+
+    /**
+     * 문제 난이도 평가
+     */
+    public void setDifficultyEvaluation(int userId, int contentId, ContentDifficultyRequest difficulty){
+
+        ContentDifficultyEvaluation c = ContentDifficultyEvaluation.builder()
+                .contentId(contentId)
+                .userId(userId)
+                .contentDifficulty(difficulty.difficulty())
+                .build();
+
+        contentDifficultyEvaluationRepository.save(c);
+
     }
 
 }

@@ -1,14 +1,12 @@
 package com.example.server.domain.content.controller;
 
 import com.example.server.domain.content.dto.ContentResponse;
+import com.example.server.domain.content.dto.ContentDifficultyRequest;
 import com.example.server.domain.content.service.ContentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -64,5 +62,16 @@ public class ContentController {
         List<ContentResponse> result = contentService.getReadHistory(userId, page);
 
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/evaluation")
+    public ResponseEntity<Void> setContentEvaluation(
+            @AuthenticationPrincipal int userId,
+            @RequestParam("contentId") int contentId,
+            @RequestBody ContentDifficultyRequest difficulty){
+
+        contentService.setDifficultyEvaluation(userId, contentId, difficulty);
+
+        return ResponseEntity.ok().build();
     }
 }

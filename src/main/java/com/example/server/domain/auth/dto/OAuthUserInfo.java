@@ -1,10 +1,6 @@
 package com.example.server.domain.auth.dto;
 
-public interface OAuth2ResponseDto {
-
-	//provider (Ex. naver, google,kakao)
-	String getProvider();
-
+public interface OAuth2UserInfo {
 	//provider에서 발급해주는 아이디
 	String getProviderId();
 

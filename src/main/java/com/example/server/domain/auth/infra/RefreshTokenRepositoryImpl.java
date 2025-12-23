@@ -21,7 +21,7 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepositoryCustom 
 	public int deleteAllByExpiresAtBefore(LocalDateTime now) {
 		long deletedCount = queryFactory
 			.delete(tokenManager)
-			.where(tokenManager.expireAt.lt(now))
+			.where(tokenManager.expiredAt.lt(now))
 			.execute();
 
 		return (int)deletedCount;

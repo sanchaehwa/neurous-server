@@ -19,10 +19,8 @@ import com.example.server.global.exception.message.SuccessMessage;
 import com.example.server.global.security.annotation.AuthenticatedApi;
 import com.example.server.global.security.annotation.PublicApi;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-@Tag(name = "Auth")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor

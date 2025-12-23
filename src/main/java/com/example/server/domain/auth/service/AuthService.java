@@ -139,7 +139,7 @@ public class AuthService {
 	}
 
 	private TokenManager findRefreshToken(String tokenValue) {
-		return refreshTokenRepository.findByToken(tokenValue)
+		return refreshTokenRepository.findByTokenValue(tokenValue)
 			.orElseThrow(() -> new NeurousException(ErrorMessage.INVALID_TOKEN));
 	}
 

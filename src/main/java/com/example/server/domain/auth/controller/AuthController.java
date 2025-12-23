@@ -12,8 +12,11 @@ import com.example.server.domain.auth.dto.RefreshRequest;
 import com.example.server.domain.auth.dto.RefreshResponse;
 import com.example.server.domain.auth.enums.OAuthProvider;
 import com.example.server.domain.auth.service.AuthService;
+import com.example.server.global.annotation.CurrentUserId;
 import com.example.server.global.exception.dto.SuccessResponse;
 import com.example.server.global.exception.message.SuccessMessage;
+import com.example.server.global.security.annotation.AuthenticatedApi;
+import com.example.server.global.security.annotation.PublicApi;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -26,17 +29,24 @@ public class AuthController {
 
 	private final AuthService authService;
 
+	@PublicApi
 	@PostMapping("/login/{provider}")
 	public SuccessResponse<LoginResponse> login(@PathVariable String provider, @RequestBody LoginRequest request) {
 		LoginResponse response = authService.login(OAuthProvider.from(provider), request.accessToken());
 		return SuccessResponse.of(SuccessMessage.LOGIN_SUCCESS, response);
 	}
 
+	@PublicApi
 	@PostMapping("/refresh")
 	public SuccessResponse<RefreshResponse> refresh(@RequestBody RefreshRequest request) {
 		RefreshResponse response = authService.refresh(request.refreshToken());
 		return SuccessResponse.of(SuccessMessage.ACCESS_TOKEN_REISSUE_SUCCESS, response);
 	}
 
-	//todo: 로그아웃
+	@AuthenticatedApi
+	@PostMapping("/logout")
+	public SuccessResponse<Void> logout(@CurrentUserId Long userId) {
+		authService.logout(userId);
+		return SuccessResponse.of(SuccessMessage.LOGOUT_SUCCESS);
+	}
 }

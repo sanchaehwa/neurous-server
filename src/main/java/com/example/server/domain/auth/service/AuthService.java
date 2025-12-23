@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.server.domain.auth.client.OAuthClient;
 import com.example.server.domain.auth.client.OAuthClientResolver;
-import com.example.server.domain.auth.dto.LoginResponse;
+import com.example.server.domain.auth.controller.dto.response.LoginResponse;
+import com.example.server.domain.auth.controller.dto.response.RefreshResponse;
 import com.example.server.domain.auth.dto.OAuthUserInfo;
-import com.example.server.domain.auth.dto.RefreshResponse;
 import com.example.server.domain.auth.dto.UserInfo;
 import com.example.server.domain.auth.entity.TokenManager;
 import com.example.server.domain.auth.enums.OAuthProvider;

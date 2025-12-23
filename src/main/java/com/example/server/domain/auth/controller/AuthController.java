@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.server.domain.auth.dto.LoginRequest;
-import com.example.server.domain.auth.dto.LoginResponse;
-import com.example.server.domain.auth.dto.RefreshRequest;
-import com.example.server.domain.auth.dto.RefreshResponse;
+import com.example.server.domain.auth.controller.dto.request.LoginRequest;
+import com.example.server.domain.auth.controller.dto.request.RefreshRequest;
+import com.example.server.domain.auth.controller.dto.response.LoginResponse;
+import com.example.server.domain.auth.controller.dto.response.RefreshResponse;
 import com.example.server.domain.auth.enums.OAuthProvider;
 import com.example.server.domain.auth.service.AuthService;
 import com.example.server.global.annotation.CurrentUserId;

@@ -1,4 +1,6 @@
-package com.example.server.domain.auth.dto;
+package com.example.server.domain.auth.controller.dto.response;
+
+import com.example.server.domain.auth.dto.UserInfo;
 
 import lombok.Builder;
 import lombok.Getter;

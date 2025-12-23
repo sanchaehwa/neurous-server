@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.server.domain.auth.controller.docs.AuthControllerDocs;
 import com.example.server.domain.auth.controller.dto.request.LoginRequest;
 import com.example.server.domain.auth.controller.dto.request.RefreshRequest;
 import com.example.server.domain.auth.controller.dto.response.LoginResponse;
@@ -25,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthControllerDocs {
 
 	private final AuthService authService;
 

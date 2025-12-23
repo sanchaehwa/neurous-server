@@ -165,6 +165,8 @@ public class ContentService {
      */
     public void setDifficultyEvaluation(int userId, int contentId, ContentDifficultyRequest difficulty){
 
+        if (contentDifficultyEvaluationRepository.findByUserIdAndContentId(userId, contentId).isPresent()) return;
+
         ContentDifficultyEvaluation c = ContentDifficultyEvaluation.builder()
                 .contentId(contentId)
                 .userId(userId)

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class KakaoResponse implements OAuth2UserInfo {
+public class KakaoUserInfo implements OAuthUserInfo {
 
 	private Long id;
 

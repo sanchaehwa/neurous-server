@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class GoogleResponse implements OAuth2UserInfo {
+public class GoogleUserInfo implements OAuthUserInfo {
 
 	private String id;
 	private String name;

@@ -4,6 +4,7 @@ import com.example.server.domain.quiz.dto.QuizQuestionResponse;
 import com.example.server.domain.quiz.dto.QuizSubmitRequest;
 import com.example.server.domain.quiz.dto.QuizSubmitResponse;
 import com.example.server.domain.quiz.service.QuizService;
+import com.example.server.global.annotation.CurrentUserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,10 +19,10 @@ public class QuizController {
 
     @GetMapping("/set")
     public ResponseEntity<QuizQuestionResponse> getQuiz(
-            @AuthenticationPrincipal(expression = "userId") Long userId,
+            @CurrentUserId Long userId,
             @RequestParam("contentId") int contentId
     ) {
-        return ResponseEntity.ok(quizService.getQuiz(userId.intValue(), contentId));
+        return ResponseEntity.ok(quizService.getQuiz(userId, contentId));
     }
 
 

@@ -33,11 +33,11 @@ public class ContentService {
     /**
      * 탐색 페이지 컨텐츠 조회
      */
-    public Map<String, List<ContentResponse>> getExploreContent(int userId, int page){
+    public Map<String, List<ContentResponse>> getExploreContent(Long userId, int page){
         int size = 10;
         PageRequest pageRequest = PageRequest.of(page, size);
 
-        String ContentDiff = userRepository.findContentDiffByUserId(userId)
+        String ContentDiff = userRepository.findLevelByUserId(userId)
                 .orElse("초급");
 
         Map<String, List<ContentResponse>> result = new LinkedHashMap<>();
@@ -54,8 +54,8 @@ public class ContentService {
     /**
      * 오늘의 미션 컨텐츠 조회
      */
-    public List<ContentResponse> getTodayContent(int userId) {
-        String difficulty = userRepository.findContentDiffByUserId(userId).orElse("초급");
+    public List<ContentResponse> getTodayContent(Long userId) {
+        String difficulty = userRepository.findLevelByUserId(userId).orElse("초급");
 
         List<String> categories = userInterestRepository.findInterestNamesByUserIdOrderByPriorityAsc(userId);
 
@@ -102,7 +102,7 @@ public class ContentService {
         return categories.get(0);
     }
 
-    private Content pickOneContent(int userId, String difficulty, String category, List<Integer> excludedIds) {
+    private Content pickOneContent(Long userId, String difficulty, String category, List<Integer> excludedIds) {
         if (excludedIds == null || excludedIds.isEmpty()) {
             return contentRepository.findRandomUnreadByContentDiffAndCategory(userId, difficulty, category).orElse(null);
         }
@@ -122,7 +122,7 @@ public class ContentService {
     /**
      * 검색 기능(title 기반)
      */
-    public List<ContentResponse> search(String keyword, int page) {
+    public List<ContentResponse> search(Long userId, String keyword, int page) {
 
         String k = (keyword == null) ? "" : keyword.trim();
         if (k.isEmpty()) {
@@ -131,7 +131,7 @@ public class ContentService {
 
         int size = 10;
 
-        String diff = userRepository.findContentDiffByUserId(userId).orElse("초급");
+        String diff = userRepository.findLevelByUserId(userId).orElse("초급");
 
         return contentRepository.searchByTitle(
                         diff,
@@ -146,7 +146,7 @@ public class ContentService {
     /**
      * 읽은 내역 조회
      */
-    public List<ContentResponse> getReadHistory(int userId, int page) {
+    public List<ContentResponse> getReadHistory(Long userId, int page) {
 
         int size = 10;
 
@@ -163,7 +163,7 @@ public class ContentService {
     /**
      * 문제 난이도 평가
      */
-    public void setDifficultyEvaluation(int userId, int contentId, ContentDifficultyRequest difficulty){
+    public void setDifficultyEvaluation(Long userId, int contentId, ContentDifficultyRequest difficulty){
 
         if (contentDifficultyEvaluationRepository.findByUserIdAndContentId(userId, contentId).isPresent()) return;
 

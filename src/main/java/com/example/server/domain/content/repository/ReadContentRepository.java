@@ -16,5 +16,5 @@ public interface ReadContentRepository extends JpaRepository<ReadContentReposito
             WHERE rc.user_id = :userId
             ORDER BY rc.read_content_id DESC
             """, nativeQuery = true)
-    List<Content> findReadContentsByUserId(int userId, Pageable pageable);
+    List<Content> findReadContentsByUserId(Long userId, Pageable pageable);
 }

@@ -23,7 +23,7 @@ public class ContentDifficultyEvaluation {
     private int contentId;
 
     @Column(name = "user_id")
-    private int userId;
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "content_difficulty")

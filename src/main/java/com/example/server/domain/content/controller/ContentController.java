@@ -3,6 +3,7 @@ package com.example.server.domain.content.controller;
 import com.example.server.domain.content.dto.ContentResponse;
 import com.example.server.domain.content.dto.ContentDifficultyRequest;
 import com.example.server.domain.content.service.ContentService;
+import com.example.server.global.annotation.CurrentUserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,7 +21,7 @@ public class ContentController {
 
     @GetMapping("/explore")
     public ResponseEntity<Map<String,List<ContentResponse>>> getExploreContent(
-            @AuthenticationPrincipal int userId,
+            @CurrentUserId Long userId,
             @RequestParam(value = "page", defaultValue = "0") int page
     ){
 
@@ -31,7 +32,7 @@ public class ContentController {
 
     @GetMapping("/today")
     public ResponseEntity<List<ContentResponse>> getTodayContent(
-            @AuthenticationPrincipal int userId
+            @CurrentUserId Long userId
     ){
         List<ContentResponse> result = contentService.getTodayContent(userId);
 
@@ -47,16 +48,17 @@ public class ContentController {
 
     @GetMapping("/serach")
     public ResponseEntity<List<ContentResponse>> searchContent(
+            @CurrentUserId Long userId,
             @RequestParam("keyword") String keyword,
             @RequestParam(value = "page", defaultValue = "0") int page){
-        List<ContentResponse> result = contentService.search(keyword, page);
+        List<ContentResponse> result = contentService.search(userId, keyword, page);
 
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/history")
     public ResponseEntity<List<ContentResponse>> getReadHistory(
-            @AuthenticationPrincipal int userId,
+            @CurrentUserId Long userId,
             @RequestParam(value = "page", defaultValue = "0") int page
     ) {
         List<ContentResponse> result = contentService.getReadHistory(userId, page);
@@ -66,7 +68,7 @@ public class ContentController {
 
     @PostMapping("/evaluation")
     public ResponseEntity<Void> setContentEvaluation(
-            @AuthenticationPrincipal int userId,
+            @CurrentUserId Long userId,
             @RequestParam("contentId") int contentId,
             @RequestBody ContentDifficultyRequest difficulty){
 

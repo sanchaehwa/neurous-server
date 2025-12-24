@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.server.domain.user.controller.dto.request.UpdateInterestsRequest;
 import com.example.server.domain.user.controller.dto.response.UserInterestsResponse;
 import com.example.server.domain.user.entity.User;
+import com.example.server.domain.user.entity.vo.Level;
 import com.example.server.domain.user.repository.UserRepository;
 import com.example.server.global.exception.message.ErrorMessage;
 import com.example.server.global.exception.model.NotFoundException;
@@ -27,6 +28,13 @@ public class UserService {
 		User user = findByUserId(userId);
 		user.updateInterests(updateInterestsRequest.interests());
 		return UserInterestsResponse.from(user.getInterests());
+	}
+
+	// 레벨 변경
+	@Transactional
+	public void updateLevel(Long userId, Level level) {
+		User user = findByUserId(userId);
+		user.changeLevel(level);
 	}
 
 	public User findByUserId(Long userId) {

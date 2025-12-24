@@ -1,4 +1,6 @@
-package com.example.server.domain.user.entity.vo;
+package com.example.server.domain.user.entity;
+
+import com.example.server.domain.user.entity.vo.Level;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

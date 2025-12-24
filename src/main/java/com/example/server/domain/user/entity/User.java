@@ -151,4 +151,9 @@ public class User extends BaseTimeEntity {
 			);
 		}
 	}
+
+	//레벨 변경
+	public void changeLevel(Level level) {
+		this.level = level;
+	}
 }

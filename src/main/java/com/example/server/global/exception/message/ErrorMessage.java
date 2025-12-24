@@ -38,6 +38,9 @@ public enum ErrorMessage {
 	USER_INVALID_INTEREST_COUNT(400, "USER3002", "관심분야는 3가지 모두 선택해야합니다"),
 	USER_DUPLICATED_INTEREST(400, "USER3003", "중복된 관심분야 항목이 있습니다"),
 
+	//컨텐츠 관련
+	NOT_FOUND_LEVEL_DESCRIPTION(404, "CNT1001", "선택한 레벨에 대한 정보가 없습니다"),
+
 	// 서버 에러
 	INTERNAL_SERVER_ERROR(500, "INT5000", "서버 내부 오류가 발생했습니다.");
 

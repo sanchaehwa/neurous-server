@@ -1,28 +1,30 @@
 package com.example.server.domain.user.entity;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.example.server.domain.auth.dto.OAuthUserInfo;
 import com.example.server.domain.auth.enums.OAuthProvider;
 import com.example.server.domain.user.entity.vo.Level;
+import com.example.server.domain.user.entity.vo.Priority;
 import com.example.server.domain.user.entity.vo.UserField;
+import com.example.server.domain.user.entity.vo.UserInterest;
 import com.example.server.domain.user.entity.vo.UserStatus;
 import com.example.server.domain.user.entity.vo.UserType;
 import com.example.server.global.domain.BaseTimeEntity;
+import com.example.server.global.exception.message.ErrorMessage;
+import com.example.server.global.exception.model.BadRequestException;
 
-import jakarta.persistence.CollectionTable;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
@@ -70,14 +72,8 @@ public class User extends BaseTimeEntity {
 	private UserType userType = UserType.USER;
 
 	//흥미
-	@ElementCollection(fetch = FetchType.LAZY)
-	@CollectionTable(
-		name = "user_interests",
-		joinColumns = @JoinColumn(name = "user_id")
-	)
-	@Enumerated(EnumType.STRING)
-	@Column(name = "interest", nullable = false)
-	private Set<UserField> interests = new HashSet<>();
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UserInterest> interests = new ArrayList<>();
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -112,7 +108,7 @@ public class User extends BaseTimeEntity {
 			.email(email)
 			.status(UserStatus.NORMAL)
 			.userType(UserType.USER)
-			.interests(new HashSet<>())
+			.interests(new ArrayList<>())
 			.level(Level.BEGINNER)
 			.signUpComplete(false)
 			.notificationStatus(false)
@@ -133,5 +129,23 @@ public class User extends BaseTimeEntity {
 
 	public boolean isSignUpComplete() {
 		return !signUpComplete;
+	}
+
+	public void updateInterests(List<UserField> fields) {
+		if (fields.size() != 3) {
+			throw new BadRequestException(ErrorMessage.USER_INVALID_INTEREST_COUNT);
+		}
+
+		this.interests.clear();
+
+		for (int i = 0; i < fields.size(); i++) {
+			this.interests.add(
+				UserInterest.of(
+					this,
+					fields.get(i),
+					Priority.fromIndex(i)
+				)
+			);
+		}
 	}
 }

@@ -12,7 +12,7 @@ do
       branch=${local_ref#refs/heads/}
       # Allow protected/special branches
       case "$branch" in
-        main|master|develop|release/*|hotfix/*) continue ;;
+        main|deploy|master|develop|release/*|hotfix/*) continue ;;
       esac
       echo "$branch" | grep -Eq "^($allowed_types)/" && {
         echo "✅ Branch name '$branch' is valid."

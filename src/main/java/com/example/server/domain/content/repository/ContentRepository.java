@@ -27,7 +27,7 @@ public interface ContentRepository extends JpaRepository<Content, Integer> {
             ORDER BY RAND()
             LIMIT 1
             """, nativeQuery = true)
-    Optional<Content> findRandomUnreadByContentDiffAndCategory(int userId, String ContentDiff, String category);
+    Optional<Content> findRandomUnreadByContentDiffAndCategory(Long userId, String ContentDiff, String category);
 
     @Query(value = """
             SELECT *
@@ -44,7 +44,7 @@ public interface ContentRepository extends JpaRepository<Content, Integer> {
             ORDER BY RAND()
             LIMIT 1
             """, nativeQuery = true)
-    Optional<Content> findRandomUnreadByContentDiffAndCategoryExcludeIds(int userId, String ContentDiff, String category, List<Integer> excludedIds);
+    Optional<Content> findRandomUnreadByContentDiffAndCategoryExcludeIds(Long userId, String ContentDiff, String category, List<Integer> excludedIds);
 
     @Query(value = """
             SELECT *

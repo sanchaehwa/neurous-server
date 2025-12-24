@@ -26,9 +26,9 @@ public class QuizService {
     /**
     * 퀴즈 문제지 출제
     */
-    public QuizQuestionResponse getQuiz(int userId, int contentId) {
+    public QuizQuestionResponse getQuiz(Long userId, int contentId) {
 
-        String quizDiff = userRepository.findContentDiffByUserId(userId).orElse("초급");
+        String quizDiff = userRepository.findLevelByUserId(userId).orElse("초급");
 
         Quiz quiz = quizRepository.findByContentIdAndQuizDiff(contentId, quizDiff)
                 .orElseThrow(() -> new IllegalArgumentException("해당 컨텐츠에 난이도별 퀴즈가 없습니다."));

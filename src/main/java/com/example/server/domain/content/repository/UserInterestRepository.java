@@ -15,5 +15,5 @@ public interface UserInterestRepository extends JpaRepository<UserInterest, Inte
            where ui.userId = :userId
            order by ui.priority asc
            """)
-    List<String> findInterestNamesByUserIdOrderByPriorityAsc(int userId);
+    List<String> findInterestNamesByUserIdOrderByPriorityAsc(Long userId);
 }

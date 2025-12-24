@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.server.domain.user.controller.docs.UserControllerDocs;
 import com.example.server.domain.user.controller.dto.request.UpdateInterestsRequest;
 import com.example.server.domain.user.controller.dto.request.UpdateLevelRequest;
 import com.example.server.domain.user.controller.dto.response.UserInterestsResponse;
@@ -22,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
 @Slf4j
-public class UserController {
+public class UserController implements UserControllerDocs {
 
 	private final UserService userService;
 

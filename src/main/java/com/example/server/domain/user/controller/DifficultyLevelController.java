@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.server.domain.user.controller.docs.DifficultyLevelControllerDocs;
 import com.example.server.domain.user.controller.dto.request.UpdateLevelRequest;
 import com.example.server.domain.user.controller.dto.response.LoadDifficultyLevel;
 import com.example.server.domain.user.service.DifficultyLevelService;
@@ -20,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RequestMapping("/api/levels")
 @Slf4j
-public class DifficultyLevelController {
+public class DifficultyLevelController implements DifficultyLevelControllerDocs {
 
 	private final DifficultyLevelService difficultyLevelService;
 

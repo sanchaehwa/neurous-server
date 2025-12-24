@@ -1,8 +1,21 @@
 package com.example.server.domain.user.controller;
 
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.server.domain.user.controller.docs.UserControllerDocs;
+import com.example.server.domain.user.controller.dto.request.UpdateInterestsRequest;
+import com.example.server.domain.user.controller.dto.request.UpdateLevelRequest;
+import com.example.server.domain.user.controller.dto.response.UserInterestsResponse;
+import com.example.server.domain.user.service.UserService;
+import com.example.server.global.annotation.CurrentUserId;
+import com.example.server.global.exception.dto.SuccessResponse;
+import com.example.server.global.exception.message.SuccessMessage;
+import com.example.server.global.security.annotation.AuthenticatedApi;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,6 +23,26 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
 @Slf4j
-public class UserController {
+public class UserController implements UserControllerDocs {
+
+	private final UserService userService;
+
+	@AuthenticatedApi
+	@PatchMapping("/update/interest")
+	public SuccessResponse<UserInterestsResponse> updateInterest(
+		@RequestBody @Valid UpdateInterestsRequest request,
+		@CurrentUserId Long userId) {
+		UserInterestsResponse response = userService.updateInterest(userId, request);
+		return SuccessResponse.of(SuccessMessage.UPDATE_SUCCESS, response);
+	}
+
+	@AuthenticatedApi
+	@PatchMapping("/update/level")
+	public SuccessResponse<Void> updateLevel(
+		@RequestBody @Valid UpdateLevelRequest request,
+		@CurrentUserId Long userId) {
+		userService.updateLevel(userId, request.level());
+		return SuccessResponse.of(SuccessMessage.UPDATE_SUCCESS);
+	}
 
 }

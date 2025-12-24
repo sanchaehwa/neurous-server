@@ -1,79 +1,50 @@
 package com.example.server.global.security.config;
 
-import java.util.Collections;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.server.global.security.jwt.JwtAuthenticationFilter;
+
 import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
-	private final AuthenticationConfiguration authenticationConfiguration;
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
 	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-		return configuration.getAuthenticationManager();
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		return http
+			.csrf(AbstractHttpConfigurer::disable)
+			.formLogin(AbstractHttpConfigurer::disable)
+			.httpBasic(AbstractHttpConfigurer::disable)
+			.sessionManagement(session ->
+				session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+			)
+			.authorizeHttpRequests(auth -> auth
+				.requestMatchers(
+					"/api/auth/login/**",
+					"/api/auth/refresh",
+					"/swagger-ui/**",
+					"/v3/api-docs/**",
+					"/swagger-ui.html",
+					"/swagger-resources/**",
+					"/api/test/**"
+				).permitAll()
+
+				.anyRequest().authenticated()
+			)
+			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+			.build();
 	}
-
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-
-	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		//cors 설정
-		http.cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
-			@Override
-			public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-				CorsConfiguration configuration = new CorsConfiguration();
-				configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-				configuration.setAllowedMethods(Collections.singletonList("*"));
-				configuration.setAllowCredentials(true);
-				configuration.setAllowedHeaders(Collections.singletonList("*"));
-				configuration.setMaxAge(3600L);
-				configuration.setExposedHeaders(Collections.singletonList("Authorization"));
-				return configuration;
-			}
-		}));
-		//csrf disable
-		http.csrf(csrf -> csrf.disable());
-		//form disable
-		http.formLogin(form -> form.disable());
-		//http basic disable
-		http.httpBasic(basic -> basic.disable());
-
-		http.authorizeHttpRequests(auth -> auth
-			.requestMatchers(
-				"/auth/**",
-				"/api/users/logout",
-				"/api/users/login",
-				"/swagger-ui/**",
-				"/v3/api-docs/**",
-				"/"
-			).permitAll()
-			.requestMatchers("/admin/**").hasRole("ADMIN")
-			.anyRequest().authenticated()
-		);
-
-		//익명 인증 비활성화
-		http.anonymous(anonymous -> anonymous.disable());
-
-		return http.build();
-	}
-
 }

@@ -111,7 +111,7 @@ public class ContentService {
 
     /**
      * 컨텐츠 상세 정보 조회
-    */
+     */
     public ContentResponse getContentDetail(int contentId){
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 컨텐츠입니다."));
@@ -121,7 +121,7 @@ public class ContentService {
 
     /**
      * 검색 기능(title 기반)
-    */
+     */
     public List<ContentResponse> search(String keyword, int page) {
 
         String k = (keyword == null) ? "" : keyword.trim();

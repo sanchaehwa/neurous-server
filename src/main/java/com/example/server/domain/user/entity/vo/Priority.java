@@ -15,12 +15,14 @@ public enum Priority {
 		this.order = order;
 	}
 
+	public int getOrder() {
+		return order;
+	}
+	
 	public static Priority fromIndex(int index) {
-		return switch (index) {
-			case 0 -> ONE_ST_PLACE;
-			case 1 -> TWO_ND_PLACE;
-			case 2 -> THIRD_RD_PLACE;
-			default -> throw new BadRequestException(ErrorMessage.USER_INVALID_INTEREST_COUNT);
-		};
+		if (index < 0 || index > values().length) {
+			throw new BadRequestException(ErrorMessage.USER_INVALID_INTEREST_COUNT);
+		}
+		return values()[index];
 	}
 }

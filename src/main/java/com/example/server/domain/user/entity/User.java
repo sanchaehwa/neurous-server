@@ -135,6 +135,9 @@ public class User extends BaseTimeEntity {
 		if (fields.size() != 3) {
 			throw new BadRequestException(ErrorMessage.USER_INVALID_INTEREST_COUNT);
 		}
+		if (fields.stream().distinct().count() != 3) {
+			throw new BadRequestException(ErrorMessage.USER_DUPLICATED_INTEREST);
+		}
 
 		this.interests.clear();
 

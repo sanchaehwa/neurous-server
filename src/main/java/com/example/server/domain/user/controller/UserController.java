@@ -1,8 +1,19 @@
 package com.example.server.domain.user.controller;
 
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.server.domain.user.controller.dto.request.UpdateInterestsRequest;
+import com.example.server.domain.user.controller.dto.response.UserInterestsResponse;
+import com.example.server.domain.user.service.UserService;
+import com.example.server.global.annotation.CurrentUserId;
+import com.example.server.global.exception.dto.SuccessResponse;
+import com.example.server.global.exception.message.SuccessMessage;
+import com.example.server.global.security.annotation.AuthenticatedApi;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,5 +22,16 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/user")
 @Slf4j
 public class UserController {
+
+	private final UserService userService;
+
+	@AuthenticatedApi
+	@PatchMapping("/signup/choese/interest")
+	public SuccessResponse<UserInterestsResponse> updateInterest(
+		@RequestBody @Valid UpdateInterestsRequest request,
+		@CurrentUserId Long userId) {
+		UserInterestsResponse response = userService.updateInterest(userId, request);
+		return SuccessResponse.of(SuccessMessage.UPDATE_SUCCESS, response);
+	}
 
 }

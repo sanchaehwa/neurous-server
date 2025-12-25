@@ -10,6 +10,10 @@ import com.example.server.domain.content.entity.vo.ContentDifficulty;
 import com.example.server.domain.content.entity.vo.DifficultyRecommend;
 import com.example.server.domain.content.repository.*;
 import com.example.server.domain.user.repository.UserRepository;
+import com.example.server.global.exception.message.ErrorMessage;
+import com.example.server.global.exception.model.BadRequestException;
+import com.example.server.global.exception.model.ConflictException;
+import com.example.server.global.exception.model.NotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -62,6 +66,10 @@ public class ContentService {
 
         List<String> categories = userInterestRepository.findInterestNamesByUserIdOrderByPriorityAsc(userId);
 
+        if (categories == null || categories.isEmpty()) {
+            throw new BadRequestException(ErrorMessage.CONTENT_INTEREST_NOT_SET);
+        }
+
         double[] weights = normalizeWeights(categories.size());
 
         Random random = new Random();
@@ -72,6 +80,10 @@ public class ContentService {
             String pickedCategory = pickCategoryByWeight(categories, weights, random);
 
             Content picked = pickOneContent(userId, difficulty, pickedCategory, excludedIds);
+
+            if (picked == null) {
+                throw new NotFoundException(ErrorMessage.CONTENT_TODAY_NOT_AVAILABLE);
+            }
 
             excludedIds.add(picked.getContentId());
             result.add(ContentResponse.from(picked));
@@ -117,7 +129,7 @@ public class ContentService {
      */
     public ContentResponse getContentDetail(int contentId){
         Content content = contentRepository.findById(contentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 컨텐츠입니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTENT_NOT_FOUND));
 
         return ContentResponse.from(content);
     }
@@ -168,8 +180,8 @@ public class ContentService {
      */
     public DifficultyRecommendResponse setDifficultyEvaluation(Long userId, int contentId, ContentDifficultyRequest difficulty){
 
-        if (contentDifficultyEvaluationRepository.findByUserIdAndContentId(userId, contentId).isPresent()){
-            throw new IllegalStateException("이미 평가한 컨텐츠입니다.");
+        if (contentDifficultyEvaluationRepository.findByUserIdAndContentId(userId, contentId).isPresent()) {
+            throw new ConflictException(ErrorMessage.CONTENT_ALREADY_EVALUATED);
         }
 
         ContentDifficultyEvaluation c = ContentDifficultyEvaluation.builder()

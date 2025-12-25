@@ -40,9 +40,14 @@ public enum ErrorMessage {
 
 	//컨텐츠 관련
 	NOT_FOUND_LEVEL_DESCRIPTION(404, "CNT1001", "선택한 레벨에 대한 정보가 없습니다"),
+	CONTENT_NOT_FOUND(404, "CNT2002", "존재하지 않는 컨텐츠입니다."),
+	CONTENT_INTEREST_NOT_SET(400, "CNT2003", "관심분야가 설정되지 않았습니다."),
+	CONTENT_TODAY_NOT_AVAILABLE(404, "CNT2004", "추천 가능한 콘텐츠가 없습니다."),
+	CONTENT_ALREADY_EVALUATED(409, "CNT2005", "이미 평가한 컨텐츠입니다."),
 
 	// 서버 에러
 	INTERNAL_SERVER_ERROR(500, "INT5000", "서버 내부 오류가 발생했습니다.");
+
 
 	private final int status;
 	private final String code;

@@ -1,19 +1,19 @@
 package com.example.server.domain.content.repository;
 
-import com.example.server.domain.content.entity.UserInterest;
+import com.example.server.domain.user.entity.vo.UserField;
+import com.example.server.domain.user.entity.vo.UserInterest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface UserInterestRepository extends JpaRepository<UserInterest, Integer> {
+public interface UserInterestRepository extends JpaRepository<UserInterest, Long> {
 
     @Query("""
-           select i.interestName
+           select ui.interest
            from UserInterest ui
-           join Interest i on ui.interestId = i.interestId
-           where ui.userId = :userId
+           where ui.user.id = :userId
            order by ui.priority asc
            """)
-    List<String> findInterestNamesByUserIdOrderByPriorityAsc(Long userId);
+    List<UserField> findInterestsByUserIdOrderByPriorityAsc(Long userId);
 }

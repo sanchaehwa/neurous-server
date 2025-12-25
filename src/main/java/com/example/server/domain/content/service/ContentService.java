@@ -9,6 +9,7 @@ import com.example.server.domain.content.entity.DifficultyBasetime;
 import com.example.server.domain.content.entity.vo.ContentDifficulty;
 import com.example.server.domain.content.entity.vo.DifficultyRecommend;
 import com.example.server.domain.content.repository.*;
+import com.example.server.domain.user.entity.vo.UserField;
 import com.example.server.domain.user.repository.UserRepository;
 import com.example.server.global.exception.message.ErrorMessage;
 import com.example.server.global.exception.model.BadRequestException;
@@ -64,9 +65,11 @@ public class ContentService {
     public List<ContentResponse> getTodayContent(Long userId) {
         String difficulty = userRepository.findLevelByUserId(userId).orElse("초급");
 
-        List<String> categories = userInterestRepository.findInterestNamesByUserIdOrderByPriorityAsc(userId);
+        List<String> categories = userInterestRepository.findInterestsByUserIdOrderByPriorityAsc(userId).stream()
+                .map(UserField::getDescription)
+                .toList();
 
-        if (categories == null || categories.isEmpty()) {
+        if (categories.isEmpty()) {
             throw new BadRequestException(ErrorMessage.CONTENT_INTEREST_NOT_SET);
         }
 

@@ -8,7 +8,8 @@ public record ContentResponse(Integer contentId,
                               String title,
                               String content,
                               String category,
-                              String contentDiff
+                              String contentDiff,
+                              String imageUrl
 ) {
     public static ContentResponse from(Content c){
         return ContentResponse.builder()
@@ -17,6 +18,7 @@ public record ContentResponse(Integer contentId,
                 .content(c.getContent())
                 .category(c.getContentCategory())
                 .contentDiff(c.getContentDiff())
+                .imageUrl(c.getImageUrl())
                 .build();
     }
 }

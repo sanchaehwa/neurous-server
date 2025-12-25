@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "content_difficulty_evaluation")
 @Builder
@@ -29,6 +31,7 @@ public class ContentDifficultyEvaluation {
     @Column(name = "content_difficulty")
     private ContentDifficulty contentDifficulty;
 
-
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
 }

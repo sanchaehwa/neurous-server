@@ -27,4 +27,7 @@ public class Content {
 
     @Column(name = "content_diff")
     private String contentDiff;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 }

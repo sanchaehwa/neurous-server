@@ -6,18 +6,17 @@ import lombok.Builder;
 @Builder
 public record QuizSubmitResponse(
         int quizId,
-        int selectedChoiceId,
+        int selectedNo,
         Boolean correct,
         int correctChoiceId,
         int correctChoiceNo,
         String correctChoiceText
 ) {
-    public static QuizSubmitResponse of(int quizId, int selectedChoiceId, boolean correct, QuizChoice correctChoice) {
+    public static QuizSubmitResponse of(int quizId, int selectedNo, boolean correct, QuizChoice correctChoice) {
         return QuizSubmitResponse.builder()
                 .quizId(quizId)
-                .selectedChoiceId(selectedChoiceId)
+                .selectedNo(selectedNo)
                 .correct(correct)
-                .correctChoiceId(correctChoice.getQuizChoiceId())
                 .correctChoiceNo(correctChoice.getChoiceNo())
                 .correctChoiceText(correctChoice.getChoiceText())
                 .build();

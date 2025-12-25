@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface QuizChoiceRepository extends JpaRepository<QuizChoice, Integer> {
 
+    Optional<QuizChoice> findByQuizIdAndChoiceNo(int quizId, int choiceNo);
+
     List<QuizChoice> findByQuizIdOrderByChoiceNoAsc(Integer quizId);
 
     Optional<QuizChoice> findByQuizIdAndIsCorrectTrue(Integer quizId);

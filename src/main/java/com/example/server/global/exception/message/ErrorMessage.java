@@ -40,9 +40,20 @@ public enum ErrorMessage {
 
 	//컨텐츠 관련
 	NOT_FOUND_LEVEL_DESCRIPTION(404, "CNT1001", "선택한 레벨에 대한 정보가 없습니다"),
+	CONTENT_NOT_FOUND(404, "CNT2002", "존재하지 않는 컨텐츠입니다."),
+	CONTENT_INTEREST_NOT_SET(400, "CNT2003", "관심분야가 설정되지 않았습니다."),
+	CONTENT_TODAY_NOT_AVAILABLE(404, "CNT2004", "추천 가능한 콘텐츠가 없습니다."),
+	CONTENT_ALREADY_EVALUATED(409, "CNT2005", "이미 평가한 컨텐츠입니다."),
+
+	// 퀴즈 관련
+	QUIZ_NOT_FOUND_FOR_CONTENT_LEVEL(404, "QUIZ4001", "해당 컨텐츠에 난이도별 퀴즈가 없습니다."),
+	QUIZ_NOT_FOUND(404, "QUIZ4002", "존재하지 않는 퀴즈입니다."),
+	QUIZ_INVALID_CHOICE(400, "QUIZ4003", "존재하지 않는 선택지입니다."),
+	QUIZ_CORRECT_ANSWER_NOT_CONFIGURED(500, "QUIZ5001", "퀴즈 정답 데이터가 설정되지 않았습니다."),
 
 	// 서버 에러
 	INTERNAL_SERVER_ERROR(500, "INT5000", "서버 내부 오류가 발생했습니다.");
+
 
 	private final int status;
 	private final String code;

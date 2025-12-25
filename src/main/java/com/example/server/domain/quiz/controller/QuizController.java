@@ -5,6 +5,9 @@ import com.example.server.domain.quiz.dto.QuizSubmitRequest;
 import com.example.server.domain.quiz.dto.QuizSubmitResponse;
 import com.example.server.domain.quiz.service.QuizService;
 import com.example.server.global.annotation.CurrentUserId;
+import com.example.server.global.exception.dto.SuccessResponse;
+import com.example.server.global.exception.message.SuccessMessage;
+import com.example.server.global.security.annotation.AuthenticatedApi;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,20 +20,23 @@ public class QuizController {
 
     private final QuizService quizService;
 
+    @AuthenticatedApi
     @GetMapping("/set")
-    public ResponseEntity<QuizQuestionResponse> getQuiz(
+    public SuccessResponse<QuizQuestionResponse> getQuiz(
             @CurrentUserId Long userId,
             @RequestParam("contentId") int contentId
     ) {
-        return ResponseEntity.ok(quizService.getQuiz(userId, contentId));
+        QuizQuestionResponse result = quizService.getQuiz(userId, contentId);
+        return SuccessResponse.of(SuccessMessage.LOAD_SUCCESS, result);
     }
 
-
+    @AuthenticatedApi
     @PostMapping("/quiz/{quizId}/submit")
-    public ResponseEntity<QuizSubmitResponse> submit(
+    public SuccessResponse<QuizSubmitResponse> submit(
             @PathVariable("quizId") int quizId,
             @RequestBody QuizSubmitRequest request
     ) {
-        return ResponseEntity.ok(quizService.submit(quizId, request.quizChoiceId()));
+        QuizSubmitResponse result = quizService.submit(quizId, request.selectedNo());
+        return SuccessResponse.of(SuccessMessage.LOAD_SUCCESS, result);
     }
 }

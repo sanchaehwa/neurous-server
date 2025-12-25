@@ -8,6 +8,10 @@ import com.example.server.domain.quiz.entity.QuizChoice;
 import com.example.server.domain.quiz.repository.QuizChoiceRepository;
 import com.example.server.domain.quiz.repository.QuizRepository;
 import com.example.server.domain.user.repository.UserRepository;
+import com.example.server.global.exception.message.ErrorMessage;
+import com.example.server.global.exception.model.BadRequestException;
+import com.example.server.global.exception.model.NeurousException;
+import com.example.server.global.exception.model.NotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,7 +35,7 @@ public class QuizService {
         String quizDiff = userRepository.findLevelByUserId(userId).orElse("초급");
 
         Quiz quiz = quizRepository.findByContentIdAndQuizDiff(contentId, quizDiff)
-                .orElseThrow(() -> new IllegalArgumentException("해당 컨텐츠에 난이도별 퀴즈가 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.QUIZ_NOT_FOUND_FOR_CONTENT_LEVEL));
 
         List<QuizChoiceResponse> choices = quizChoiceRepository.findByQuizIdOrderByChoiceNoAsc(quiz.getQuizId())
                 .stream()
@@ -44,18 +48,18 @@ public class QuizService {
     /**
      * 퀴즈 정답 검증
      */
-    public QuizSubmitResponse submit(int quizId, int quizChoiceId) {
+    public QuizSubmitResponse submit(int quizId, int selectedNo) {
         Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 퀴즈입니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.QUIZ_NOT_FOUND));
 
-        QuizChoice selected = quizChoiceRepository.findById(quizChoiceId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 선택지입니다."));
+        QuizChoice selected = quizChoiceRepository.findByQuizIdAndChoiceNo(quizId, selectedNo)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.QUIZ_INVALID_CHOICE));
 
         QuizChoice correct = quizChoiceRepository.findByQuizIdAndIsCorrectTrue(quizId)
-                .orElseThrow(() -> new IllegalStateException("정답이 선택되지 않았습니다."));
+                .orElseThrow(() -> new NeurousException(ErrorMessage.QUIZ_CORRECT_ANSWER_NOT_CONFIGURED));
 
         boolean isCorrect = Boolean.TRUE.equals(selected.getIsCorrect());
 
-        return QuizSubmitResponse.of(quizId, quizChoiceId, isCorrect, correct);
+        return QuizSubmitResponse.of(quizId, selectedNo, isCorrect, correct);
     }
 }

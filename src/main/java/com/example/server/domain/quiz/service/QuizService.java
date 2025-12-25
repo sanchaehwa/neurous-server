@@ -44,11 +44,11 @@ public class QuizService {
     /**
      * 퀴즈 정답 검증
      */
-    public QuizSubmitResponse submit(int quizId, int quizChoiceId) {
+    public QuizSubmitResponse submit(int quizId, int selectedNo) {
         Quiz quiz = quizRepository.findById(quizId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 퀴즈입니다."));
 
-        QuizChoice selected = quizChoiceRepository.findById(quizChoiceId)
+        QuizChoice selected = quizChoiceRepository.findByQuizIdAndChoiceNo(quizId, selectedNo)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 선택지입니다."));
 
         QuizChoice correct = quizChoiceRepository.findByQuizIdAndIsCorrectTrue(quizId)
@@ -56,6 +56,6 @@ public class QuizService {
 
         boolean isCorrect = Boolean.TRUE.equals(selected.getIsCorrect());
 
-        return QuizSubmitResponse.of(quizId, quizChoiceId, isCorrect, correct);
+        return QuizSubmitResponse.of(quizId, selectedNo, isCorrect, correct);
     }
 }

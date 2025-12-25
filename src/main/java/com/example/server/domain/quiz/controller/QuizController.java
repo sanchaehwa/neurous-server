@@ -31,6 +31,6 @@ public class QuizController {
             @PathVariable("quizId") int quizId,
             @RequestBody QuizSubmitRequest request
     ) {
-        return ResponseEntity.ok(quizService.submit(quizId, request.quizChoiceId()));
+        return ResponseEntity.ok(quizService.submit(quizId, request.selectedNo()));
     }
 }

@@ -2,11 +2,11 @@ package com.example.server.domain.content.controller;
 
 import com.example.server.domain.content.dto.ContentResponse;
 import com.example.server.domain.content.dto.ContentDifficultyRequest;
+import com.example.server.domain.content.dto.DifficultyRecommendResponse;
 import com.example.server.domain.content.service.ContentService;
 import com.example.server.global.annotation.CurrentUserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,7 +46,7 @@ public class ContentController {
         return ResponseEntity.ok(contentResponse);
     }
 
-    @GetMapping("/serach")
+    @GetMapping("/search")
     public ResponseEntity<List<ContentResponse>> searchContent(
             @CurrentUserId Long userId,
             @RequestParam("keyword") String keyword,
@@ -67,13 +67,13 @@ public class ContentController {
     }
 
     @PostMapping("/evaluation")
-    public ResponseEntity<Void> setContentEvaluation(
+    public ResponseEntity<DifficultyRecommendResponse> setContentEvaluation(
             @CurrentUserId Long userId,
             @RequestParam("contentId") int contentId,
             @RequestBody ContentDifficultyRequest difficulty){
 
-        contentService.setDifficultyEvaluation(userId, contentId, difficulty);
+        DifficultyRecommendResponse result = contentService.setDifficultyEvaluation(userId, contentId, difficulty);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(result);
     }
 }

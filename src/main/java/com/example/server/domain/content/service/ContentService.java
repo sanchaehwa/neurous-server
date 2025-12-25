@@ -2,18 +2,20 @@ package com.example.server.domain.content.service;
 
 import com.example.server.domain.content.dto.ContentResponse;
 import com.example.server.domain.content.dto.ContentDifficultyRequest;
+import com.example.server.domain.content.dto.DifficultyRecommendResponse;
 import com.example.server.domain.content.entity.Content;
 import com.example.server.domain.content.entity.ContentDifficultyEvaluation;
-import com.example.server.domain.content.repository.ContentDifficultyEvaluationRepository;
-import com.example.server.domain.content.repository.ContentRepository;
-import com.example.server.domain.content.repository.ReadContentRepository;
-import com.example.server.domain.content.repository.UserInterestRepository;
+import com.example.server.domain.content.entity.DifficultyBasetime;
+import com.example.server.domain.content.entity.vo.ContentDifficulty;
+import com.example.server.domain.content.entity.vo.DifficultyRecommend;
+import com.example.server.domain.content.repository.*;
 import com.example.server.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -26,6 +28,7 @@ public class ContentService {
     private final UserInterestRepository userInterestRepository;
     private final ReadContentRepository readContentRepository;
     private final ContentDifficultyEvaluationRepository contentDifficultyEvaluationRepository;
+    private final DifficultyBasetimeRepository difficultyBasetimeRepository;
 
     private static final List<String> CATEGORIES = List.of("정치", "경제", "사회", "생활/문화", "IT/과학", "세계");
     private static final int RESULT_SIZE = 3;
@@ -163,18 +166,51 @@ public class ContentService {
     /**
      * 문제 난이도 평가
      */
-    public void setDifficultyEvaluation(Long userId, int contentId, ContentDifficultyRequest difficulty){
+    public DifficultyRecommendResponse setDifficultyEvaluation(Long userId, int contentId, ContentDifficultyRequest difficulty){
 
-        if (contentDifficultyEvaluationRepository.findByUserIdAndContentId(userId, contentId).isPresent()) return;
+        if (contentDifficultyEvaluationRepository.findByUserIdAndContentId(userId, contentId).isPresent()){
+            throw new IllegalStateException("이미 평가한 컨텐츠입니다.");
+        }
 
         ContentDifficultyEvaluation c = ContentDifficultyEvaluation.builder()
                 .contentId(contentId)
                 .userId(userId)
                 .contentDifficulty(difficulty.difficulty())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         contentDifficultyEvaluationRepository.save(c);
 
+        // 난이도 추천 로직
+        DifficultyBasetime basetime = difficultyBasetimeRepository.findTopByUserIdOrderByBaseTimeDesc(userId)
+                .orElseGet(() -> difficultyBasetimeRepository.save(DifficultyBasetime.now(userId)));
+
+        LocalDateTime from = basetime.getBaseTime();
+        LocalDateTime to = LocalDateTime.now();
+
+        long evaluationEASYCount = contentDifficultyEvaluationRepository
+                .countByUserIdAndDifficultyBetween(userId, ContentDifficulty.EASY, from, to);
+
+        long evaluationHARDCount = contentDifficultyEvaluationRepository
+                .countByUserIdAndDifficultyBetween(userId, ContentDifficulty.HARD, from, to);
+
+        DifficultyRecommend recommend = DifficultyRecommend.NONE;
+
+        if (evaluationEASYCount >= 13) {
+            recommend = DifficultyRecommend.INCREASE;
+        } else if (evaluationHARDCount >= 8) {
+            recommend = DifficultyRecommend.DECREASE;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (recommend != DifficultyRecommend.NONE) {
+            basetime.reset(now);
+        }
+
+        DifficultyRecommendResponse response = new DifficultyRecommendResponse(recommend);
+
+        return response;
     }
 
 }

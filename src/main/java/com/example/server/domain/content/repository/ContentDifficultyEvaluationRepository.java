@@ -11,8 +11,6 @@ import java.util.Optional;
 public interface ContentDifficultyEvaluationRepository extends JpaRepository<ContentDifficultyEvaluation, Integer> {
     Optional<ContentDifficultyEvaluation> findByUserIdAndContentId(Long userId, int contentId);
 
-    int count(Long userId, ContentDifficulty contentDifficulty);
-
     @Query("""
         select count(e)
         from ContentDifficultyEvaluation e

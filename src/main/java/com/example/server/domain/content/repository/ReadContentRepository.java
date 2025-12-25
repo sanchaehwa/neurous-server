@@ -1,13 +1,14 @@
 package com.example.server.domain.content.repository;
 
 import com.example.server.domain.content.entity.Content;
+import com.example.server.domain.content.entity.ReadContent;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface ReadContentRepository extends JpaRepository<ReadContentRepository, Integer> {
+public interface ReadContentRepository extends JpaRepository<ReadContent, Integer> {
 
     @Query(value = """
             SELECT c.*

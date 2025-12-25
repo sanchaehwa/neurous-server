@@ -1,0 +1,39 @@
+package com.example.server.domain.quiz.controller.docs;
+
+import com.example.server.domain.quiz.entity.Quiz;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Operation(
+        summary = "퀴즈 출제",
+        description = "contentId와 사용자 난이도(레벨)에 맞는 퀴즈 문제+보기 목록을 조회합니다."
+)
+@ApiResponse(
+        responseCode = "200",
+        description = "조회 성공",
+        content = @Content(schema = @Schema(implementation = Quiz.class)
+        )
+)
+@ApiResponse(
+        responseCode = "401",
+        description = "인증 실패/세션 만료"
+)
+@ApiResponse(
+        responseCode = "404",
+        description = "해당 컨텐츠에 난이도별 퀴즈가 없음"
+)
+@ApiResponse(
+        responseCode = "500",
+        description = "서버 내부 오류"
+)
+public @interface GetQuizDocs {
+}

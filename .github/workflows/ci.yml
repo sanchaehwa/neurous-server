@@ -15,6 +15,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+
       # Gradle 캐시 복원 ** 빌드 속도 향상
       - name: Restore Gradle cache
         uses: actions/cache@v3
@@ -28,8 +29,3 @@ jobs:
 
       - name: Build & Test
         run: ./gradlew clean test -Dspring.profiles.active=test
-        env:
-          JWT_SECRET: test-jwt-secret-for-ci
-          DB_URL: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
-          DB_USERNAME: sa
-          DB_PASSWORD:

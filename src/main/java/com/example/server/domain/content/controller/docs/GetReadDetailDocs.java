@@ -1,6 +1,5 @@
 package com.example.server.domain.content.controller.docs;
 
-import com.example.server.global.docs.ApiErrorStandard;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,17 +13,13 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-        summary = "콘텐츠 상세 조회",
-        description = "콘텐츠 상세 정보를 조회합니다."
+        summary = "읽은 글 상세 조회",
+        description = "읽은 글 상세 정보를 조회합니다."
 )
 @ApiResponse(
         responseCode = "200",
         description = "조회 성공",
         content = @Content(schema = @Schema(implementation = Content.class))
-)
-@ApiResponse(
-        responseCode = "400",
-        description = "요청 값이 유효하지 않음"
 )
 @ApiResponse(
         responseCode = "404",
@@ -34,5 +29,5 @@ import java.lang.annotation.Target;
         responseCode = "500",
         description = "서버 내부 오류"
 )
-public @interface GetContentDetailDocs {
+public @interface GetReadDetailDocs {
 }

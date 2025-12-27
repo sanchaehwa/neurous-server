@@ -16,6 +16,7 @@ server:
       force-response: true
 
 jwt:
+  secret: ${JWT_SECRET}
   expiration: 3600000
   refresh-expiration: 2592000000
 

@@ -1,16 +1,16 @@
 package com.example.server.global.security.jwt;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@Component
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
 
-	private final String secret;
-	private final Long expiration;
-	private final Long refreshExpiration;
+	private String secret;
+	private Long expiration;
+	private Long refreshExpiration;
 }

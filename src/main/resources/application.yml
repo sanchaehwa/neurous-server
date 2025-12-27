@@ -19,3 +19,6 @@ jwt:
   expiration: 3600000
   refresh-expiration: 2592000000
 
+app:
+  backend:
+    base-url: ${APP_BACKEND_URL:http://localhost:8080}

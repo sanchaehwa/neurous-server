@@ -2,8 +2,8 @@ FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
 
-ARG JAR_FILE=build/libs/server-0.0.1-SNAPSHOT.jar
-COPY ${JAR_FILE} app.jar
+# 특정 파일명이 아닌 build/libs/ 내부의 jar 파일을 찾도록 수정
+COPY build/libs/*.jar app.jar
 
 EXPOSE 8080
 

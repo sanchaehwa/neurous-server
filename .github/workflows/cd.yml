@@ -38,4 +38,4 @@ jobs:
           script: |
             cd /home/ubuntu/neurous
             docker pull neurous.kr.ncr.ntruss.com/neurous/neurous-api:${{ github.sha }}
-            IMAGE_TAG=${{ github.sha }} docker-compose up -d
+            IMAGE_TAG=${{ github.sha }} docker-compose -f docker-compose.prod.yml up -d

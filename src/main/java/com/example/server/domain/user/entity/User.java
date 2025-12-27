@@ -64,17 +64,21 @@ public class User extends BaseTimeEntity {
 	@Email
 	private String email;
 
+	@Builder.Default
 	@Enumerated(EnumType.STRING)
 	private UserStatus status = UserStatus.NORMAL;
 
+	@Builder.Default
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, length = 25)
 	private UserType userType = UserType.USER;
 
 	//흥미
+	@Builder.Default
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserInterest> interests = new ArrayList<>();
 
+	@Builder.Default
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Level level = Level.BEGINNER; //기본값 : 초급
@@ -82,6 +86,7 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private boolean signUpComplete; //회원가입 이후 추가 정보까지 입력 여부
 
+	@Builder.Default
 	@Column(nullable = false, name = "notification_status")
 	private boolean notificationStatus = false; //알람 여부 미설정
 

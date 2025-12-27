@@ -39,9 +39,11 @@ public class TokenManager extends BaseTimeEntity {
 	@Column(nullable = false)
 	private LocalDateTime expiredAt;
 
+	@Builder.Default
 	@Column(nullable = false)
 	private boolean revoked = false;
 
+	@Builder.Default
 	@Version
 	@Column(nullable = false)
 	private Long tokenVersion = 0L;

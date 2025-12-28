@@ -64,16 +64,6 @@ public class ContentController implements ContentControllerDocs {
     }
 
     @AuthenticatedApi
-    @GetMapping("/history")
-    public SuccessResponse<List<ContentResponse>> getReadHistory(
-            @CurrentUserId Long userId,
-            @RequestParam(value = "page", defaultValue = "0") int page
-    ) {
-        List<ContentResponse> result = contentService.getReadHistory(userId, page);
-        return SuccessResponse.of(SuccessMessage.LOAD_SUCCESS, result);
-    }
-
-    @AuthenticatedApi
     @PostMapping("/evaluation")
     public SuccessResponse<DifficultyRecommendResponse> setContentEvaluation(
             @CurrentUserId Long userId,

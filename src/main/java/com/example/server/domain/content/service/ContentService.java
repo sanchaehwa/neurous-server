@@ -175,23 +175,6 @@ public class ContentService {
     }
 
     /**
-     * 읽은 내역 조회
-     */
-    public List<ContentResponse> getReadHistory(Long userId, int page) {
-
-        int size = 10;
-
-        List<Content> contents = readContentRepository.findReadContentsByUserId(
-                userId,
-                PageRequest.of(page, size)
-        );
-
-        return contents.stream()
-                .map(ContentResponse::from)
-                .toList();
-    }
-
-    /**
      * 문제 난이도 평가
      */
     public DifficultyRecommendResponse setDifficultyEvaluation(Long userId, int contentId, ContentDifficultyRequest difficulty){

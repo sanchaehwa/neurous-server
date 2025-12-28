@@ -48,7 +48,7 @@ public class ContentService {
     private final QuizRepository quizRepository;
     private final QuizChoiceRepository quizChoiceRepository;
 
-    private static final List<String> CATEGORIES = List.of("정치", "경제", "사회", "생활/문화", "IT/과학", "세계");
+    private static final List<String> CATEGORIES = List.of("POLITICS", "ECONOMY", "SOCIETY", "LIFE_CULTURE", "IT/IT_SCIENCE", "WORLD");
     private static final int RESULT_SIZE = 3;
 
     /**
@@ -59,7 +59,7 @@ public class ContentService {
         PageRequest pageRequest = PageRequest.of(page, size);
 
         String ContentDiff = userRepository.findLevelByUserId(userId)
-                .orElse("초급");
+                .orElse("INTERMEDIATE");
 
         Map<String, List<ContentResponse>> result = new LinkedHashMap<>();
 
@@ -76,7 +76,7 @@ public class ContentService {
      * 오늘의 미션 컨텐츠 조회
      */
     public List<ContentResponse> getTodayContent(Long userId) {
-        String difficulty = userRepository.findLevelByUserId(userId).orElse("초급");
+        String difficulty = userRepository.findLevelByUserId(userId).orElse("INTERMEDIATE");
 
         List<String> categories = userInterestRepository.findInterestsByUserIdOrderByPriorityAsc(userId).stream()
                 .map(UserField::getDescription)
@@ -162,7 +162,7 @@ public class ContentService {
 
         int size = 10;
 
-        String diff = userRepository.findLevelByUserId(userId).orElse("초급");
+        String diff = userRepository.findLevelByUserId(userId).orElse("INTERMEDIATE");
 
         return contentRepository.searchByTitle(
                         diff,

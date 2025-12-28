@@ -22,16 +22,19 @@ public class NaverUserInfo implements OAuthUserInfo {
 
 	@Override
 	public String getProviderId() {
-		return naverAccount.getId();
+		// null이면 "unknown" 반환
+		return naverAccount != null && naverAccount.getId() != null ? naverAccount.getId() : "unknown";
 	}
 
 	@Override
 	public String getName() {
-		return naverAccount.getName();
+		// null이면 "Unknown" 반환
+		return naverAccount != null && naverAccount.getName() != null ? naverAccount.getName() : "Unknown";
 	}
 
 	@Override
 	public String getEmail() {
-		return naverAccount.getEmail();
+		// null이면 null 반환 (필요시 기본값 사용 가능)
+		return naverAccount != null ? naverAccount.getEmail() : null;
 	}
 }

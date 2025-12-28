@@ -1,5 +1,7 @@
 package com.example.server.global.security.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -9,6 +11,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.example.server.global.security.jwt.JwtAuthenticationFilter;
 
@@ -25,6 +29,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 			.csrf(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
@@ -41,10 +46,24 @@ public class SecurityConfig {
 					"/swagger-resources/**",
 					"/api/test/**"
 				).permitAll()
-
 				.anyRequest().authenticated()
 			)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.build();
 	}
+
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		return request -> {
+			CorsConfiguration configuration = new CorsConfiguration();
+			configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+			configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+			configuration.setAllowedHeaders(List.of("*"));
+			configuration.setAllowCredentials(true);
+			configuration.setMaxAge(3600L);
+			configuration.setExposedHeaders(List.of("Authorization"));
+			return configuration;
+		};
+	}
+
 }

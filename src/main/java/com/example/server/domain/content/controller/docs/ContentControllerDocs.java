@@ -41,12 +41,6 @@ public interface ContentControllerDocs {
             int page
     );
 
-    @GetReadHistoryDocs
-    SuccessResponse<List<ContentResponse>> getReadHistory(
-            @CurrentUserId Long userId,
-            int page
-    );
-
     @SetContentEvaluationDocs
     SuccessResponse<DifficultyRecommendResponse> setContentEvaluation(
             @CurrentUserId Long userId,

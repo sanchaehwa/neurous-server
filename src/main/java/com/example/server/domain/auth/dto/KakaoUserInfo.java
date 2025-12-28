@@ -36,14 +36,17 @@ public class KakaoUserInfo implements OAuthUserInfo {
 
 	@Override
 	public String getEmail() {
+		if (kakaoAccount == null)
+			return null;
 		return kakaoAccount.getEmail();
 	}
 
 	@Override
 	public String getName() {
-		return kakaoAccount.profile.getNickname();
+		if (kakaoAccount == null)
+			return "Unknown";
+		if (kakaoAccount.getProfile() == null)
+			return "Unknown";
+		return kakaoAccount.getProfile().getNickname();
 	}
 }
-
-
-

@@ -3,32 +3,32 @@ package com.example.server.global.security.oauth;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@RequiredArgsConstructor
+@Setter  // final을 제거하고 Setter를 추가합니다.
 @ConfigurationProperties(prefix = "oauth")
 public class OAuthProperties {
 
-	private final Kakao kakao;
-	private final Google google;
-	private final Naver naver;
+	private Kakao kakao;
+	private Google google;
+	private Naver naver;
 
 	@Getter
-	@RequiredArgsConstructor
+	@Setter
 	public static class Kakao {
-		private final String userInfoUrl;
+		private String userInfoUrl;
 	}
 
 	@Getter
-	@RequiredArgsConstructor
+	@Setter
 	public static class Google {
-		private final String userInfoUrl;
+		private String userInfoUrl;
 	}
 
 	@Getter
-	@RequiredArgsConstructor
+	@Setter
 	public static class Naver {
-		private final String userInfoUrl;
+		private String userInfoUrl;
 	}
 }

@@ -1,18 +1,16 @@
 package com.example.server.global.security.oauth;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Component // 명시적으로 빈 등록
 @ConfigurationProperties(prefix = "oauth")
 public class OAuthProperties {
 
-	// 직접 초기화하여 NullPointerException 방지
+	// 선언만 하지 말고 = new ...() 로 직접 초기화하세요! (핵심)
 	private Kakao kakao = new Kakao();
 	private Google google = new Google();
 	private Naver naver = new Naver();
@@ -26,6 +24,7 @@ public class OAuthProperties {
 	@Getter
 	@Setter
 	public static class Google {
+		// 기본값을 넣어두면 설정파일이 비어있어도 Null이 안 뜹니다.
 		private String userInfoUrl = "https://www.googleapis.com/oauth2/v2/userinfo";
 	}
 

@@ -23,3 +23,9 @@ jwt:
 app:
   backend:
     base-url: ${APP_BACKEND_URL:http://localhost:8080}
+
+oauth:
+  kakao:
+    user-info-url: https://kapi.kakao.com/v2/user/me
+  google:
+    user-info-url: https://www.googleapis.com/oauth2/v2/userinfo

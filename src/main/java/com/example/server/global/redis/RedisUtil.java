@@ -1,5 +1,10 @@
 package com.example.server.global.redis;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -43,5 +48,29 @@ public class RedisUtil {
 		String countKey = RedisKey.CONTENT_HITS.getPrefix() + ":" + contentId;
 		String val = redisTemplate.opsForValue().get(countKey);
 		return val != null ? Integer.parseInt(val) : 0;
+	}
+
+	//최근 검색어 추가 및 점수(시간) 업데이트
+	public void zAdd(RedisKey redisKey, Long userId, String value, double score) {
+		String key = redisKey.getFullKey(userId);
+		redisTemplate.opsForZSet().add(key, value, score);
+		redisTemplate.expire(key, redisKey.getTtl());
+	}
+
+	//최신순 조회
+	public List<String> zRevRange(RedisKey redisKey, Long userId, long start, long end) {
+		String key = redisKey.getFullKey(userId);
+		Set<String> range = redisTemplate.opsForZSet().reverseRange(key, start, end);
+		return range == null ? Collections.emptyList() : new ArrayList<>(range);
+	}
+
+	//개수 제한 삭제 * 오래된 것 삭제
+	public void zRemRangeByRank(RedisKey redisKey, Long userId, long start, long end) {
+		redisTemplate.opsForZSet().removeRange(redisKey.getFullKey(userId), start, end);
+	}
+
+	// 개별 삭제
+	public void zRem(RedisKey redisKey, Long userId, String value) {
+		redisTemplate.opsForZSet().remove(redisKey.getFullKey(userId), value);
 	}
 }

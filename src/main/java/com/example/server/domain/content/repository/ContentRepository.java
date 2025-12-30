@@ -35,4 +35,16 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
 		Pageable pageable
 	);
 
+	@Query("""
+		    SELECT c FROM Content c
+		    WHERE c.contentLevel = :level
+		      AND c.title LIKE %:keyword%
+		    ORDER BY c.contentId DESC
+		""")
+	List<Content> searchByTitle(
+		@Param("level") ContentLevel level,
+		@Param("keyword") String keyword,
+		Pageable pageable
+	);
+
 }

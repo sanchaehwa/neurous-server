@@ -1,11 +1,23 @@
 package com.example.server.domain.quiz.entity;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+import com.example.server.domain.content.entity.ReadContent;
+import com.example.server.domain.user.entity.User;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "quiz_solve")
@@ -13,39 +25,43 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class QuizSolve {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "quiz_solve_id")
-    private Long quizSolveId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "quiz_solve_id")
+	private Long quizSolveId;
 
-    @Column(name = "user_id")
-    private Long userId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	private User user;
 
-    @Column(name = "content_id")
-    private int contentId;
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "read_content_id")
+	private ReadContent readContent;
 
-    @Column(name = "quiz_id")
-    private int quizId;
+	@Column(name = "quiz_id")
+	private Long quizId;
 
-    @Column(name = "selected_no")
-    private int selectedNo;
+	@Column(name = "selected_no")
+	private int selectedNo;
 
-    @Column(name = "is_answer_correct")
-    private boolean isAnswerCorrect;
+	@Column(name = "is_answer_correct")
+	private boolean isAnswerCorrect;
 
-    @Column(name = "solved_at")
-    private LocalDateTime solvedAt;
+	@Column(name = "solved_at")
+	private LocalDateTime solvedAt;
 
-    private QuizSolve(Long userId, int contentId, int quizId, int selectedNo, boolean isAnswerCorrect, LocalDateTime solvedAt) {
-        this.userId = userId;
-        this.contentId = contentId;
-        this.quizId = quizId;
-        this.selectedNo = selectedNo;
-        this.isAnswerCorrect = isAnswerCorrect;
-        this.solvedAt = solvedAt;
-    }
+	private QuizSolve(User user, ReadContent readContent, Long quizId, int selectedNo, boolean isAnswerCorrect,
+		LocalDateTime solvedAt) {
+		this.user = user;
+		this.readContent = readContent;
+		this.quizId = quizId;
+		this.selectedNo = selectedNo;
+		this.isAnswerCorrect = isAnswerCorrect;
+		this.solvedAt = solvedAt;
+	}
 
-    public static QuizSolve of(Long userId, int contentId, int quizId, int selectedNo, boolean isAnswerCorrect, LocalDateTime solvedAt) {
-        return new QuizSolve(userId, contentId, quizId, selectedNo, isAnswerCorrect, solvedAt);
-    }
+	public static QuizSolve of(User user, ReadContent readContent, Long quizId, int selectedNo, boolean isAnswerCorrect,
+		LocalDateTime solvedAt) {
+		return new QuizSolve(user, readContent, quizId, selectedNo, isAnswerCorrect, solvedAt);
+	}
 }

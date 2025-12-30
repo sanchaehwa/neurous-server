@@ -38,7 +38,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User extends BaseTimeEntity {
 
 	@Id
@@ -89,6 +89,8 @@ public class User extends BaseTimeEntity {
 	@Builder.Default
 	@Column(nullable = false, name = "notification_status")
 	private boolean notificationStatus = false; //알람 여부 미설정
+
+	//읽은 컨텐츠
 
 	private LocalDateTime lastLoginAt;
 

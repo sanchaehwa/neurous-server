@@ -9,5 +9,9 @@ import com.example.server.domain.quiz.entity.QuizSolve;
 
 @Repository
 public interface QuizSolveRepository extends JpaRepository<QuizSolve, Long> {
-	Optional<QuizSolve> findByUserIdAndContentId(Long userId, int contentId);
+
+	Optional<QuizSolve> findByUser_IdAndReadContent_ReadContentId(Long userId, Long readContentId);
+
+	//특정 읽기 기록에 대한 풀이 이력이 있는지 확인
+	boolean existsByReadContent_ReadContentId(Long readContentId);
 }

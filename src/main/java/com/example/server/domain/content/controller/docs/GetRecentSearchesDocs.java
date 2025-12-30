@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.example.server.domain.content.dto.response.ContentDetailResponse;
+import com.example.server.domain.content.dto.response.RecentSearchResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,23 +14,22 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Operation(summary = "콘텐츠 상세 조회", description = "콘텐츠 상세 정보와 실시간 조회수를 조회합니다.")
+@Operation(
+	summary = "최근 검색어 조회",
+	description = "현재 로그인한 사용자가 최근에 검색한 키워드 목록(최대 10개)을 조회합니다."
+)
 @ApiResponse(
 	responseCode = "200",
 	description = "조회 성공",
-	content = @Content(schema = @Schema(implementation = ContentDetailResponse.class))
+	content = @Content(schema = @Schema(implementation = RecentSearchResponse.class))
 )
 @ApiResponse(
-	responseCode = "400",
-	description = "요청 값이 유효하지 않음"
-)
-@ApiResponse(
-	responseCode = "404",
-	description = "리소스를 찾을 수 없음(컨텐츠 미존재)"
+	responseCode = "401",
+	description = "인증 실패 (토큰 누락 또는 만료)"
 )
 @ApiResponse(
 	responseCode = "500",
 	description = "서버 내부 오류"
 )
-public @interface GetContentDetailDocs {
+public @interface GetRecentSearchesDocs {
 }

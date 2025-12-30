@@ -5,9 +5,13 @@ import java.util.Map;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.example.server.domain.content.dto.ContentResponse;
 import com.example.server.domain.content.dto.request.ContentDifficultyRequest;
+import com.example.server.domain.content.dto.response.ContentDetailResponse;
+import com.example.server.domain.content.dto.response.ContentResponse;
 import com.example.server.domain.content.dto.response.DifficultyRecommendResponse;
+import com.example.server.domain.content.dto.response.ExploreResponse;
+import com.example.server.domain.content.dto.response.RecentSearchResponse;
+import com.example.server.domain.content.entity.vo.ContentCategory;
 import com.example.server.domain.quiz.dto.ReadContentDetailResponse;
 import com.example.server.global.annotation.CurrentUserId;
 import com.example.server.global.exception.dto.SuccessResponse;
@@ -19,19 +23,14 @@ import jakarta.validation.Valid;
 public interface ContentControllerDocs {
 
 	@GetExploreContentDocs
-	SuccessResponse<Map<String, List<ContentResponse>>> getExploreContent(
-		@CurrentUserId Long userId,
-		int page
-	);
-
-	@GetTodayContentDocs
-	SuccessResponse<List<ContentResponse>> getTodayContent(
+	SuccessResponse<Map<ContentCategory, ExploreResponse>> getExploreContent(
 		@CurrentUserId Long userId
 	);
 
 	@GetContentDetailDocs
-	SuccessResponse<ContentResponse> getContentDetail(
-		int contentId
+	SuccessResponse<ContentDetailResponse> getContentDetail(
+		@CurrentUserId Long userId,
+		Long contentId  // int -> Long 및 userId 추가
 	);
 
 	@SearchContentDocs
@@ -41,22 +40,35 @@ public interface ContentControllerDocs {
 		int page
 	);
 
+	@GetRecentSearchesDocs
+	SuccessResponse<List<RecentSearchResponse>> getRecentSearches(
+		@CurrentUserId Long userId
+	);
+
 	@SetContentEvaluationDocs
 	SuccessResponse<DifficultyRecommendResponse> setContentEvaluation(
 		@CurrentUserId Long userId,
-		int contentId,
+		Long contentId, // int -> Long
 		@RequestBody @Valid ContentDifficultyRequest difficulty
 	);
 
 	@SetContentReadDocs
 	SuccessResponse<Void> setContentRead(
 		@CurrentUserId Long userId,
-		int contentId
+		Long contentId // int -> Long
 	);
 
-	@SetContentReadDocs
+	@UpdateReadStatusDocs
+	SuccessResponse<Void> updateReadStatus(
+		@CurrentUserId Long userId,
+		Long contentId,
+		Long staySeconds,
+		boolean isCompleted
+	);
+
+	@GetReadDetailDocs
 	SuccessResponse<ReadContentDetailResponse> getReadDetail(
 		@CurrentUserId Long userId,
-		int contentId
+		Long contentId // int -> Long
 	);
 }

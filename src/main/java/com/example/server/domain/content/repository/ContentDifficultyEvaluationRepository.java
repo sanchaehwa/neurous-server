@@ -30,4 +30,8 @@ public interface ContentDifficultyEvaluationRepository extends JpaRepository<Con
 		@Param("fromTime") LocalDateTime fromTime,
 		@Param("toTime") LocalDateTime toTime
 	);
+
+	//ReadContent ID를 통해 이미 평가가 존재했는지 확인
+	boolean existsByReadContent_ReadContentId(Long readContentId);
 }
+

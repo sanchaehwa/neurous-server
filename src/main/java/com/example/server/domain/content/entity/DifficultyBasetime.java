@@ -40,6 +40,14 @@ public class DifficultyBasetime {
 		this.baseTime = LocalDateTime.now();
 	}
 
+	public void reset(LocalDateTime newBaseTime) {
+		this.baseTime = newBaseTime;
+	}
+
+	public static DifficultyBasetime now(Long userId, Long contentId) {
+		return new DifficultyBasetime(userId, contentId);
+	}
+
 	public long calculateStaySeconds() {
 		return java.time.Duration.between(this.baseTime, LocalDateTime.now()).getSeconds();
 	}

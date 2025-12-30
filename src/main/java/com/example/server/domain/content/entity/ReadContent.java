@@ -73,7 +73,9 @@ public class ReadContent {
 		this.readAt = now;
 	}
 
-	public void changeIsCompleted(boolean completed) {
-		this.isCompleted = completed;
+	//컨텐츠에 남아있었던 시간
+	public void updateStatus(Long staySeconds, boolean isCompleted) {
+		this.staySeconds = staySeconds;
+		this.isCompleted = isCompleted;
 	}
 }

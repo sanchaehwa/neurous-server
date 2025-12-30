@@ -139,10 +139,12 @@ public class User extends BaseTimeEntity {
 	}
 
 	public void updateInterests(List<UserField> fields) {
-		if (fields.size() != 3) {
+
+		//최소 1개에서 ~ 3개
+		if (fields == null || fields.isEmpty() || fields.size() > 3) {
 			throw new BadRequestException(ErrorMessage.USER_INVALID_INTEREST_COUNT);
 		}
-		if (fields.stream().distinct().count() != 3) {
+		if (fields.stream().distinct().count() != fields.size()) {
 			throw new BadRequestException(ErrorMessage.USER_DUPLICATED_INTEREST);
 		}
 

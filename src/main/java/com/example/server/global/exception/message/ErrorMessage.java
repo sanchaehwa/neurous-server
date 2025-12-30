@@ -35,7 +35,7 @@ public enum ErrorMessage {
 
 	//User 관련
 	USER_NOT_FOUND(404, "USER3001", "유저를 찾을 수 없습니다"),
-	USER_INVALID_INTEREST_COUNT(400, "USER3002", "관심분야는 3가지 모두 선택해야합니다"),
+	USER_INVALID_INTEREST_COUNT(400, "USER3002", "관심분야는 3가지만 선택할 수 있습니다."),
 	USER_DUPLICATED_INTEREST(400, "USER3003", "중복된 관심분야 항목이 있습니다"),
 
 	//컨텐츠 관련

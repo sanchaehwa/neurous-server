@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.server.domain.quiz.controller.docs.QuizControllerDocs;
-import com.example.server.domain.quiz.dto.QuizQuestionResponse;
-import com.example.server.domain.quiz.dto.QuizSubmitRequest;
-import com.example.server.domain.quiz.dto.QuizSubmitResponse;
+import com.example.server.domain.quiz.dto.request.QuizSubmitRequest;
+import com.example.server.domain.quiz.dto.response.QuizQuestionResponse;
+import com.example.server.domain.quiz.dto.response.QuizSubmitResponse;
 import com.example.server.domain.quiz.service.QuizService;
 import com.example.server.global.annotation.CurrentUserId;
 import com.example.server.global.exception.dto.SuccessResponse;

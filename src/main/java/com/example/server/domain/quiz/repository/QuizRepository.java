@@ -7,13 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.example.server.domain.content.entity.vo.ContentLevel;
 import com.example.server.domain.quiz.entity.Quiz;
-import com.example.server.domain.user.entity.vo.Level;
 
 @Repository
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
 	@Query(" SELECT q FROM Quiz q WHERE q.content.contentId = :contentId AND q.quizDiff = :quizDiff")
-	Optional<Quiz> findQuiz(@Param("contentId") Long contentId, @Param("quizDiff") Level quizDiff);
+	Optional<Quiz> findQuiz(@Param("contentId") Long contentId, @Param("quizDiff") ContentLevel quizDiff);
 
 }

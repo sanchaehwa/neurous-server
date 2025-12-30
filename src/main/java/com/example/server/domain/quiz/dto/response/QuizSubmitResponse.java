@@ -1,4 +1,4 @@
-package com.example.server.domain.quiz.dto;
+package com.example.server.domain.quiz.dto.response;
 
 import com.example.server.domain.quiz.entity.QuizChoice;
 

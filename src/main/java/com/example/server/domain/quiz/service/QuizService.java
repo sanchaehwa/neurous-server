@@ -7,18 +7,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.server.domain.content.entity.ReadContent;
+import com.example.server.domain.content.entity.vo.ContentLevel;
 import com.example.server.domain.content.repository.ReadContentRepository;
-import com.example.server.domain.quiz.dto.QuizChoiceResponse;
-import com.example.server.domain.quiz.dto.QuizQuestionResponse;
-import com.example.server.domain.quiz.dto.QuizSubmitRequest;
-import com.example.server.domain.quiz.dto.QuizSubmitResponse;
+import com.example.server.domain.quiz.dto.request.QuizSubmitRequest;
+import com.example.server.domain.quiz.dto.response.QuizChoiceResponse;
+import com.example.server.domain.quiz.dto.response.QuizQuestionResponse;
+import com.example.server.domain.quiz.dto.response.QuizSubmitResponse;
 import com.example.server.domain.quiz.entity.Quiz;
 import com.example.server.domain.quiz.entity.QuizChoice;
 import com.example.server.domain.quiz.entity.QuizSolve;
 import com.example.server.domain.quiz.repository.QuizChoiceRepository;
 import com.example.server.domain.quiz.repository.QuizRepository;
 import com.example.server.domain.quiz.repository.QuizSolveRepository;
-import com.example.server.domain.user.entity.vo.Level;
 import com.example.server.domain.user.repository.UserRepository;
 import com.example.server.global.exception.message.ErrorMessage;
 import com.example.server.global.exception.model.BadRequestException;
@@ -44,8 +44,8 @@ public class QuizService {
 	 */
 	public QuizQuestionResponse getQuiz(Long userId, Long contentId) {
 
-		Level quizDiff = userRepository.findLevelByUserId(userId)
-			.orElse(Level.BEGINNER);
+		ContentLevel quizDiff = userRepository.findLevelByUserId(userId)
+			.orElse(ContentLevel.BEGINNER);
 
 		Quiz quiz = quizRepository.findQuiz(contentId, quizDiff)
 			.orElseThrow(() -> new NotFoundException(ErrorMessage.QUIZ_NOT_FOUND_FOR_CONTENT_LEVEL));

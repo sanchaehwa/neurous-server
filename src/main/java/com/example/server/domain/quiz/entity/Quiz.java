@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.server.domain.content.entity.Content;
-import com.example.server.domain.user.entity.vo.Level;
+import com.example.server.domain.content.entity.vo.ContentLevel;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -50,11 +50,12 @@ public class Quiz {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "quiz_diff")
-	private Level quizDiff;
+	private ContentLevel quizDiff;
 
 	@Column(name = "quiz_category")
 	private String quizCategory;
 
+	@Builder.Default
 	@OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<QuizChoice> choices = new ArrayList<>();
 }

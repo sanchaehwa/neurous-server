@@ -2,6 +2,7 @@ package com.example.server.domain.content.entity;
 
 import java.time.LocalDateTime;
 
+import com.example.server.domain.content.entity.vo.ContentLevel;
 import com.example.server.domain.quiz.entity.QuizSolve;
 import com.example.server.domain.user.entity.User;
 
@@ -76,6 +77,18 @@ public class ReadContent {
 	//컨텐츠에 남아있었던 시간
 	public void updateStatus(Long staySeconds, boolean isCompleted) {
 		this.staySeconds = staySeconds;
-		this.isCompleted = isCompleted;
+		this.isCompleted = checkCompletion(this.content.getContentLevel(), staySeconds);
+	}
+
+	//체류 시간에 따른 완료 여부 체크
+	private boolean checkCompletion(ContentLevel level, Long seconds) {
+		if (seconds == null)
+			return false;
+
+		return switch (level) {
+			case BEGINNER -> seconds >= 50; //초급 50초
+			case INTERMEDIATE -> seconds >= 90;   // 중급 1분 30초 (90초)
+			case ADVANCED -> seconds >= 190;      // 고급 3분 10초 (190초)
+		};
 	}
 }

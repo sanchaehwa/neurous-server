@@ -238,7 +238,18 @@ public class ContentService {
 	@Transactional
 	public void updateReadStatus(Long userId, Long contentId, Long staySeconds, boolean isCompleted) {
 		ReadContent readContent = findReadContentById(userId, contentId);
-		readContent.updateStatus(staySeconds, isCompleted);
+
+		ContentLevel level = readContent.getContent().getContentLevel();
+
+		boolean isSatisfied = false;
+		if (level == ContentLevel.BEGINNER && staySeconds >= 50)
+			isSatisfied = true;
+		else if (level == ContentLevel.INTERMEDIATE && staySeconds >= 90)
+			isSatisfied = true;
+		else if (level == ContentLevel.ADVANCED && staySeconds >= 190)
+			isSatisfied = true;
+
+		readContent.updateStatus(staySeconds, isSatisfied);
 	}
 
 	/**

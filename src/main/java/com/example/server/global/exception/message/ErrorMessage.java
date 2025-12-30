@@ -45,6 +45,8 @@ public enum ErrorMessage {
 	CONTENT_TODAY_NOT_AVAILABLE(404, "CNT4004", "추천 가능한 콘텐츠가 없습니다."),
 	CONTENT_ALREADY_EVALUATED(409, "CNT4005", "이미 평가한 컨텐츠입니다."),
 	CONTENT_ALREADY_READ(409, "CNT4006", "이미 읽음 처리된 컨텐츠입니다."),
+	READ_RECORD_NOT_FOUND(404, "CNT4007", "컨텐츠 읽은 기록이 없습니다"),
+	INVALID_USER_READ_RECORD(400, "CNT4008", "현재 로그인한 사용자가 읽은 콘텐츠가 아닙니다"),
 
 	// 퀴즈 관련
 	QUIZ_NOT_FOUND_FOR_CONTENT_LEVEL(404, "QUIZ5001", "해당 컨텐츠에 난이도별 퀴즈가 없습니다."),
@@ -54,10 +56,8 @@ public enum ErrorMessage {
 	QUIZ_SOLVE_NOT_FOUND(404, "QUIZ5005", "해당 콘텐츠에 대한 퀴즈 풀이 기록이 없습니다."),
 	QUIZ_CORRECT_CHOICE_NOT_FOUND(404, "QUIZ5006", "정답 선택지가 설정되지 않았습니다."),
 	QUIZ_ALREADY_SOLVED(409, "QUIZ5007", "이미 퀴즈를 제출했습니다."),
-
 	// 서버 에러
 	INTERNAL_SERVER_ERROR(500, "INT5000", "서버 내부 오류가 발생했습니다.");
-
 
 	private final int status;
 	private final String code;

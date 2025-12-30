@@ -28,21 +28,21 @@ public class AuthController implements AuthControllerDocs {
 
 	private final AuthService authService;
 
-	@PublicApi
+	@PublicApi(reason = "소셜 로그인은 인증 없이 접근 가능해야 합니다")
 	@PostMapping("/login/{provider}")
 	public SuccessResponse<LoginResponse> login(@PathVariable String provider, @RequestBody LoginRequest request) {
 		LoginResponse response = authService.login(OAuthProvider.from(provider), request.accessToken());
 		return SuccessResponse.of(SuccessMessage.LOGIN_SUCCESS, response);
 	}
 
-	@PublicApi
+	@PublicApi(reason = "Refresh Token 발급은 인증 없이 가능해야합니다. ")
 	@PostMapping("/refresh")
 	public SuccessResponse<RefreshResponse> refresh(@RequestBody RefreshRequest request) {
 		RefreshResponse response = authService.refresh(request.refreshToken());
 		return SuccessResponse.of(SuccessMessage.ACCESS_TOKEN_REISSUE_SUCCESS, response);
 	}
 
-	@AuthenticatedApi
+	@AuthenticatedApi(reason = "로그인한 사용자만 로그아웃이 가능합니다")
 	@PostMapping("/logout")
 	public SuccessResponse<Void> logout(@CurrentUserId Long userId) {
 		authService.logout(userId);

@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.example.server.domain.auth.enums.OAuthProvider;
+import com.example.server.domain.content.entity.vo.ContentLevel;
 import com.example.server.domain.user.entity.User;
-import com.example.server.domain.user.entity.vo.Level;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -17,10 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	Optional<User> findByProviderAndProviderId(OAuthProvider provider, String providerId);
 
-	@Query("""
-		select u.level
-		from User u
-		where u.id = :userId
-		""")
-	Optional<Level> findLevelByUserId(Long userId);
+	@Query("select u.level from User u where u.id = :userId")
+	Optional<ContentLevel> findLevelByUserId(Long userId);
+
 }

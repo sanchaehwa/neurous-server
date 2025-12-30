@@ -1,15 +1,34 @@
 package com.example.server.domain.content.service;
 
-import com.example.server.domain.content.dto.ContentResponse;
-import com.example.server.domain.content.dto.ContentDifficultyRequest;
-import com.example.server.domain.content.dto.DifficultyRecommendResponse;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.server.domain.content.dto.request.ContentDifficultyRequest;
+import com.example.server.domain.content.dto.response.ContentDetailResponse;
+import com.example.server.domain.content.dto.response.ContentResponse;
+import com.example.server.domain.content.dto.response.DifficultyRecommendResponse;
+import com.example.server.domain.content.dto.response.ExploreResponse;
 import com.example.server.domain.content.entity.Content;
 import com.example.server.domain.content.entity.ContentDifficultyEvaluation;
 import com.example.server.domain.content.entity.DifficultyBasetime;
 import com.example.server.domain.content.entity.ReadContent;
+import com.example.server.domain.content.entity.vo.ContentCategory;
 import com.example.server.domain.content.entity.vo.ContentDifficulty;
+import com.example.server.domain.content.entity.vo.ContentLevel;
 import com.example.server.domain.content.entity.vo.DifficultyRecommend;
-import com.example.server.domain.content.repository.*;
+import com.example.server.domain.content.repository.ContentDifficultyEvaluationRepository;
+import com.example.server.domain.content.repository.ContentRepository;
+import com.example.server.domain.content.repository.DifficultyBasetimeRepository;
+import com.example.server.domain.content.repository.ReadContentRepository;
+import com.example.server.domain.content.repository.UserInterestRepository;
 import com.example.server.domain.quiz.dto.QuizChoiceResponse;
 import com.example.server.domain.quiz.dto.ReadContentDetailResponse;
 import com.example.server.domain.quiz.dto.SolvedQuizResponse;
@@ -19,261 +38,88 @@ import com.example.server.domain.quiz.entity.QuizSolve;
 import com.example.server.domain.quiz.repository.QuizChoiceRepository;
 import com.example.server.domain.quiz.repository.QuizRepository;
 import com.example.server.domain.quiz.repository.QuizSolveRepository;
-import com.example.server.domain.user.entity.vo.UserField;
 import com.example.server.domain.user.repository.UserRepository;
 import com.example.server.global.exception.message.ErrorMessage;
-import com.example.server.global.exception.model.BadRequestException;
 import com.example.server.global.exception.model.ConflictException;
 import com.example.server.global.exception.model.NotFoundException;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
+import com.example.server.global.redis.RedisUtil;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class ContentService {
 
-    private final ContentRepository contentRepository;
-    private final UserRepository userRepository;
-    private final UserInterestRepository userInterestRepository;
-    private final ReadContentRepository readContentRepository;
-    private final ContentDifficultyEvaluationRepository contentDifficultyEvaluationRepository;
-    private final DifficultyBasetimeRepository difficultyBasetimeRepository;
-    private final QuizSolveRepository quizSolveRepository;
-    private final QuizRepository quizRepository;
-    private final QuizChoiceRepository quizChoiceRepository;
+	private final ContentRepository contentRepository;
+	private final UserRepository userRepository;
+	private final UserInterestRepository userInterestRepository;
+	private final ReadContentRepository readContentRepository;
+	private final ContentDifficultyEvaluationRepository contentDifficultyEvaluationRepository;
+	private final DifficultyBasetimeRepository difficultyBasetimeRepository;
+	private final QuizSolveRepository quizSolveRepository;
+	private final QuizRepository quizRepository;
+	private final QuizChoiceRepository quizChoiceRepository;
 
-    private static final List<String> CATEGORIES = List.of("POLITICS", "ECONOMY", "SOCIETY", "LIFE_CULTURE", "IT/IT_SCIENCE", "WORLD");
-    private static final int RESULT_SIZE = 3;
+	private final RedisUtil redisUtil;
 
-    /**
-     * 탐색 페이지 컨텐츠 조회
-     */
-    public Map<String, List<ContentResponse>> getExploreContent(Long userId, int page){
-        int size = 10;
-        PageRequest pageRequest = PageRequest.of(page, size);
+	/**
+	 * 탐색 페이지 컨텐츠 조회 (전체 / 카테고리)
+	 */
+	public Map<ContentCategory, ExploreResponse> getExplore(Long userId) {
 
-        String ContentDiff = userRepository.findLevelByUserId(userId)
-                .orElse("INTERMEDIATE");
+		ContentLevel level = userRepository.findLevelByUserId(userId)
+			.orElse(ContentLevel.BEGINNER);
 
-        Map<String, List<ContentResponse>> result = new LinkedHashMap<>();
+		LocalDateTime latestBatchTime = contentRepository.findLatestBatchTime();
+		if (latestBatchTime == null) {
+			return Collections.emptyMap();
+		}
 
-        for(String category : CATEGORIES){
-            List<Content> contents = contentRepository.findByContentDiffAndContentCategory(ContentDiff, category, pageRequest);
+		long remainingMinutes = calculateRemainingMinutes(latestBatchTime);
 
-            result.put(category, contents.stream().map(ContentResponse::from).toList());
-        }
+		Map<ContentCategory, ExploreResponse> result = new LinkedHashMap<>();
 
-        return result;
-    }
+		for (ContentCategory category : ContentCategory.values()) {
+			List<Content> contents = contentRepository.findLatestBatchContents(
+				level,
+				category,
+				latestBatchTime,
+				PageRequest.of(0, 10)
+			);
 
-    /**
-     * 오늘의 미션 컨텐츠 조회
-     */
-    public List<ContentResponse> getTodayContent(Long userId) {
-        String difficulty = userRepository.findLevelByUserId(userId).orElse("INTERMEDIATE");
+			List<ContentResponse> responses = contents.stream()
+				.map(c -> ContentResponse.from(c, redisUtil.getHits(c.getContentId())))
+				.toList();
 
-        List<String> categories = userInterestRepository.findInterestsByUserIdOrderByPriorityAsc(userId).stream()
-                .map(UserField::getDescription)
-                .toList();
+			result.put(category, ExploreResponse.builder()
+				.contents(responses)
+				.remainingMinutes(remainingMinutes)
+				.build());
+		}
+		return result;
+	}
 
-        if (categories.isEmpty()) {
-            throw new BadRequestException(ErrorMessage.CONTENT_INTEREST_NOT_SET);
-        }
+	//배치 타임 계산
+	private long calculateRemainingMinutes(LocalDateTime batchTime) {
+		LocalDateTime nextBatch = batchTime.plusHours(6);
+		long minutes = Duration.between(LocalDateTime.now(), nextBatch).toMinutes();
+		return Math.max(0, minutes); // 음수 방지
+	}
 
-        double[] weights = normalizeWeights(categories.size());
+	/**
+	 * 컨텐츠 상세 정보 조회 + 조회수
+	 */
+	public ContentDetailResponse getContentDetail(Long contentId) {
 
-        Random random = new Random();
-        List<ContentResponse> result = new ArrayList<>();
-        List<Integer> excludedIds = new ArrayList<>();
+		Content content = contentRepository.findById(contentId)
+			.orElseThrow(() -> new NotFoundException(ErrorMessage.CONTENT_NOT_FOUND));
 
-        for (int i = 0; i < RESULT_SIZE; i++) {
-            String pickedCategory = pickCategoryByWeight(categories, weights, random);
+		int redisHits = redisUtil.getHits(contentId);
 
-            Content picked = pickOneContent(userId, difficulty, pickedCategory, excludedIds);
+		return ContentDetailResponse.from(content, redisHits)
+	}
 
-            if (picked == null) {
-                throw new NotFoundException(ErrorMessage.CONTENT_TODAY_NOT_AVAILABLE);
-            }
 
-            excludedIds.add(picked.getContentId());
-            result.add(ContentResponse.from(picked));
-        }
 
-        return result;
-    }
-
-    private double[] normalizeWeights(int categoryCount) {
-        int n = Math.min(categoryCount, 3);
-
-        if (n == 1) {
-            return new double[]{1.0};
-        }
-        if (n == 2) {
-            return new double[]{0.6, 0.4};
-        }
-        // n == 3
-        return new double[]{0.5, 0.3, 0.2};
-    }
-
-    private String pickCategoryByWeight(List<String> categories, double[] weights, Random random) {
-        int n = categories.size();
-        double r = random.nextDouble();
-        double acc = 0.0;
-
-        for (int i = 0; i < n; i++) {
-            acc += weights[i];
-            if (r < acc) return categories.get(i);
-        }
-        return categories.get(0);
-    }
-
-    private Content pickOneContent(Long userId, String difficulty, String category, List<Integer> excludedIds) {
-        if (excludedIds == null || excludedIds.isEmpty()) {
-            return contentRepository.findRandomUnreadByContentDiffAndCategory(userId, difficulty, category).orElse(null);
-        }
-        return contentRepository.findRandomUnreadByContentDiffAndCategoryExcludeIds(userId, difficulty, category, excludedIds).orElse(null);
-    }
-
-    /**
-     * 컨텐츠 상세 정보 조회
-     */
-    public ContentResponse getContentDetail(int contentId){
-        Content content = contentRepository.findById(contentId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTENT_NOT_FOUND));
-
-        return ContentResponse.from(content);
-    }
-
-    /**
-     * 검색 기능(title 기반)
-     */
-    public List<ContentResponse> search(Long userId, String keyword, int page) {
-
-        String k = (keyword == null) ? "" : keyword.trim();
-        if (k.isEmpty()) {
-            return List.of();
-        }
-
-        int size = 10;
-
-        String diff = userRepository.findLevelByUserId(userId).orElse("INTERMEDIATE");
-
-        return contentRepository.searchByTitle(
-                        diff,
-                        k,
-                        PageRequest.of(page, size)
-                )
-                .stream()
-                .map(ContentResponse::from)
-                .toList();
-    }
-
-    /**
-     * 문제 난이도 평가
-     */
-    public DifficultyRecommendResponse setDifficultyEvaluation(Long userId, int contentId, ContentDifficultyRequest difficulty){
-
-        if (contentDifficultyEvaluationRepository.findByUserIdAndContentId(userId, contentId).isPresent()) {
-            throw new ConflictException(ErrorMessage.CONTENT_ALREADY_EVALUATED);
-        }
-
-        ContentDifficultyEvaluation c = ContentDifficultyEvaluation.builder()
-                .contentId(contentId)
-                .userId(userId)
-                .contentDifficulty(difficulty.difficulty())
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        contentDifficultyEvaluationRepository.save(c);
-
-        // 난이도 추천 로직
-        DifficultyBasetime basetime = difficultyBasetimeRepository.findTopByUserIdOrderByBaseTimeDesc(userId)
-                .orElseGet(() -> difficultyBasetimeRepository.save(DifficultyBasetime.now(userId)));
-
-        LocalDateTime from = basetime.getBaseTime();
-        LocalDateTime to = LocalDateTime.now();
-
-        long evaluationEASYCount = contentDifficultyEvaluationRepository
-                .countByUserIdAndDifficultyBetween(userId, ContentDifficulty.EASY, from, to);
-
-        long evaluationHARDCount = contentDifficultyEvaluationRepository
-                .countByUserIdAndDifficultyBetween(userId, ContentDifficulty.HARD, from, to);
-
-        DifficultyRecommend recommend = DifficultyRecommend.NONE;
-
-        if (evaluationEASYCount >= 13) {
-            recommend = DifficultyRecommend.INCREASE;
-        } else if (evaluationHARDCount >= 8) {
-            recommend = DifficultyRecommend.DECREASE;
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-
-        if (recommend != DifficultyRecommend.NONE) {
-            basetime.reset(now);
-        }
-
-        DifficultyRecommendResponse response = new DifficultyRecommendResponse(recommend);
-
-        return response;
-    }
-
-    /**
-     * 읽음 체크
-     */
-    public void setContentRead(Long userId, int contentId) {
-
-        if (!contentRepository.existsById(contentId)) {
-            throw new NotFoundException(ErrorMessage.CONTENT_NOT_FOUND);
-        }
-
-        if (readContentRepository.findByUserIdAndContentId(userId, contentId).isPresent()) {
-            throw new ConflictException(ErrorMessage.CONTENT_ALREADY_READ);
-        }
-
-        ReadContent readContent = ReadContent.of(userId, contentId, LocalDateTime.now());
-
-        readContentRepository.save(readContent);
-    }
-
-    /**
-     * 읽은 글 상세
-     */
-    public ReadContentDetailResponse getReadContentDetail(Long userId, int contentId) {
-
-        ContentResponse content = getContentDetail(contentId);
-
-        QuizSolve solve = quizSolveRepository.findByUserIdAndContentId(userId, contentId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.QUIZ_SOLVE_NOT_FOUND));
-
-        Quiz quiz = quizRepository.findById(solve.getQuizId())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.QUIZ_NOT_FOUND));
-
-        List<QuizChoiceResponse> choices = quizChoiceRepository.findByQuizIdOrderByChoiceNoAsc(quiz.getQuizId())
-                .stream()
-                .map(QuizChoiceResponse::from)
-                .toList();
-
-        QuizChoice correct = quizChoiceRepository.findByQuizIdAndIsCorrectTrue(quiz.getQuizId())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.QUIZ_CORRECT_CHOICE_NOT_FOUND));
-
-        SolvedQuizResponse solvedQuiz = SolvedQuizResponse.of(
-                quiz.getQuizId(),
-                quiz.getContentId(),
-                quiz.getQuizContent(),
-                choices,
-                correct.getChoiceNo(),
-                solve.isAnswerCorrect()
-        );
-
-        ReadContentDetailResponse response = ReadContentDetailResponse.of(content, solvedQuiz);
-
-        return response;
-    }
 }

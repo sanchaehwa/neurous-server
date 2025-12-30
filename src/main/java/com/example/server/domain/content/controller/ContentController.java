@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.server.domain.content.controller.docs.ContentControllerDocs;
-import com.example.server.domain.content.dto.ContentDifficultyRequest;
 import com.example.server.domain.content.dto.ContentResponse;
-import com.example.server.domain.content.dto.DifficultyRecommendResponse;
+import com.example.server.domain.content.dto.request.ContentDifficultyRequest;
+import com.example.server.domain.content.dto.response.DifficultyRecommendResponse;
 import com.example.server.domain.content.service.ContentService;
 import com.example.server.domain.quiz.dto.ReadContentDetailResponse;
 import com.example.server.global.annotation.CurrentUserId;

@@ -1,5 +1,7 @@
 package com.example.server.domain.content.entity;
 
+import java.time.LocalDateTime;
+
 import com.example.server.domain.content.entity.vo.ContentCategory;
 import com.example.server.domain.content.entity.vo.ContentLevel;
 
@@ -30,11 +32,14 @@ public class Content {
 	@Column(name = "content_id")
 	private Long contentId;
 
-	@Column(name = "title", nullable = false)
+	@Column(name = "title", nullable = false, length = 100)
 	private String title;
 
 	@Column(name = "content_body", nullable = false, columnDefinition = "TEXT")
 	private String content;
+
+	@Column(name = "content_date") //컨텐츠 발행일
+	private LocalDateTime contentDate;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "content_category")
@@ -46,6 +51,9 @@ public class Content {
 
 	@Column(name = "image_url")
 	private String imageUrl;
+
+	@Column(name = "batch_time")
+	private LocalDateTime batchTime;
 
 	//조회수
 	@Column(name = "hits", nullable = false)

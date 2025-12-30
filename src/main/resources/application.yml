@@ -22,7 +22,7 @@ jwt:
 
 app:
   backend:
-    base-url: ${APP_BACKEND_URL:http://localhost:8080}
+    base-url: ${APP_BACKEND_URL:http://175.45.193.98:8080}
 
 oauth:
   kakao:

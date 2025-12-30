@@ -1,5 +1,6 @@
 package com.example.server.domain.content.entity;
 
+import com.example.server.domain.content.entity.vo.ContentCategory;
 import com.example.server.domain.content.entity.vo.ContentLevel;
 
 import jakarta.persistence.Column;
@@ -35,8 +36,9 @@ public class Content {
 	@Column(name = "content_body", nullable = false, columnDefinition = "TEXT")
 	private String content;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "content_category")
-	private String contentCategory;
+	private ContentCategory contentCategory;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "content_level", nullable = false)
@@ -44,5 +46,9 @@ public class Content {
 
 	@Column(name = "image_url")
 	private String imageUrl;
+
+	//조회수
+	@Column(name = "hits", nullable = false)
+	private int hits = 0; //조회수 초기값 0으로 설정
 }
 

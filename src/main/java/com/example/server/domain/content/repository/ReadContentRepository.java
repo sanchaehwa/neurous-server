@@ -1,5 +1,6 @@
 package com.example.server.domain.content.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,11 +15,28 @@ import com.example.server.domain.content.entity.ReadContent;
 
 @Repository
 public interface ReadContentRepository extends JpaRepository<ReadContent, Long> {
-	
+
 	@Query("SELECT rc.content FROM ReadContent rc " +
 		"WHERE rc.user.id = :userId " +
 		"ORDER BY rc.readContentId DESC")
 	List<Content> findReadContentsByUserId(@Param("userId") Long userId, Pageable pageable);
 
 	Optional<ReadContent> findByUser_IdAndContent_ContentId(Long userId, Long contentId);
+
+	//마이페이지용 사용자 데이터 조회 * 읽은 컨텐츠 + 퀴즈 정답 여부
+	@Query("""
+		select rc from ReadContent rc
+		join fetch rc.content c
+		left join fetch rc.quizSolve qs
+		where rc.user.id = :userId
+		  and rc.readAt between :startOfWeek and :endOfWeek
+		order by rc.readAt desc
+		""")
+	List<ReadContent> findWeeklyHistory(
+		@Param("userId") Long userId,
+		@Param("startOfWeek") LocalDateTime startOfWeek, //시작주
+		@Param("endOfWeek") LocalDateTime endOfWeek
+	);
 }
+
+

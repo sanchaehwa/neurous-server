@@ -1,7 +1,11 @@
 package com.example.server.domain.content.entity;
 
+import com.example.server.domain.content.entity.vo.ContentLevel;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,15 +32,17 @@ public class Content {
 	@Column(name = "title", nullable = false)
 	private String title;
 
-	@Column(name = "content", nullable = false, columnDefinition = "TEXT")
+	@Column(name = "content_body", nullable = false, columnDefinition = "TEXT")
 	private String content;
 
 	@Column(name = "content_category")
 	private String contentCategory;
 
-	@Column(name = "content_diff")
-	private String contentDiff;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "content_level", nullable = false)
+	private ContentLevel contentLevel;
 
 	@Column(name = "image_url")
 	private String imageUrl;
 }
+

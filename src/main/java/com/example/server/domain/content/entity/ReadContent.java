@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "read_content")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+
 public class ReadContent {
 
 	@Id
@@ -40,23 +41,39 @@ public class ReadContent {
 	private Content content;
 
 	@Column(name = "read_at")
-	private LocalDateTime readAt;
+	private LocalDateTime readAt; //언제 읽었는지
+
+	@Column(name = "stay_seconds", nullable = false)
+	private Long staySeconds = 0L; //몇분 동안 콘텐츠 읽었는지
+
+	@Column(name = "is_completed", nullable = false)
+	private boolean isCompleted = false;
 
 	// 마이페이지 조회를 위한 양방향 연관관계
-	@OneToOne(mappedBy = "readContent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@OneToOne(mappedBy = "readContent", fetch = FetchType.LAZY)
 	private QuizSolve quizSolve;
 
-	private ReadContent(User user, Content content, LocalDateTime readAt) {
+	//해당 글에 대한 난이도 평가
+	@OneToOne(mappedBy = "readContent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private ContentDifficultyEvaluation contentDifficultyEvaluation;
+
+	private ReadContent(User user, Content content, LocalDateTime readAt, Long staySeconds, boolean isCompleted) {
 		this.user = user;
 		this.content = content;
 		this.readAt = readAt;
+		this.staySeconds = staySeconds;
+		this.isCompleted = isCompleted;
 	}
 
-	public static ReadContent of(User user, Content content, LocalDateTime now) {
-		return new ReadContent(user, content, now);
+	public static ReadContent of(User user, Content content, Long staySeconds, boolean isCompleted) {
+		return new ReadContent(user, content, LocalDateTime.now(), staySeconds, isCompleted);
 	}
 
 	public void setTime(LocalDateTime now) {
 		this.readAt = now;
+	}
+
+	public void changeIsCompleted(boolean completed) {
+		this.isCompleted = completed;
 	}
 }

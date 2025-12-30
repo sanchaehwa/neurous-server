@@ -25,7 +25,7 @@ public class DifficultyLevelController implements DifficultyLevelControllerDocs 
 
 	private final DifficultyLevelService difficultyLevelService;
 
-	@PublicApi
+	@PublicApi(reason = "로그인을 하지않은 사용자도 레벨에 대한 정보를 조회 할 수 있습니다.")
 	@GetMapping
 	public SuccessResponse<LoadDifficultyLevel> loadDifficultyLevel(
 		@Valid @RequestBody UpdateLevelRequest request) {

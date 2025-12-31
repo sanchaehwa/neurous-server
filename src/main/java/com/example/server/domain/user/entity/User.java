@@ -97,12 +97,15 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false, name = "notification_status")
 	private boolean notificationStatus = false; //알람 여부 미설정
 
+	@Builder.Default
 	@Column(nullable = false)
 	private int point = 0; //현재 보유 포인트
 
+	@Builder.Default
 	@Column(nullable = false)
 	private int exp = 0; //현재 보유 경험치
 
+	@Builder.Default
 	@Column(nullable = false)
 	private int countReadContent = 0; //읽은 콘텐츠 개수
 

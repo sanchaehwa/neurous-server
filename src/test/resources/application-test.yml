@@ -1,18 +1,26 @@
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
+  main:
+    allow-bean-definition-overriding: true
+  sql:
+    init:
+      mode: never
   jpa:
     hibernate:
       ddl-auto: create-drop
-    show-sql: false
+    show-sql: true
 
-logging:
-  level:
-    root: INFO
-
+# 환경 변수들에 가짜(Mock) 데이터 주입
 jwt:
-  secret: test-jwt-secret-for-ci
+  secret: "this-is-a-test-secret-key-with-enough-length-32chars"
+
+ncp:
+  object-storage:
+    bucket-base-url: "https://test-bucket.com"
+    profile-url: "https://test-profile.com"
+    character-url: "https://test-character.com"
+
+# 혹시 몰라 추가하는 NCP 직접 참조 변수들
+NCP_BUCKET: "test-bucket"
+NCP_PROFILE_BUCKET: "test-profile"
+NCP_CHARACTER_BUCKET: "test-character"
+JWT_SECRET: "this-is-a-test-secret-key-with-enough-length-32chars"

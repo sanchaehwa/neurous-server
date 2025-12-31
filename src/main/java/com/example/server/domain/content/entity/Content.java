@@ -56,6 +56,7 @@ public class Content {
 	private LocalDateTime batchTime;
 
 	//조회수
+	@Builder.Default
 	@Column(name = "hits", nullable = false)
 	private int hits = 0; //조회수 초기값 0으로 설정
 }

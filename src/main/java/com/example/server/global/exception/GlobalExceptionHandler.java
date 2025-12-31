@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.example.server.global.exception.dto.ErrorResponse;
 import com.example.server.global.exception.message.ErrorMessage;
@@ -62,6 +63,14 @@ public class GlobalExceptionHandler {
 		e.printStackTrace();
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 			.body(ErrorResponse.of(ErrorMessage.INTERNAL_SERVER_ERROR));
+	}
+
+	//Enum 변환 실패 * PathVariable이나 QueryParam 시 발생하는 예외 처리
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+		log.error("MethodArgumentTypeMismatchException: {}", e.getMessage());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			.body(ErrorResponse.of(ErrorMessage.NS_ENUM_VALUE_BAD_REQUEST));
 	}
 
 }

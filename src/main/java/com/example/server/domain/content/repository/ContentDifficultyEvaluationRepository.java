@@ -33,5 +33,23 @@ public interface ContentDifficultyEvaluationRepository extends JpaRepository<Con
 
 	//ReadContent ID를 통해 이미 평가가 존재했는지 확인
 	boolean existsByReadContent_ReadContentId(Long readContentId);
+
+	//기존 시간 이후로 이 유저가 평가한 전체 횟수
+	@Query("""
+		SELECT COUNT(e) FROM ContentDifficultyEvaluation e 
+		WHERE e.readContent.user.id = :userId AND e.createdAt >= :baseTime""")
+	long countByUserIdAfter(@Param("userId") Long userId, @Param("baseTime") LocalDateTime baseTime);
+
+	//기존 시간 이후로 특정 난이도 선택한 횟수
+	@Query("""
+		SELECT COUNT(e) FROM ContentDifficultyEvaluation e
+		WHERE e.readContent.user.id = :userId
+		AND e.contentDifficulty = :difficulty
+		AND e.createdAt >= :baseTime """)
+	long countByUserIdAndDifficultyAfter(
+		@Param("userId") Long userId,
+		@Param("difficulty") ContentDifficulty difficulty,
+		@Param("baseTime") LocalDateTime baseTime
+	);
 }
 

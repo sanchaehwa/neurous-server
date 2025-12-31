@@ -12,9 +12,8 @@ public enum ErrorMessage {
 	NS_VALIDATION_MISSING(400, "NS1002", "요청 값이 비어 있습니다"),
 	NS_VALIDATION_NULL_OR_BLANK(400, "NS1003", "필수 요청 값이 누락되었습니다."),
 	NS_VALIDATION_LENGTH_EXCEEDED(400, "NS1004", "요청 값이 길이를 초과했습니다."),
-	NS_NO_FORBIDDEN(403, "NS1005", "권한이 없습니다. "),
-	NS_TEMP_TOKEN_EMPTY(404, "NS1006", "TempToken 값은 null이거나 비어있을 수 없습니다."),
-	NS_UNAUTHORIZED(401, "NS1007", "권한이 없습니다"),
+	NS_TEMP_TOKEN_EMPTY(404, "NS1005", "TempToken 값은 null이거나 비어있을 수 없습니다."),
+	NS_UNAUTHORIZED(401, "NS1006", "권한이 없습니다"),
 
 	//사용자 관련 에러 & 인증 / 인가
 	INVALID_TOKEN(401, "AUTH1001", "유효하지 않은 토큰입니다"),
@@ -37,7 +36,7 @@ public enum ErrorMessage {
 	USER_NOT_FOUND(404, "USER3001", "유저를 찾을 수 없습니다"),
 	USER_INVALID_INTEREST_COUNT(400, "USER3002", "관심분야는 3가지만 선택할 수 있습니다."),
 	USER_DUPLICATED_INTEREST(400, "USER3003", "중복된 관심분야 항목이 있습니다"),
-
+	ALEADY_LEVEL_CHANGE(400, "USER3004", "이미 난이도를 변경했습니다"),
 	//컨텐츠 관련
 	NOT_FOUND_LEVEL_DESCRIPTION(404, "CNT4001", "선택한 레벨에 대한 정보가 없습니다"),
 	CONTENT_NOT_FOUND(404, "CNT4002", "존재하지 않는 컨텐츠입니다."),
@@ -46,6 +45,7 @@ public enum ErrorMessage {
 	CONTENT_ALREADY_EVALUATED(409, "CNT4005", "이미 평가한 컨텐츠입니다."),
 	CONTENT_ALREADY_READ(409, "CNT4006", "이미 읽음 처리된 컨텐츠입니다."),
 	READ_RECORD_NOT_FOUND(404, "CNT4007", "컨텐츠 읽은 기록이 없습니다"),
+	CONTENT_DIFFICULTY_ASSESSMENT_NOT_FOUND(404, "CNT4008", "평가 기록이 없습니다"),
 	INVALID_USER_READ_RECORD(400, "CNT4008", "현재 로그인한 사용자가 읽은 콘텐츠가 아닙니다"),
 
 	// 퀴즈 관련

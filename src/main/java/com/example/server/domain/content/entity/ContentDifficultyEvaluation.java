@@ -1,8 +1,7 @@
 package com.example.server.domain.content.entity;
 
-import java.time.LocalDateTime;
-
 import com.example.server.domain.content.entity.vo.ContentDifficulty;
+import com.example.server.global.domain.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,7 +26,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-public class ContentDifficultyEvaluation {
+public class ContentDifficultyEvaluation extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,11 +37,16 @@ public class ContentDifficultyEvaluation {
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "read_content_id")
 	private ReadContent readContent;
-	
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "content_difficulty")
 	private ContentDifficulty contentDifficulty;
 
-	@Column(name = "created_at", nullable = false)
-	private LocalDateTime createdAt;
+	public static ContentDifficultyEvaluation create(ReadContent readContent, ContentDifficulty contentDifficulty) {
+		return ContentDifficultyEvaluation.builder()
+			.readContent(readContent)
+			.contentDifficulty(contentDifficulty)
+			.build();
+	}
+
 }

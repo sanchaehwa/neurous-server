@@ -30,6 +30,8 @@ import com.example.server.domain.content.repository.ContentRepository;
 import com.example.server.domain.content.repository.DifficultyBasetimeRepository;
 import com.example.server.domain.content.repository.ReadContentRepository;
 import com.example.server.domain.content.repository.UserInterestRepository;
+import com.example.server.domain.content.service.command.DifficultyRecommendConfig;
+import com.example.server.domain.content.service.command.RequestRecommendContentMessage;
 import com.example.server.domain.quiz.dto.response.QuizChoiceResponse;
 import com.example.server.domain.quiz.dto.response.ReadContentDetailResponse;
 import com.example.server.domain.quiz.dto.response.SolvedQuizResponse;
@@ -40,8 +42,10 @@ import com.example.server.domain.quiz.repository.QuizChoiceRepository;
 import com.example.server.domain.quiz.repository.QuizRepository;
 import com.example.server.domain.quiz.repository.QuizSolveRepository;
 import com.example.server.domain.user.entity.User;
+import com.example.server.domain.user.entity.vo.Level;
 import com.example.server.domain.user.repository.UserRepository;
 import com.example.server.global.exception.message.ErrorMessage;
+import com.example.server.global.exception.model.BadRequestException;
 import com.example.server.global.exception.model.ConflictException;
 import com.example.server.global.exception.model.NotFoundException;
 import com.example.server.global.redis.RedisKey;
@@ -65,6 +69,8 @@ public class ContentService {
 	private final QuizChoiceRepository quizChoiceRepository;
 
 	private final RedisUtil redisUtil;
+
+	private final
 
 	/**
 	 * 탐색 페이지 컨텐츠 조회 (전체 / 카테고리)
@@ -189,6 +195,7 @@ public class ContentService {
 
 		contentDifficultyEvaluationRepository.save(evaluation);
 
+		//개인별 난이도 추천 로직
 		DifficultyBasetime basetime = difficultyBasetimeRepository.findByUserId(userId)
 			.orElseGet(() -> difficultyBasetimeRepository.save(DifficultyBasetime.now(userId, contentId)));
 
@@ -288,12 +295,6 @@ public class ContentService {
 		return ReadContentDetailResponse.of(contentDetail, solvedQuiz);
 	}
 
-	//User 조회
-	private User findUserById(Long userId) {
-		return userRepository.findById(userId)
-			.orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
-	}
-
 	//Content 조회
 	private Content findContentById(Long contentId) {
 		return contentRepository.findById(contentId)
@@ -305,4 +306,110 @@ public class ContentService {
 		return readContentRepository.findByUser_IdAndContent_ContentId(userId, contentId)
 			.orElseThrow(() -> new NotFoundException(ErrorMessage.READ_RECORD_NOT_FOUND));
 	}
+
+	@Transactional
+	public DifficultyRecommendResponse requestRecommendContentLevel(Long userId) {
+
+		DifficultyBasetime baseTime = findDifficultyBaseTimeByUserId(userId);
+
+		User user = findUserById(userId);
+		Level currentLevel = user.getLevel();
+		LocalDateTime since = baseTime.getBaseTime();
+
+		long totalCount = contentDifficultyEvaluationRepository.countByUserIdAfter(userId, since);
+
+		// 20회 미만이면 모댤 표시 안함
+		if (totalCount < DifficultyRecommendConfig.BASE_TOTAL_COUNT) {
+			return DifficultyRecommendResponse.noDisplay();
+		}
+
+		long maintenanceCount = contentDifficultyEvaluationRepository.countByUserIdAndDifficultyAfter(
+			userId, ContentDifficulty.MEDIUM, since);
+
+		// 유지 기준(9회) 이상이면 모댤 표시 안함
+		if (maintenanceCount >= DifficultyRecommendConfig.MAINTENANCE_REFERENCE) {
+			return DifficultyRecommendResponse.noDisplay();
+		}
+
+		long hardCount = contentDifficultyEvaluationRepository.countByUserIdAndDifficultyAfter(
+			userId, ContentDifficulty.HARD, since);
+		long easyCount = contentDifficultyEvaluationRepository.countByUserIdAndDifficultyAfter(
+			userId, ContentDifficulty.EASY, since);
+
+		if (hardCount >= DifficultyRecommendConfig.DECREASE_THRESHOLD) {
+			return RequestRecommendContentMessage.RECOMMEND_DECREASE_BEGINNER_MESSAGE
+				.choiceRecommendDecrease(currentLevel)
+				.map(recommend -> DifficultyRecommendResponse.display(DifficultyRecommend.DECREASE, recommend))
+				.orElseGet(DifficultyRecommendResponse::noDisplay);
+		}
+
+		if (easyCount >= DifficultyRecommendConfig.INCREASE_THRESHOLD) {
+			return RequestRecommendContentMessage.RECOMMEND_INCREASE_MESSAGE
+				.choiceRecommendIncrease(currentLevel)
+				.map(recommend -> DifficultyRecommendResponse.display(DifficultyRecommend.INCREASE, recommend))
+				.orElseGet(DifficultyRecommendResponse::noDisplay);
+		}
+
+		return DifficultyRecommendResponse.noDisplay();
+	}
+
+	//컨텐츠 난이도 변경 선택
+	@Transactional
+	public void changeUserLevel(Long userId, Level level) {
+
+		DifficultyBasetime baseTime = findDifficultyBaseTimeByUserId(userId);
+		User user = findUserById(userId);
+
+		//중복 클릭 방지
+		if (baseTime.getBaseTime().isAfter(LocalDateTime.now().minusSeconds(5))) {
+			throw new BadRequestException(ErrorMessage.ALEADY_LEVEL_CHANGE);
+		}
+
+		//레벨 변경
+		user.changeLevel(level);
+		baseTime.reset(LocalDateTime.now());
+	}
+
+	//컨텐츠 난이도 평가 (퀴즈 풀이 후 모댤)
+	@Transactional
+	public void contentDifficultyAssessment(Long userId, Long contentId, ContentDifficulty difficulty) {
+
+		ReadContent readContent = findReadContentByContentIdAndCheckContentDifficulty(userId, contentId);
+
+		ContentDifficultyEvaluation evaluationResult = ContentDifficultyEvaluation.create(
+			readContent,
+			difficulty
+		);
+
+		contentDifficultyEvaluationRepository.save(evaluationResult);
+
+		if (!difficultyBasetimeRepository.existsById(userId)) {
+			difficultyBasetimeRepository.save(DifficultyBasetime.now(userId, contentId));
+		}
+
+	}
+
+	//ReadContent + 난이도 평가 여부 조회
+	public ReadContent findReadContentByContentIdAndCheckContentDifficulty(Long userId, Long contentId) {
+
+		ReadContent readContent = readContentRepository.findByUser_IdAndContent_ContentId(userId, contentId)
+			.orElseThrow(() -> new NotFoundException(ErrorMessage.READ_RECORD_NOT_FOUND));
+
+		if (contentDifficultyEvaluationRepository.existsByReadContent_ReadContentId(readContent.getReadContentId())) {
+			throw new ConflictException(ErrorMessage.CONTENT_ALREADY_EVALUATED);
+		}
+
+		return readContent;
+	}
+
+	private User findUserById(Long userId) {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+	}
+
+	private DifficultyBasetime findDifficultyBaseTimeByUserId(Long userId) {
+		return difficultyBasetimeRepository.findByUserId(userId)
+			.orElseThrow(() -> new NotFoundException(ErrorMessage.CONTENT_DIFFICULTY_ASSESSMENT_NOT_FOUND));
+	}
+
 }

@@ -104,7 +104,7 @@ public class User extends BaseTimeEntity {
 	private int exp = 0; //현재 보유 경험치
 
 	@Column(nullable = false)
-	private int readContent = 0; //읽은 콘텐츠
+	private int countReadContent = 0; //읽은 콘텐츠 개수
 
 	//케릭터 레벨
 	@Builder.Default
@@ -140,6 +140,7 @@ public class User extends BaseTimeEntity {
 			.notificationStatus(false)
 			.point(0)
 			.exp(0)
+			.countReadContent(0)
 			.characterLevel(CharacterLevel.LEVEL_1)
 			.lastLoginAt(LocalDateTime.now())
 			.build();

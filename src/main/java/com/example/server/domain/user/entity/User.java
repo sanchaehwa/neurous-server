@@ -59,8 +59,8 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String providerId;
 
-	@Column //기본 이미지 설정
-	private String profileImgUrl;
+	@Column(name = "profile_img_file_name")
+	private String profileImgFileName;
 
 	@Column(unique = true, length = 50)
 	@Email
@@ -112,19 +112,18 @@ public class User extends BaseTimeEntity {
 		this.notificationStatus = !this.notificationStatus;
 	}
 
-	//todo: 프로필 이미지 추가정보 입력전에는 기본 이미지 처리
 	public static User create(
 		String name,
 		OAuthProvider provider,
 		String providerId,
-		String profileImgUrl,
+		String profileImgFileName,
 		String email
 	) {
 		return User.builder()
 			.name(name)
 			.provider(provider)
 			.providerId(providerId)
-			.profileImgUrl(profileImgUrl)
+			.profileImgFileName(profileImgFileName)
 			.email(email)
 			.status(UserStatus.NORMAL)
 			.userType(UserType.USER)
@@ -142,7 +141,7 @@ public class User extends BaseTimeEntity {
 			name,
 			provider,
 			oauthUserInfo.getProviderId(),
-			name,
+			"lv1_profile.png", //처음 회원가입 하면 기본 프로필
 			oauthUserInfo.getEmail()
 		);
 	}
@@ -197,6 +196,11 @@ public class User extends BaseTimeEntity {
 	public void addPointAndExp(int point, int exp) {
 		this.point += point;
 		this.exp += exp;
+	}
+
+	//프로필 사진 번경
+	public void changeProfileImgFileName(String profileImgFileName) {
+		this.profileImgFileName = profileImgFileName;
 	}
 
 }

@@ -19,11 +19,17 @@ public class StorageConfig {
 	private String characterPath;
 
 	public String getProfileUrl(String fileName) {
+		if (fileName == null) {
+			return null;
+		}
 		return baseUrl + profilePath + fileName;
 	}
 
 	// 파일 여러개
 	public String getCharacterUrl(String folderName) {
+		if (folderName == null) {
+			return null;
+		}
 		return baseUrl + characterPath + folderName + "/";
 	}
 }

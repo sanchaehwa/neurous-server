@@ -1,7 +1,23 @@
 package com.example.server.domain.content.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.LocalDateTime;
+
+import com.example.server.domain.content.entity.vo.ContentCategory;
+import com.example.server.domain.content.entity.vo.ContentLevel;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Builder
@@ -11,23 +27,36 @@ import lombok.*;
 @AllArgsConstructor
 public class Content {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "content_id")
-    private int contentId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "content_id")
+	private Long contentId;
 
-    @Column(name = "title")
-    private String title;
+	@Column(name = "title", nullable = false, length = 100)
+	private String title;
 
-    @Column(name = "content")
-    private String content;
+	@Column(name = "content_body", nullable = false, columnDefinition = "TEXT")
+	private String content;
 
-    @Column(name = "content_category")
-    private String contentCategory;
+	@Column(name = "content_date") //컨텐츠 발행일
+	private LocalDateTime contentDate;
 
-    @Column(name = "content_diff")
-    private String contentDiff;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "content_category")
+	private ContentCategory contentCategory;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "content_level", nullable = false)
+	private ContentLevel contentLevel;
+
+	@Column(name = "image_url")
+	private String imageUrl;
+
+	@Column(name = "batch_time")
+	private LocalDateTime batchTime;
+
+	//조회수
+	@Column(name = "hits", nullable = false)
+	private int hits = 0; //조회수 초기값 0으로 설정
 }
+

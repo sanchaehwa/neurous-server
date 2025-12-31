@@ -38,7 +38,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User extends BaseTimeEntity {
 
 	@Id
@@ -90,6 +90,8 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false, name = "notification_status")
 	private boolean notificationStatus = false; //알람 여부 미설정
 
+	//읽은 컨텐츠
+
 	private LocalDateTime lastLoginAt;
 
 	//알림 여부 변경
@@ -137,10 +139,12 @@ public class User extends BaseTimeEntity {
 	}
 
 	public void updateInterests(List<UserField> fields) {
-		if (fields.size() != 3) {
+
+		//최소 1개에서 ~ 3개
+		if (fields == null || fields.isEmpty() || fields.size() > 3) {
 			throw new BadRequestException(ErrorMessage.USER_INVALID_INTEREST_COUNT);
 		}
-		if (fields.stream().distinct().count() != 3) {
+		if (fields.stream().distinct().count() != fields.size()) {
 			throw new BadRequestException(ErrorMessage.USER_DUPLICATED_INTEREST);
 		}
 

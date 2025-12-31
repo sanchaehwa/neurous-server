@@ -1,17 +1,19 @@
 package com.example.server.domain.quiz.dto;
 
-import com.example.server.domain.content.dto.ContentResponse;
+import com.example.server.domain.content.dto.response.ContentDetailResponse;
+import com.example.server.domain.quiz.dto.response.SolvedQuizResponse;
+
 import lombok.Builder;
 
 @Builder
 public record ReadContentDetailResponse(
-        ContentResponse content,
-        SolvedQuizResponse quiz
+	ContentDetailResponse content,
+	SolvedQuizResponse quiz
 ) {
-    public static ReadContentDetailResponse of(ContentResponse content, SolvedQuizResponse quiz) {
-        return ReadContentDetailResponse.builder()
-                .content(content)
-                .quiz(quiz)
-                .build();
-    }
+	public static ReadContentDetailResponse of(ContentDetailResponse content, SolvedQuizResponse quiz) {
+		return ReadContentDetailResponse.builder()
+			.content(content)
+			.quiz(quiz)
+			.build();
+	}
 }

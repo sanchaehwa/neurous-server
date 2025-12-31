@@ -1,43 +1,94 @@
 package com.example.server.domain.content.entity;
 
-import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
+
+import com.example.server.domain.content.entity.vo.ContentLevel;
+import com.example.server.domain.quiz.entity.QuizSolve;
+import com.example.server.domain.user.entity.User;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "read_content")
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
+
 public class ReadContent {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "read_content_id")
-    private int readContentId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "read_content_id")
+	private Long readContentId;
 
-    @Column(name = "user_id")
-    private Long userId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	private User user;
 
-    @Column(name = "content_id")
-    private int contentId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "content_id")
+	private Content content;
 
-    @Column(name = "read_at")
-    private LocalDateTime readAt;
+	@Column(name = "read_at")
+	private LocalDateTime readAt; //언제 읽었는지
 
-    private ReadContent(Long userId, Integer contentId, LocalDateTime readAt) {
-        this.userId = userId;
-        this.contentId = contentId;
-        this.readAt = readAt;
-    }
+	@Column(name = "stay_seconds", nullable = false)
+	private Long staySeconds = 0L; //몇분 동안 콘텐츠 읽었는지
 
-    public static ReadContent of(Long userId, Integer contentId, LocalDateTime now) {
-        return new ReadContent(userId, contentId, now);
-    }
+	@Column(name = "is_completed", nullable = false)
+	private boolean isCompleted = false;
 
-    public void setTime(LocalDateTime now) {
-        this.readAt = now;
-    }
+	// 마이페이지 조회를 위한 양방향 연관관계
+	@OneToOne(mappedBy = "readContent", fetch = FetchType.LAZY)
+	private QuizSolve quizSolve;
+
+	//해당 글에 대한 난이도 평가
+	@OneToOne(mappedBy = "readContent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private ContentDifficultyEvaluation contentDifficultyEvaluation;
+
+	private ReadContent(User user, Content content, LocalDateTime readAt, Long staySeconds, boolean isCompleted) {
+		this.user = user;
+		this.content = content;
+		this.readAt = readAt;
+		this.staySeconds = staySeconds;
+		this.isCompleted = isCompleted;
+	}
+
+	public static ReadContent of(User user, Content content, Long staySeconds, boolean isCompleted) {
+		return new ReadContent(user, content, LocalDateTime.now(), staySeconds, isCompleted);
+	}
+
+	public void setTime(LocalDateTime now) {
+		this.readAt = now;
+	}
+
+	//컨텐츠에 남아있었던 시간
+	public void updateStatus(Long staySeconds, boolean isCompleted) {
+		this.staySeconds = staySeconds;
+		this.isCompleted = checkCompletion(this.content.getContentLevel(), staySeconds);
+	}
+
+	//체류 시간에 따른 완료 여부 체크
+	private boolean checkCompletion(ContentLevel level, Long seconds) {
+		if (seconds == null)
+			return false;
+
+		return switch (level) {
+			case BEGINNER -> seconds >= 50; //초급 50초
+			case INTERMEDIATE -> seconds >= 90;   // 중급 1분 30초 (90초)
+			case ADVANCED -> seconds >= 190;      // 고급 3분 10초 (190초)
+		};
+	}
 }

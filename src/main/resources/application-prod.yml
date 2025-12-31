@@ -4,6 +4,10 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: 127.0.0.1 #redis (배포)
+      port: 6379
 
   jpa:
     hibernate:
@@ -20,3 +24,5 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger
+
+

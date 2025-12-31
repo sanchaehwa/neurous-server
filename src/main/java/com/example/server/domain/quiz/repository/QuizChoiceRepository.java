@@ -9,11 +9,11 @@ import org.springframework.stereotype.Repository;
 import com.example.server.domain.quiz.entity.QuizChoice;
 
 @Repository
-public interface QuizChoiceRepository extends JpaRepository<QuizChoice, Integer> {
+public interface QuizChoiceRepository extends JpaRepository<QuizChoice, Long> {
 
-	Optional<QuizChoice> findByQuizIdAndChoiceNo(int quizId, int choiceNo);
+	Optional<QuizChoice> findByQuiz_QuizIdAndChoiceNo(Long quizId, int choiceNo);
 
-	List<QuizChoice> findByQuizIdOrderByChoiceNoAsc(Integer quizId);
+	List<QuizChoice> findByQuiz_QuizIdOrderByChoiceNoAsc(Long quizId);
 
-	Optional<QuizChoice> findByQuizIdAndIsCorrectTrue(Integer quizId);
+	Optional<QuizChoice> findByQuiz_QuizIdAndIsCorrectTrue(Long quizId);
 }

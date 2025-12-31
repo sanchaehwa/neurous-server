@@ -1,62 +1,50 @@
 package com.example.server.domain.content.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.server.domain.content.entity.Content;
+import com.example.server.domain.content.entity.vo.ContentCategory;
+import com.example.server.domain.content.entity.vo.ContentLevel;
 
 @Repository
-public interface ContentRepository extends JpaRepository<Content, Integer> {
-	List<Content> findByContentDiffAndContentCategory(String contentDiff, String contentCategory, Pageable pageable);
+public interface ContentRepository extends JpaRepository<Content, Long> {
 
-	List<Content> findByContentDiffOrderByContentIdDesc(String contentDiff, Pageable pageable);
+	//batchTime 조회 * 최신
+	@Query(" SELECT MAX(c.batchTime) FROM Content c")
+	LocalDateTime findLatestBatchTime();
 
-	@Query(value = """
-		SELECT *
-		FROM content
-		WHERE content_diff = :ContentDiff
-		  AND content_category = :category
-		  AND NOT EXISTS (
-		                    SELECT 1
-		                    FROM read_content rc
-		                    WHERE rc.user_id = :userId
-		                      AND rc.content_id = c.content_id
-		                )
-		ORDER BY RAND()
-		LIMIT 1
-		""", nativeQuery = true)
-	Optional<Content> findRandomUnreadByContentDiffAndCategory(Long userId, String ContentDiff, String category);
+	//최신 배치 + 카테고리 + 10개 * 카테고리별 10개
+	@Query("""
+		    SELECT c FROM Content c
+		    WHERE c.contentLevel = :level
+		      AND c.contentCategory = :category
+		      AND c.batchTime = :batchTime
+		    ORDER BY c.contentId DESC
+		""")
+	List<Content> findLatestBatchContents(
+		@Param("level") ContentLevel level,
+		@Param("category") ContentCategory category,
+		@Param("batchTime") LocalDateTime batchTime,
+		Pageable pageable
+	);
 
-	@Query(value = """
-		SELECT *
-		FROM content
-		WHERE content_diff = :ContentDiff
-		  AND content_category = :category
-		  AND content_id NOT IN (:excludedIds)
-		  AND NOT EXISTS (
-		                    SELECT 1
-		                    FROM read_content rc
-		                    WHERE rc.user_id = :userId
-		                      AND rc.content_id = c.content_id
-		                )
-		ORDER BY RAND()
-		LIMIT 1
-		""", nativeQuery = true)
-	Optional<Content> findRandomUnreadByContentDiffAndCategoryExcludeIds(Long userId, String ContentDiff,
-		String category, List<Integer> excludedIds);
+	@Query("""
+		    SELECT c FROM Content c
+		    WHERE c.contentLevel = :level
+		      AND c.title LIKE %:keyword%
+		    ORDER BY c.contentId DESC
+		""")
+	List<Content> searchByTitle(
+		@Param("level") ContentLevel level,
+		@Param("keyword") String keyword,
+		Pageable pageable
+	);
 
-	@Query(value = """
-		SELECT *
-		FROM content c
-		WHERE c.content_diff = :contentDiff
-		  AND LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-		ORDER BY c.content_id DESC
-		""", nativeQuery = true)
-	List<Content> searchByTitle(String contentDiff, String keyword, Pageable pageable);
 }
-

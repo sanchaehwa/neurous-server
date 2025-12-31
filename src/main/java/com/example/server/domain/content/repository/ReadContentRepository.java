@@ -1,27 +1,42 @@
 package com.example.server.domain.content.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.server.domain.content.entity.Content;
 import com.example.server.domain.content.entity.ReadContent;
 
 @Repository
-public interface ReadContentRepository extends JpaRepository<ReadContent, Integer> {
+public interface ReadContentRepository extends JpaRepository<ReadContent, Long> {
 
-	@Query(value = """
-		SELECT c.*
-		FROM read_content rc
-		JOIN content c ON c.content_id = rc.content_id
-		WHERE rc.user_id = :userId
-		ORDER BY rc.read_content_id DESC
-		""", nativeQuery = true)
-	List<Content> findReadContentsByUserId(Long userId, Pageable pageable);
+	@Query("SELECT rc.content FROM ReadContent rc " +
+		"WHERE rc.user.id = :userId " +
+		"ORDER BY rc.readContentId DESC")
+	List<Content> findReadContentsByUserId(@Param("userId") Long userId, Pageable pageable);
 
-	Optional<ReadContent> findByUserIdAndContentId(Long userId, Integer contentId);
+	Optional<ReadContent> findByUser_IdAndContent_ContentId(Long userId, Long contentId);
+
+	//마이페이지용 사용자 데이터 조회 * 읽은 컨텐츠 + 퀴즈 정답 여부
+	@Query("""
+		select rc from ReadContent rc
+		join fetch rc.content c
+		left join fetch rc.quizSolve qs
+		where rc.user.id = :userId
+		  and rc.readAt between :startOfWeek and :endOfWeek
+		order by rc.readAt desc
+		""")
+	List<ReadContent> findWeeklyHistory(
+		@Param("userId") Long userId,
+		@Param("startOfWeek") LocalDateTime startOfWeek, //시작주
+		@Param("endOfWeek") LocalDateTime endOfWeek
+	);
 }
+
+

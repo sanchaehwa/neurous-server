@@ -1,8 +1,18 @@
 package com.example.server.domain.quiz.service;
 
-import com.example.server.domain.quiz.dto.QuizChoiceResponse;
-import com.example.server.domain.quiz.dto.QuizQuestionResponse;
-import com.example.server.domain.quiz.dto.QuizSubmitResponse;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.server.domain.content.entity.ReadContent;
+import com.example.server.domain.content.entity.vo.ContentLevel;
+import com.example.server.domain.content.repository.ReadContentRepository;
+import com.example.server.domain.quiz.dto.request.QuizSubmitRequest;
+import com.example.server.domain.quiz.dto.response.QuizChoiceResponse;
+import com.example.server.domain.quiz.dto.response.QuizQuestionResponse;
+import com.example.server.domain.quiz.dto.response.QuizSubmitResponse;
 import com.example.server.domain.quiz.entity.Quiz;
 import com.example.server.domain.quiz.entity.QuizChoice;
 import com.example.server.domain.quiz.entity.QuizSolve;
@@ -15,69 +25,83 @@ import com.example.server.global.exception.model.BadRequestException;
 import com.example.server.global.exception.model.ConflictException;
 import com.example.server.global.exception.model.NeurousException;
 import com.example.server.global.exception.model.NotFoundException;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class QuizService {
 
-    private final QuizRepository quizRepository;
-    private final QuizChoiceRepository quizChoiceRepository;
-    private final UserRepository userRepository;
-    private final QuizSolveRepository quizSolveRepository;
+	private final QuizRepository quizRepository;
+	private final QuizChoiceRepository quizChoiceRepository;
+	private final UserRepository userRepository;
+	private final QuizSolveRepository quizSolveRepository;
+	private final ReadContentRepository readContentRepository;
 
-    /**
-    * 퀴즈 문제지 출제
-    */
-    public QuizQuestionResponse getQuiz(Long userId, int contentId) {
+	/**
+	 * 퀴즈 문제지 출제
+	 */
+	public QuizQuestionResponse getQuiz(Long userId, Long contentId) {
 
-        String quizDiff = userRepository.findLevelByUserId(userId).orElse("초급");
+		ContentLevel quizDiff = userRepository.findLevelByUserId(userId)
+			.orElse(ContentLevel.BEGINNER);
 
-        Quiz quiz = quizRepository.findByContentIdAndQuizDiff(contentId, quizDiff)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.QUIZ_NOT_FOUND_FOR_CONTENT_LEVEL));
+		Quiz quiz = quizRepository.findQuiz(contentId, quizDiff)
+			.orElseThrow(() -> new NotFoundException(ErrorMessage.QUIZ_NOT_FOUND_FOR_CONTENT_LEVEL));
 
-        List<QuizChoiceResponse> choices = quizChoiceRepository.findByQuizIdOrderByChoiceNoAsc(quiz.getQuizId())
-                .stream()
-                .map(QuizChoiceResponse::from)
-                .toList();
+		List<QuizChoiceResponse> choices = quizChoiceRepository.findByQuiz_QuizIdOrderByChoiceNoAsc(quiz.getQuizId())
+			.stream()
+			.map(QuizChoiceResponse::from)
+			.toList();
 
-        QuizQuestionResponse response = QuizQuestionResponse.of(quiz, choices);
+		QuizQuestionResponse response = QuizQuestionResponse.of(quiz, choices);
 
-        return response;
-    }
+		return response;
+	}
 
-    /**
-     * 퀴즈 정답 검증
-     */
-    public QuizSubmitResponse submit(Long userId, int quizId, int selectedNo) {
-        Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.QUIZ_NOT_FOUND));
+	/**
+	 * 퀴즈 정답 검증
+	 */
+	@Transactional
+	public QuizSubmitResponse submit(Long userId, QuizSubmitRequest request) {
 
-        int contentId = quiz.getContentId();
-        if (quizSolveRepository.findByUserIdAndContentId(userId, contentId).isPresent()) {
-            throw new ConflictException(ErrorMessage.QUIZ_ALREADY_SOLVED);
-        }
+		//읽기 기록
+		ReadContent readContent = readContentRepository.findById(request.getReadContentId())
+			.orElseThrow(() -> new NotFoundException(ErrorMessage.READ_RECORD_NOT_FOUND));
 
-        QuizChoice selected = quizChoiceRepository.findByQuizIdAndChoiceNo(quizId, selectedNo)
-                .orElseThrow(() -> new BadRequestException(ErrorMessage.QUIZ_INVALID_CHOICE));
+		if (!readContent.getUser().getId().equals(userId)) {
+			throw new BadRequestException(ErrorMessage.INVALID_USER_READ_RECORD);
+		}
 
-        QuizChoice correct = quizChoiceRepository.findByQuizIdAndIsCorrectTrue(quizId)
-                .orElseThrow(() -> new NeurousException(ErrorMessage.QUIZ_CORRECT_ANSWER_NOT_CONFIGURED));
+		//이미 풀었던건지 확인
+		if (quizSolveRepository.existsByReadContent_ReadContentId(request.getReadContentId())) {
+			throw new ConflictException(ErrorMessage.QUIZ_ALREADY_SOLVED);
+		}
 
-        boolean isAnswerCorrect = Boolean.TRUE.equals(selected.getIsCorrect());
+		Quiz quiz = quizRepository.findById(request.getQuizId())
+			.orElseThrow(() -> new NotFoundException(ErrorMessage.QUIZ_NOT_FOUND));
 
-        QuizSolve solve = QuizSolve.of(userId, contentId, quizId, selectedNo, isAnswerCorrect, LocalDateTime.now());
+		QuizChoice selected = quizChoiceRepository.findByQuiz_QuizIdAndChoiceNo(request.getQuizId(),
+				request.getSelectedNo())
+			.orElseThrow(() -> new BadRequestException(ErrorMessage.QUIZ_INVALID_CHOICE));
 
-        quizSolveRepository.save(solve);
+		QuizChoice correct = quizChoiceRepository.findByQuiz_QuizIdAndIsCorrectTrue(request.getQuizId())
+			.orElseThrow(() -> new NeurousException(ErrorMessage.QUIZ_CORRECT_ANSWER_NOT_CONFIGURED));
 
-        QuizSubmitResponse response = QuizSubmitResponse.of(quizId, selectedNo, isAnswerCorrect, correct);
+		boolean isAnswerCorrect = selected.isCorrect();
 
-        return response;
-    }
+		QuizSolve solve = QuizSolve.of(
+			readContent.getUser(),
+			readContent,
+			quiz.getQuizId(),
+			request.getSelectedNo(),
+			isAnswerCorrect,
+			LocalDateTime.now()
+		);
+
+		quizSolveRepository.save(solve);
+
+		return QuizSubmitResponse.of(quiz.getQuizId(), request.getSelectedNo(), isAnswerCorrect, correct);
+	}
 }

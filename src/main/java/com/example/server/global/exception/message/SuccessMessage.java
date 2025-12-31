@@ -16,6 +16,8 @@ public enum SuccessMessage {
 	LOAD_SUCCESS(HttpStatus.OK.value(), "조회가 완료되었습니다"),
 	UPDATE_SUCCESS(HttpStatus.OK.value(), "수정이 완료되었습니다"),
 
+	QUIZ_SUBMIT_SUCCESS(HttpStatus.OK.value(), "퀴즈 답안이 성공적으로 제출되었습니다."),
+	GET_QUIZ_SUCCESS(HttpStatus.OK.value(), "퀴즈를 성공적으로 가져왔습니다"),
 
 	//201
 	ACCESS_TOKEN_REISSUE_SUCCESS(HttpStatus.CREATED.value(), "액세스 토큰 재발급이 완료되었습니다.");

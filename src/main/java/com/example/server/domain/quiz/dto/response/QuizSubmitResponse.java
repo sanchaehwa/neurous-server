@@ -1,29 +1,17 @@
 package com.example.server.domain.quiz.dto.response;
 
-import com.example.server.domain.quiz.entity.QuizChoice;
+import com.example.server.domain.mission.dto.response.RewardResponse;
+import com.example.server.domain.user.dto.response.LevelUpInfo;
 
 import lombok.Builder;
 
 @Builder
 public record QuizSubmitResponse(
-	Long quizId,
-	int selectedNo,
-	boolean isAnswerCorrect,
-	int correctChoiceNo,
-	String correctChoiceText,
-	int earnedPoint,
-	int earnedExp
+	//퀴즈 관련 정보
+	QuizResultResponse quizResultResponse,
+	//포인트 * 보상 획득 정보
+	RewardResponse rewardResponse,
+	//레벨업 정보 * 레벨업이 없으면 Null
+	LevelUpInfo userLevelInformation
 ) {
-	public static QuizSubmitResponse of(Long quizId, int selectedNo, boolean isAnswerCorrect,
-		QuizChoice correctChoice, int earnedPoint, int earnedExp) {
-		return QuizSubmitResponse.builder()
-			.quizId(quizId)
-			.selectedNo(selectedNo)
-			.isAnswerCorrect(isAnswerCorrect)
-			.correctChoiceNo(correctChoice.getChoiceNo())
-			.correctChoiceText(correctChoice.getChoiceText())
-			.earnedPoint(earnedPoint)
-			.earnedExp(earnedExp)
-			.build();
-	}
 }

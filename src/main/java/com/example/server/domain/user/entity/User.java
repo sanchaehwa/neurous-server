@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.example.server.domain.auth.dto.OAuthUserInfo;
 import com.example.server.domain.auth.enums.OAuthProvider;
+import com.example.server.domain.user.entity.vo.CharacterLevel;
 import com.example.server.domain.user.entity.vo.Level;
 import com.example.server.domain.user.entity.vo.Priority;
 import com.example.server.domain.user.entity.vo.UserField;
@@ -105,6 +106,12 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private int readContent = 0; //읽은 콘텐츠
 
+	//케릭터 레벨
+	@Builder.Default
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private CharacterLevel characterLevel = CharacterLevel.LEVEL_1;
+
 	private LocalDateTime lastLoginAt;
 
 	//알림 여부 변경
@@ -131,6 +138,9 @@ public class User extends BaseTimeEntity {
 			.level(Level.BEGINNER)
 			.signUpComplete(false)
 			.notificationStatus(false)
+			.point(0)
+			.exp(0)
+			.characterLevel(CharacterLevel.LEVEL_1)
 			.lastLoginAt(LocalDateTime.now())
 			.build();
 	}
@@ -193,14 +203,30 @@ public class User extends BaseTimeEntity {
 	}
 
 	//포인트 * 경험치 총 증가
-	public void addPointAndExp(int point, int exp) {
+	public boolean addPointAndExp(int point, int exp) {
 		this.point += point;
 		this.exp += exp;
+
+		CharacterLevel nextLevel = CharacterLevel.getLevelByExp(this.exp);
+
+		if (this.characterLevel != nextLevel) {
+			this.characterLevel = nextLevel;
+			updateProfileImgByLevel();
+			return true;
+		}
+		return false; //레벨업 미발생
 	}
 
-	//프로필 사진 번경
-	public void changeProfileImgFileName(String profileImgFileName) {
-		this.profileImgFileName = profileImgFileName;
+	//프로필 사진 번경 (레벨에 따라)
+	private void updateProfileImgByLevel() {
+		this.profileImgFileName = switch (this.characterLevel) {
+			case LEVEL_1 -> "lv1_profile.png";
+			case LEVEL_2 -> "lv2_profile.png";
+			case LEVEL_3 -> "lv3_profile.png";
+			case LEVEL_4 -> "lv4_profile.png";
+			case LEVEL_5 -> "lv5_profile.png";
+			default -> this.profileImgFileName; // 예외 케이스 대비
+		};
 	}
 
 }

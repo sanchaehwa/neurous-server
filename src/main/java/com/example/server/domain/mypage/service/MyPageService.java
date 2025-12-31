@@ -14,6 +14,7 @@ import com.example.server.domain.user.entity.User;
 import com.example.server.domain.user.repository.UserRepository;
 import com.example.server.global.exception.message.ErrorMessage;
 import com.example.server.global.exception.model.NotFoundException;
+import com.example.server.global.storage.StorageConfig;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +25,7 @@ public class MyPageService {
 
 	private final UserRepository userRepository;
 	private final ReadContentRepository readContentRepository;
+	private final StorageConfig storageConfig;
 
 	public MyPageResponse getMyPageInfo(Long userId, LocalDateTime startOfWeek, LocalDateTime endOfWeek) {
 
@@ -50,7 +52,7 @@ public class MyPageService {
 			.toList();
 
 		return MyPageResponse.builder()
-			.profileImgUrl(user.getProfileImgUrl())
+			.profileImgUrl(storageConfig.getProfileUrl(user.getProfileImgFileName()))
 			.name(user.getName())
 			.email(user.getEmail())
 			.interests(user.getInterests().stream()

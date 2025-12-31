@@ -31,7 +31,7 @@ public class UserService {
 		return UserInterestsResponse.from(user.getInterests());
 	}
 
-	// 레벨 변경
+	// 레벨 변경 (초급 / 중급 / 고급)
 	@Transactional
 	public void updateLevel(Long userId, Level level) {
 		User user = findByUserId(userId);

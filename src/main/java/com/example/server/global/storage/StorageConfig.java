@@ -19,17 +19,15 @@ public class StorageConfig {
 	private String characterPath;
 
 	public String getProfileUrl(String fileName) {
-		if (fileName == null) {
+		if (fileName == null)
 			return null;
-		}
 		return baseUrl + profilePath + fileName;
 	}
-
-	// 파일 여러개
+	
+	//동영상 형식 캐릭터
 	public String getCharacterUrl(String folderName) {
-		if (folderName == null) {
+		if (folderName == null)
 			return null;
-		}
 		return baseUrl + characterPath + folderName + "/";
 	}
 }

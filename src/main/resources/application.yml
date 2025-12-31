@@ -6,7 +6,7 @@ spring:
     default: local
   data:
     redis:
-      host: ${REDIS_HOST:localhost} # 로컬 실행을 위해 기본값 localhost 추가 권장
+      host: ${REDIS_HOST:localhost}
       port: 6379
 
 server:
@@ -36,3 +36,8 @@ oauth:
   naver:
     user-info-url: https://openapi.naver.com/v1/nid/me
 
+ncp:
+  object-storage:
+    bucket-base-url: ${NCP_BUCKET}
+    profile-url: ${NCP_PROFILE_BUCKET}
+    character-url: ${NCP_CHARACTER_BUCKET}

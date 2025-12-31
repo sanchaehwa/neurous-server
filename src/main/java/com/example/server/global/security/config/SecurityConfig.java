@@ -39,7 +39,6 @@ public class SecurityConfig {
 			.exceptionHandling(exception -> exception
 				.authenticationEntryPoint((request, response, authException) -> {
 					// 인증되지 않은 사용자가 @AuthenticatedApi 접근 시 401 반환
-					// 인증되지 않은 사용자가 @AuthenticatedApi 접근 시 401 반환
 					response.sendError(401, "Unauthorized");
 				})
 			)

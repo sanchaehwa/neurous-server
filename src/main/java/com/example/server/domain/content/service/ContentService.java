@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.server.domain.content.dto.request.ContentDifficultyRequest;
 import com.example.server.domain.content.dto.response.ContentDetailResponse;
 import com.example.server.domain.content.dto.response.ContentResponse;
 import com.example.server.domain.content.dto.response.DifficultyRecommendResponse;
@@ -70,7 +69,7 @@ public class ContentService {
 
 	private final RedisUtil redisUtil;
 
-	private final
+	private final ContentDifficultyService contentDifficultyService;
 
 	/**
 	 * 탐색 페이지 컨텐츠 조회 (전체 / 카테고리)
@@ -171,56 +170,6 @@ public class ContentService {
 		return redisUtil.zRevRange(RedisKey.RECENT_SEARCH, userId, 0, 9).stream()
 			.map(RecentSearchResponse::from)
 			.toList();
-	}
-
-	/**
-	 * 문제 난이도 평가
-	 */
-	@Transactional
-	public DifficultyRecommendResponse setDifficultyEvaluation(Long userId, Long contentId,
-		ContentDifficultyRequest difficulty) {
-
-		ReadContent readContent = readContentRepository.findByUser_IdAndContent_ContentId(userId, contentId)
-			.orElseThrow(() -> new NotFoundException(ErrorMessage.INVALID_USER_READ_RECORD));
-
-		if (contentDifficultyEvaluationRepository.existsByReadContent_ReadContentId(readContent.getReadContentId())) {
-			throw new ConflictException(ErrorMessage.CONTENT_ALREADY_EVALUATED);
-		}
-
-		ContentDifficultyEvaluation evaluation = ContentDifficultyEvaluation.builder()
-			.readContent(readContent) // 연결된 읽기 기록 주입
-			.contentDifficulty(difficulty.difficulty())
-			.createdAt(LocalDateTime.now())
-			.build();
-
-		contentDifficultyEvaluationRepository.save(evaluation);
-
-		//개인별 난이도 추천 로직
-		DifficultyBasetime basetime = difficultyBasetimeRepository.findByUserId(userId)
-			.orElseGet(() -> difficultyBasetimeRepository.save(DifficultyBasetime.now(userId, contentId)));
-
-		LocalDateTime from = basetime.getBaseTime();
-		LocalDateTime to = LocalDateTime.now();
-
-		long evaluationEASYCount = contentDifficultyEvaluationRepository
-			.countByUserIdAndDifficultyBetween(userId, ContentDifficulty.EASY, from, to);
-
-		long evaluationHARDCount = contentDifficultyEvaluationRepository
-			.countByUserIdAndDifficultyBetween(userId, ContentDifficulty.HARD, from, to);
-
-		DifficultyRecommend recommend = DifficultyRecommend.NONE;
-		if (evaluationEASYCount >= 13) {
-			recommend = DifficultyRecommend.INCREASE;
-		} else if (evaluationHARDCount >= 8) {
-			recommend = DifficultyRecommend.DECREASE;
-		}
-
-		if (recommend != DifficultyRecommend.NONE) {
-			basetime.reset(LocalDateTime.now());
-			difficultyBasetimeRepository.save(basetime);
-		}
-
-		return new DifficultyRecommendResponse(recommend);
 	}
 
 	/**
@@ -376,12 +325,15 @@ public class ContentService {
 
 		ReadContent readContent = findReadContentByContentIdAndCheckContentDifficulty(userId, contentId);
 
+		int score = difficulty.getScore();
+
 		ContentDifficultyEvaluation evaluationResult = ContentDifficultyEvaluation.create(
 			readContent,
 			difficulty
 		);
 
 		contentDifficultyEvaluationRepository.save(evaluationResult);
+		contentDifficultyService.processEvaluation(contentId, score);
 
 		if (!difficultyBasetimeRepository.existsById(userId)) {
 			difficultyBasetimeRepository.save(DifficultyBasetime.now(userId, contentId));

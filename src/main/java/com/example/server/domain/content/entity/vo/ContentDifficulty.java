@@ -11,4 +11,8 @@ public enum ContentDifficulty {
 	HARD(3);
 
 	private final int score; //난이도 선택에 따른 점수 부여
+
+	public int getScore() {
+		return score;
+	}
 }

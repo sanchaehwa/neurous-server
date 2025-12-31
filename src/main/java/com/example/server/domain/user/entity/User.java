@@ -220,11 +220,11 @@ public class User extends BaseTimeEntity {
 	//프로필 사진 번경 (레벨에 따라)
 	private void updateProfileImgByLevel() {
 		this.profileImgFileName = switch (this.characterLevel) {
-			case LEVEL_1 -> "lv1_profile.png";
-			case LEVEL_2 -> "lv2_profile.png";
-			case LEVEL_3 -> "lv3_profile.png";
-			case LEVEL_4 -> "lv4_profile.png";
-			case LEVEL_5 -> "lv5_profile.png";
+			case LEVEL_1 -> ProfileImgFileName.LV1_PROFILE_IMG_FILE_NAME;
+			case LEVEL_2 -> ProfileImgFileName.LV2_PROFILE_IMG_FILE_NAME;
+			case LEVEL_3 -> ProfileImgFileName.LV3_PROFILE_IMG_FILE_NAME;
+			case LEVEL_4 -> ProfileImgFileName.LV4_PROFILE_IMG_FILE_NAME;
+			case LEVEL_5 -> ProfileImgFileName.LV5_PROFILE_IMG_FILE_NAME;
 			default -> this.profileImgFileName; // 예외 케이스 대비
 		};
 	}

@@ -6,7 +6,6 @@ import com.example.server.domain.content.entity.vo.ContentLevel;
 import com.example.server.domain.quiz.entity.QuizSolve;
 import com.example.server.domain.user.entity.User;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -55,7 +54,7 @@ public class ReadContent {
 	private QuizSolve quizSolve;
 
 	//해당 글에 대한 난이도 평가
-	@OneToOne(mappedBy = "readContent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToOne(mappedBy = "readContent", fetch = FetchType.LAZY)
 	private ContentDifficultyEvaluation contentDifficultyEvaluation;
 
 	private ReadContent(User user, Content content, LocalDateTime readAt, Long staySeconds, boolean isCompleted) {

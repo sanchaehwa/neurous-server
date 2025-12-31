@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = false)
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -35,6 +35,13 @@ public class SecurityConfig {
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.sessionManagement(session ->
 				session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+			)
+			.exceptionHandling(exception -> exception
+				.authenticationEntryPoint((request, response, authException) -> {
+					// 인증되지 않은 사용자가 @AuthenticatedApi 접근 시 401 반환
+					// 인증되지 않은 사용자가 @AuthenticatedApi 접근 시 401 반환
+					response.sendError(401, "Unauthorized");
+				})
 			)
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(

@@ -10,16 +10,20 @@ public record QuizSubmitResponse(
 	int selectedNo,
 	boolean isAnswerCorrect,
 	int correctChoiceNo,
-	String correctChoiceText
+	String correctChoiceText,
+	int earnedPoint,
+	int earnedExp
 ) {
 	public static QuizSubmitResponse of(Long quizId, int selectedNo, boolean isAnswerCorrect,
-		QuizChoice correctChoice) {
+		QuizChoice correctChoice, int earnedPoint, int earnedExp) {
 		return QuizSubmitResponse.builder()
 			.quizId(quizId)
 			.selectedNo(selectedNo)
 			.isAnswerCorrect(isAnswerCorrect)
 			.correctChoiceNo(correctChoice.getChoiceNo())
 			.correctChoiceText(correctChoice.getChoiceText())
+			.earnedPoint(earnedPoint)
+			.earnedExp(earnedExp)
 			.build();
 	}
 }

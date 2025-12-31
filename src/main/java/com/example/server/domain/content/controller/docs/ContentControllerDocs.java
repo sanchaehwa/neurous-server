@@ -12,7 +12,7 @@ import com.example.server.domain.content.dto.response.DifficultyRecommendRespons
 import com.example.server.domain.content.dto.response.ExploreResponse;
 import com.example.server.domain.content.dto.response.RecentSearchResponse;
 import com.example.server.domain.content.entity.vo.ContentCategory;
-import com.example.server.domain.quiz.dto.ReadContentDetailResponse;
+import com.example.server.domain.quiz.dto.response.ReadContentDetailResponse;
 import com.example.server.global.annotation.CurrentUserId;
 import com.example.server.global.exception.dto.SuccessResponse;
 

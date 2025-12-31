@@ -27,6 +27,7 @@ public class UserService {
 	public UserInterestsResponse updateInterest(Long userId, UpdateInterestsRequest updateInterestsRequest) {
 		User user = findByUserId(userId);
 		user.updateInterests(updateInterestsRequest.interests());
+
 		return UserInterestsResponse.from(user.getInterests());
 	}
 

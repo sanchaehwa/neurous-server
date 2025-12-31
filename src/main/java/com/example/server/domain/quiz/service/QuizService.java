@@ -9,6 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.server.domain.content.entity.ReadContent;
 import com.example.server.domain.content.entity.vo.ContentLevel;
 import com.example.server.domain.content.repository.ReadContentRepository;
+import com.example.server.domain.mission.entity.RewardHistory;
+import com.example.server.domain.mission.entity.vo.HistoryMessage;
+import com.example.server.domain.mission.repository.RewardHistoryRepository;
 import com.example.server.domain.quiz.dto.request.QuizSubmitRequest;
 import com.example.server.domain.quiz.dto.response.QuizChoiceResponse;
 import com.example.server.domain.quiz.dto.response.QuizQuestionResponse;
@@ -19,6 +22,8 @@ import com.example.server.domain.quiz.entity.QuizSolve;
 import com.example.server.domain.quiz.repository.QuizChoiceRepository;
 import com.example.server.domain.quiz.repository.QuizRepository;
 import com.example.server.domain.quiz.repository.QuizSolveRepository;
+import com.example.server.domain.quiz.service.command.PointExperienceProvisionInformation;
+import com.example.server.domain.user.entity.User;
 import com.example.server.domain.user.repository.UserRepository;
 import com.example.server.global.exception.message.ErrorMessage;
 import com.example.server.global.exception.model.BadRequestException;
@@ -38,6 +43,7 @@ public class QuizService {
 	private final UserRepository userRepository;
 	private final QuizSolveRepository quizSolveRepository;
 	private final ReadContentRepository readContentRepository;
+	private final RewardHistoryRepository rewardHistoryRepository;
 
 	/**
 	 * 퀴즈 문제지 출제
@@ -66,7 +72,6 @@ public class QuizService {
 	@Transactional
 	public QuizSubmitResponse submit(Long userId, QuizSubmitRequest request) {
 
-		//읽기 기록
 		ReadContent readContent = readContentRepository.findById(request.getReadContentId())
 			.orElseThrow(() -> new NotFoundException(ErrorMessage.READ_RECORD_NOT_FOUND));
 
@@ -74,7 +79,6 @@ public class QuizService {
 			throw new BadRequestException(ErrorMessage.INVALID_USER_READ_RECORD);
 		}
 
-		//이미 풀었던건지 확인
 		if (quizSolveRepository.existsByReadContent_ReadContentId(request.getReadContentId())) {
 			throw new ConflictException(ErrorMessage.QUIZ_ALREADY_SOLVED);
 		}
@@ -86,22 +90,52 @@ public class QuizService {
 				request.getSelectedNo())
 			.orElseThrow(() -> new BadRequestException(ErrorMessage.QUIZ_INVALID_CHOICE));
 
-		QuizChoice correct = quizChoiceRepository.findByQuiz_QuizIdAndIsCorrectTrue(request.getQuizId())
-			.orElseThrow(() -> new NeurousException(ErrorMessage.QUIZ_CORRECT_ANSWER_NOT_CONFIGURED));
-
 		boolean isAnswerCorrect = selected.isCorrect();
+		User user = findByUserId(userId);
+
+		int earnedPoint;
+		int earnedExp;
+		HistoryMessage historyMessage;
+
+		if (isAnswerCorrect) {
+			earnedPoint = PointExperienceProvisionInformation.CORRECT_ANSWER_POINT;
+			earnedExp = PointExperienceProvisionInformation.CORRECT_ANSWER_EXPERIENCE;
+			historyMessage = HistoryMessage.QUIZ_ANSWERS;
+		} else {
+			earnedPoint = PointExperienceProvisionInformation.WRONG_ANSWER_POINT;
+			earnedExp = PointExperienceProvisionInformation.WRONG_ANSWER_EXPERIENCE;
+			historyMessage = HistoryMessage.QUIZ_CHALLENGE;
+		}
+
+		user.addPointAndExp(earnedPoint, earnedExp);
+
+		RewardHistory rewardHistory = RewardHistory.create(
+			user,
+			earnedPoint,
+			earnedExp,
+			historyMessage // 변수 적용
+		);
+		rewardHistoryRepository.save(rewardHistory);
 
 		QuizSolve solve = QuizSolve.of(
-			readContent.getUser(),
+			user,
 			readContent,
 			quiz.getQuizId(),
 			request.getSelectedNo(),
 			isAnswerCorrect,
 			LocalDateTime.now()
 		);
-
 		quizSolveRepository.save(solve);
 
-		return QuizSubmitResponse.of(quiz.getQuizId(), request.getSelectedNo(), isAnswerCorrect, correct);
+		QuizChoice correct = quizChoiceRepository.findByQuiz_QuizIdAndIsCorrectTrue(request.getQuizId())
+			.orElseThrow(() -> new NeurousException(ErrorMessage.QUIZ_CORRECT_ANSWER_NOT_CONFIGURED));
+
+		return QuizSubmitResponse.of(quiz.getQuizId(), request.getSelectedNo(), isAnswerCorrect, correct, earnedPoint,
+			earnedExp);
+	}
+
+	public User findByUserId(Long userId) {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
 	}
 }

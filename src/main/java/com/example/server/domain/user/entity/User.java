@@ -1,6 +1,8 @@
 package com.example.server.domain.user.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +80,10 @@ public class User extends BaseTimeEntity {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserInterest> interests = new ArrayList<>();
 
+	//순위 선택 * 수
+	@Column(nullable = false, name = "count_interests")
+	private int countInterests;
+
 	@Builder.Default
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -90,7 +96,14 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false, name = "notification_status")
 	private boolean notificationStatus = false; //알람 여부 미설정
 
-	//읽은 컨텐츠
+	@Column(nullable = false)
+	private int point = 0; //현재 보유 포인트
+
+	@Column(nullable = false)
+	private int exp = 0; //현재 보유 경험치
+
+	@Column(nullable = false)
+	private int readContent = 0; //읽은 콘텐츠
 
 	private LocalDateTime lastLoginAt;
 
@@ -159,10 +172,31 @@ public class User extends BaseTimeEntity {
 				)
 			);
 		}
+		//선택한 개수 업데이트 ( 미션 컨텐츠 제공에서 사용)
+		this.countInterests = fields.size();
 	}
 
 	//레벨 변경
 	public void changeLevel(Level level) {
 		this.level = level;
 	}
+
+	//신규 가입 인지 아닌지
+	public boolean isNewUserBonusPeriod() {
+		if (this.getCreatedAt() == null)
+			return true;
+
+		LocalDate signUpDate = this.getCreatedAt().toLocalDate();
+		LocalDate today = LocalDate.now();
+
+		long daysBetween = ChronoUnit.DAYS.between(signUpDate, today);
+		return daysBetween >= 0 && daysBetween <= 2;
+	}
+
+	//포인트 * 경험치 총 증가
+	public void addPointAndExp(int point, int exp) {
+		this.point += point;
+		this.exp += exp;
+	}
+
 }

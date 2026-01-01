@@ -17,6 +17,8 @@ import com.example.server.domain.user.entity.User;
 @Repository
 public interface ReadContentRepository extends JpaRepository<ReadContent, Long> {
 
+	boolean existsByUser_IdAndContent_ContentId(Long userId, Long contentId);
+
 	@Query("SELECT rc FROM ReadContent rc JOIN FETCH rc.user WHERE rc.readContentId = :id")
 	List<Content> findReadContentsByUserId(@Param("userId") Long userId, Pageable pageable);
 

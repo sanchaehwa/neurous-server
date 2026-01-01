@@ -3,26 +3,32 @@ package com.example.server.domain.content.controller.docs;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import com.example.server.domain.content.dto.request.ContentDifficultyRequest;
+import com.example.server.domain.content.dto.request.UpdateReadStatusRequest;
+import com.example.server.domain.content.dto.response.ContentAccessResponse;
 import com.example.server.domain.content.dto.response.ContentDetailResponse;
 import com.example.server.domain.content.dto.response.ContentResponse;
 import com.example.server.domain.content.dto.response.DifficultyRecommendResponse;
 import com.example.server.domain.content.dto.response.ExploreResponse;
+import com.example.server.domain.content.dto.response.ReadStatusResponse;
 import com.example.server.domain.content.dto.response.RecentSearchResponse;
 import com.example.server.domain.content.entity.vo.ContentCategory;
+import com.example.server.domain.content.entity.vo.ContentDifficulty;
 import com.example.server.domain.quiz.dto.response.ReadContentDetailResponse;
+import com.example.server.domain.user.entity.vo.Level;
 import com.example.server.global.annotation.CurrentUserId;
 import com.example.server.global.exception.dto.SuccessResponse;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-@Tag(name = "[콘텐츠] 콘텐츠 조회/검색/상세/히스토리/난이도 평가 API", description = "콘텐츠 관련 API")
+@Tag(name = "[컨텐츠] 컨텐츠 탐색 / 조회 / 구매 / 난이도 관련 API", description = "컨ㅋ텐츠 관련 API")
 public interface ContentControllerDocs {
 
-	@GetExploreContentDocs
+	@GetExploreDocs
 	SuccessResponse<Map<ContentCategory, ExploreResponse>> getExploreContent(
 		@CurrentUserId Long userId
 	);
@@ -30,45 +36,68 @@ public interface ContentControllerDocs {
 	@GetContentDetailDocs
 	SuccessResponse<ContentDetailResponse> getContentDetail(
 		@CurrentUserId Long userId,
-		Long contentId  // int -> Long 및 userId 추가
+		@PathVariable Long contentId
+	);
+
+	@GetReadContentDetailDocs
+	SuccessResponse<ReadContentDetailResponse> getReadContentDetail(
+		@CurrentUserId Long userId,
+		@PathVariable Long contentId
 	);
 
 	@SearchContentDocs
 	SuccessResponse<List<ContentResponse>> searchContent(
 		@CurrentUserId Long userId,
-		String keyword,
-		int page
+		@RequestParam String keyword,
+		@RequestParam(defaultValue = "0") int page
 	);
 
-	@GetRecentSearchesDocs
+	@GetRecentSearchDocs
 	SuccessResponse<List<RecentSearchResponse>> getRecentSearches(
 		@CurrentUserId Long userId
 	);
 
-	@SetContentEvaluationDocs
-	SuccessResponse<DifficultyRecommendResponse> setContentEvaluation(
+	@CheckContentAccessDocs
+	SuccessResponse<ContentAccessResponse> checkContentAccess(
 		@CurrentUserId Long userId,
-		Long contentId, // int -> Long
-		@RequestBody @Valid ContentDifficultyRequest difficulty
-	);
-
-	@SetContentReadDocs
-	SuccessResponse<Void> setContentRead(
-		@CurrentUserId Long userId,
-		Long contentId // int -> Long
+		@PathVariable Long contentId
 	);
 
 	@UpdateReadStatusDocs
-	SuccessResponse<Void> updateReadStatus(
+	SuccessResponse<ReadStatusResponse> updateReadStatus(
 		@CurrentUserId Long userId,
-		Long contentId,
-		Long staySeconds,
-		boolean isCompleted
+		@PathVariable Long contentId,
+		@Valid @RequestBody UpdateReadStatusRequest request
 	);
 
-	@GetReadDetailDocs
-	SuccessResponse<ReadContentDetailResponse> getReadDetail(
+	@PurchaseContentByPointDocs
+	SuccessResponse<Void> purchaseByPoint(
 		@CurrentUserId Long userId,
-		Long contentId // int -> Long
+		@PathVariable Long contentId
 	);
+
+	@UnlockContentByAdDocs
+	SuccessResponse<Void> unlockByWatchingAd(
+		@CurrentUserId Long userId,
+		@PathVariable Long contentId
+	);
+
+	@RecommendDifficultyDocs
+	SuccessResponse<DifficultyRecommendResponse> recommendDifficulty(
+		@CurrentUserId Long userId
+	);
+
+	@ChangeUserLevelDocs
+	SuccessResponse<Void> changeUserLevel(
+		@CurrentUserId Long userId,
+		@RequestParam Level level
+	);
+
+	@EvaluateContentDifficultyDocs
+	SuccessResponse<Void> evaluateDifficulty(
+		@CurrentUserId Long userId,
+		@PathVariable Long contentId,
+		@RequestParam ContentDifficulty difficulty
+	);
+	
 }

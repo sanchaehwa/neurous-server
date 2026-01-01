@@ -37,6 +37,7 @@ public enum ErrorMessage {
 	USER_INVALID_INTEREST_COUNT(400, "USER3002", "관심분야는 3가지만 선택할 수 있습니다."),
 	USER_DUPLICATED_INTEREST(400, "USER3003", "중복된 관심분야 항목이 있습니다"),
 	ALEADY_LEVEL_CHANGE(400, "USER3004", "이미 난이도를 변경했습니다"),
+
 	//컨텐츠 관련
 	NOT_FOUND_LEVEL_DESCRIPTION(404, "CNT4001", "선택한 레벨에 대한 정보가 없습니다"),
 	CONTENT_NOT_FOUND(404, "CNT4002", "존재하지 않는 컨텐츠입니다."),
@@ -56,6 +57,10 @@ public enum ErrorMessage {
 	QUIZ_SOLVE_NOT_FOUND(404, "QUIZ5005", "해당 콘텐츠에 대한 퀴즈 풀이 기록이 없습니다."),
 	QUIZ_CORRECT_CHOICE_NOT_FOUND(404, "QUIZ5006", "정답 선택지가 설정되지 않았습니다."),
 	QUIZ_ALREADY_SOLVED(409, "QUIZ5007", "이미 퀴즈를 제출했습니다."),
+
+	//리워드 관련
+	NOT_ENOUGH_POINT(400, "REW5008", "콘텐츠를 구매하기 위한 포인트가 부족합니다"),
+
 	// 서버 에러
 	INTERNAL_SERVER_ERROR(500, "INT5000", "서버 내부 오류가 발생했습니다.");
 

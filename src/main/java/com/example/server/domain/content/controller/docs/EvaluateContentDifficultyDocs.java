@@ -5,6 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.example.server.global.exception.dto.ErrorResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,21 +15,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-	summary = "미션 컨텐츠 조회",
-	description = "미션 컨텐츠 화면에 필요한 콘텐츠 목록을 조회합니다."
+	summary = "컨텐츠 난이도 평가",
+	description = "퀴즈 풀이 후 컨텐츠 난이도를 평가합니다"
 )
 @ApiResponse(
 	responseCode = "200",
-	description = "조회 성공",
-	content = @Content(schema = @Schema(implementation = Content.class))
+	description = "난이도 평가 완료"
 )
 @ApiResponse(
-	responseCode = "401",
-	description = "인증 실패 (토큰 누락 또는 만료)"
+	responseCode = "409",
+	description = "이미 평가한 컨텐츠",
+	content = @Content(schema = @Schema(implementation = ErrorResponse.class))
 )
-@ApiResponse(
-	responseCode = "500",
-	description = "서버 내부 오류"
-)
-public @interface GetTodayContentDocs {
+public @interface EvaluateContentDifficultyDocs {
 }

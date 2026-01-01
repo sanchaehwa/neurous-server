@@ -115,6 +115,10 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private CharacterLevel characterLevel = CharacterLevel.LEVEL_1;
 
+	@Builder.Default
+	@Column(nullable = false, name = "last_read_date")
+	private LocalDate lastReadDate = LocalDate.now(); // 마지막으로 읽은 날짜
+
 	private LocalDateTime lastLoginAt;
 
 	//알림 여부 변경
@@ -233,4 +237,19 @@ public class User extends BaseTimeEntity {
 		};
 	}
 
+	//읽은 콘텐츠
+	public void syncReadCount() {
+		LocalDate today = LocalDate.now();
+
+		// 마지막 읽은 날짜가 오늘이 아니면 카운트 리셋 및 날짜 갱신
+		if (this.lastReadDate == null || !this.lastReadDate.isEqual(today)) {
+			this.countReadContent = 0; // 초기화
+			this.lastReadDate = today; // 오늘 날짜로 업데이트
+		}
+	}
+
+	//읽은 콘텐츠 수 증가
+	public void incrementReadCount() {
+		this.countReadContent++;
+	}
 }

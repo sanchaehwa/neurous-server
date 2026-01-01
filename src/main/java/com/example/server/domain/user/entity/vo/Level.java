@@ -14,4 +14,9 @@ public enum Level {
 	public String getDescription() {
 		return description;
 	}
+
+	@com.fasterxml.jackson.annotation.JsonCreator
+	public static Level from(String value) {
+		return Level.valueOf(value.toUpperCase());
+	}
 }

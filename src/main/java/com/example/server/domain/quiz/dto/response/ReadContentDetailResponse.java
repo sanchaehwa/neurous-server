@@ -1,7 +1,6 @@
-package com.example.server.domain.quiz.dto;
+package com.example.server.domain.quiz.dto.response;
 
 import com.example.server.domain.content.dto.response.ContentDetailResponse;
-import com.example.server.domain.quiz.dto.response.SolvedQuizResponse;
 
 import lombok.Builder;
 

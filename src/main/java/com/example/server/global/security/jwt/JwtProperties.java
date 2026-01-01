@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-@Setter // 2. Setter 추가 (필수)
+@Setter // Setter 추가 (필수)
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
 	private String secret;

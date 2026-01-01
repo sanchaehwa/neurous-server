@@ -6,7 +6,6 @@ import java.util.List;
 import com.example.server.domain.content.entity.Content;
 import com.example.server.domain.content.entity.vo.ContentLevel;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -56,6 +55,6 @@ public class Quiz {
 	private String quizCategory;
 
 	@Builder.Default
-	@OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "quiz")
 	private List<QuizChoice> choices = new ArrayList<>();
 }

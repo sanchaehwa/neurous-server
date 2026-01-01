@@ -1,11 +1,14 @@
 package com.example.server.domain.user.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.example.server.domain.auth.dto.OAuthUserInfo;
 import com.example.server.domain.auth.enums.OAuthProvider;
+import com.example.server.domain.user.entity.vo.CharacterLevel;
 import com.example.server.domain.user.entity.vo.Level;
 import com.example.server.domain.user.entity.vo.Priority;
 import com.example.server.domain.user.entity.vo.UserField;
@@ -57,8 +60,8 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String providerId;
 
-	@Column //기본 이미지 설정
-	private String profileImgUrl;
+	@Column(name = "profile_img_file_name")
+	private String profileImgFileName;
 
 	@Column(unique = true, length = 50)
 	@Email
@@ -78,6 +81,10 @@ public class User extends BaseTimeEntity {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserInterest> interests = new ArrayList<>();
 
+	//순위 선택 * 수
+	@Column(nullable = false, name = "count_interests")
+	private int countInterests;
+
 	@Builder.Default
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -90,7 +97,27 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false, name = "notification_status")
 	private boolean notificationStatus = false; //알람 여부 미설정
 
-	//읽은 컨텐츠
+	@Builder.Default
+	@Column(nullable = false)
+	private int point = 0; //현재 보유 포인트
+
+	@Builder.Default
+	@Column(nullable = false)
+	private int exp = 0; //현재 보유 경험치
+
+	@Builder.Default
+	@Column(nullable = false)
+	private int countReadContent = 0; //읽은 콘텐츠 개수
+
+	//케릭터 레벨
+	@Builder.Default
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private CharacterLevel characterLevel = CharacterLevel.LEVEL_1;
+
+	@Builder.Default
+	@Column(nullable = false, name = "last_read_date")
+	private LocalDate lastReadDate = LocalDate.now(); // 마지막으로 읽은 날짜
 
 	private LocalDateTime lastLoginAt;
 
@@ -99,19 +126,18 @@ public class User extends BaseTimeEntity {
 		this.notificationStatus = !this.notificationStatus;
 	}
 
-	//todo: 프로필 이미지 추가정보 입력전에는 기본 이미지 처리
 	public static User create(
 		String name,
 		OAuthProvider provider,
 		String providerId,
-		String profileImgUrl,
+		String profileImgFileName,
 		String email
 	) {
 		return User.builder()
 			.name(name)
 			.provider(provider)
 			.providerId(providerId)
-			.profileImgUrl(profileImgUrl)
+			.profileImgFileName(profileImgFileName)
 			.email(email)
 			.status(UserStatus.NORMAL)
 			.userType(UserType.USER)
@@ -119,6 +145,10 @@ public class User extends BaseTimeEntity {
 			.level(Level.BEGINNER)
 			.signUpComplete(false)
 			.notificationStatus(false)
+			.point(0)
+			.exp(0)
+			.countReadContent(0)
+			.characterLevel(CharacterLevel.LEVEL_1)
 			.lastLoginAt(LocalDateTime.now())
 			.build();
 	}
@@ -129,7 +159,7 @@ public class User extends BaseTimeEntity {
 			name,
 			provider,
 			oauthUserInfo.getProviderId(),
-			name,
+			"lv1_profile.png", //처음 회원가입 하면 기본 프로필
 			oauthUserInfo.getEmail()
 		);
 	}
@@ -159,10 +189,67 @@ public class User extends BaseTimeEntity {
 				)
 			);
 		}
+		//선택한 개수 업데이트 ( 미션 컨텐츠 제공에서 사용)
+		this.countInterests = fields.size();
 	}
 
 	//레벨 변경
 	public void changeLevel(Level level) {
 		this.level = level;
+	}
+
+	//신규 가입 인지 아닌지
+	public boolean isNewUserBonusPeriod() {
+		if (this.getCreatedAt() == null)
+			return true;
+
+		LocalDate signUpDate = this.getCreatedAt().toLocalDate();
+		LocalDate today = LocalDate.now();
+
+		long daysBetween = ChronoUnit.DAYS.between(signUpDate, today);
+		return daysBetween >= 0 && daysBetween <= 2;
+	}
+
+	//포인트 * 경험치 총 증가
+	public boolean addPointAndExp(int point, int exp) {
+		this.point += point;
+		this.exp += exp;
+
+		CharacterLevel nextLevel = CharacterLevel.getLevelByExp(this.exp);
+
+		if (this.characterLevel != nextLevel) {
+			this.characterLevel = nextLevel;
+			updateProfileImgByLevel();
+			return true;
+		}
+		return false; //레벨업 미발생
+	}
+
+	//프로필 사진 번경 (레벨에 따라)
+	private void updateProfileImgByLevel() {
+		this.profileImgFileName = switch (this.characterLevel) {
+			case LEVEL_1 -> ProfileImgFileName.LV1_PROFILE_IMG_FILE_NAME;
+			case LEVEL_2 -> ProfileImgFileName.LV2_PROFILE_IMG_FILE_NAME;
+			case LEVEL_3 -> ProfileImgFileName.LV3_PROFILE_IMG_FILE_NAME;
+			case LEVEL_4 -> ProfileImgFileName.LV4_PROFILE_IMG_FILE_NAME;
+			case LEVEL_5 -> ProfileImgFileName.LV5_PROFILE_IMG_FILE_NAME;
+			default -> this.profileImgFileName; // 예외 케이스 대비
+		};
+	}
+
+	//읽은 콘텐츠
+	public void syncReadCount() {
+		LocalDate today = LocalDate.now();
+
+		// 마지막 읽은 날짜가 오늘이 아니면 카운트 리셋 및 날짜 갱신
+		if (this.lastReadDate == null || !this.lastReadDate.isEqual(today)) {
+			this.countReadContent = 0; // 초기화
+			this.lastReadDate = today; // 오늘 날짜로 업데이트
+		}
+	}
+
+	//읽은 콘텐츠 수 증가
+	public void incrementReadCount() {
+		this.countReadContent++;
 	}
 }

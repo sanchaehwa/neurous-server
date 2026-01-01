@@ -12,20 +12,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.server.domain.content.controller.docs.ContentControllerDocs;
-import com.example.server.domain.content.dto.request.ContentDifficultyRequest;
+import com.example.server.domain.content.dto.request.UpdateReadStatusRequest;
+import com.example.server.domain.content.dto.response.ContentAccessResponse;
 import com.example.server.domain.content.dto.response.ContentDetailResponse;
 import com.example.server.domain.content.dto.response.ContentResponse;
 import com.example.server.domain.content.dto.response.DifficultyRecommendResponse;
 import com.example.server.domain.content.dto.response.ExploreResponse;
+import com.example.server.domain.content.dto.response.ReadStatusResponse;
 import com.example.server.domain.content.dto.response.RecentSearchResponse;
 import com.example.server.domain.content.entity.vo.ContentCategory;
+import com.example.server.domain.content.entity.vo.ContentDifficulty;
 import com.example.server.domain.content.service.ContentService;
-import com.example.server.domain.quiz.dto.ReadContentDetailResponse;
+import com.example.server.domain.quiz.dto.response.ReadContentDetailResponse;
+import com.example.server.domain.user.entity.vo.Level;
 import com.example.server.global.annotation.CurrentUserId;
 import com.example.server.global.exception.dto.SuccessResponse;
 import com.example.server.global.exception.message.SuccessMessage;
 import com.example.server.global.security.annotation.AuthenticatedApi;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -35,85 +40,143 @@ public class ContentController implements ContentControllerDocs {
 
 	private final ContentService contentService;
 
-	@AuthenticatedApi(reason = "사용자의 학습 레벨)에 최적화된 카테고리별 컨텐츠 목록을 탐색하기 위해 로그인이 필요합니다.")
+	@AuthenticatedApi(reason = "사용자의 학습 레벨에 맞는 컨텐츠 탐색을 위해 로그인 필요")
 	@GetMapping("/explore")
 	public SuccessResponse<Map<ContentCategory, ExploreResponse>> getExploreContent(
 		@CurrentUserId Long userId
 	) {
-		Map<ContentCategory, ExploreResponse> result = contentService.getExplore(userId);
-		return SuccessResponse.of(SuccessMessage.LOAD_SUCCESS, result);
+		return SuccessResponse.of(
+			SuccessMessage.LOAD_CONTENT_EXPLORE_SUCCESS,
+			contentService.getExplore(userId)
+		);
 	}
 
-	@AuthenticatedApi
-	@GetMapping("/detail/{contentId}")
+	@AuthenticatedApi(reason = "컨텐츠 상세 조회를 위해 로그인 필요")
+	@GetMapping("/{contentId}")
 	public SuccessResponse<ContentDetailResponse> getContentDetail(
 		@CurrentUserId Long userId,
 		@PathVariable Long contentId
 	) {
-		ContentDetailResponse contentResponse = contentService.getContentDetail(userId, contentId);
-		return SuccessResponse.of(SuccessMessage.LOAD_SUCCESS, contentResponse);
+		return SuccessResponse.of(
+			SuccessMessage.LOAD_CONTENT_DETAIL_SUCCESS,
+			contentService.getContentDetailWithCount(userId, contentId)
+		);
 	}
 
-	@AuthenticatedApi(reason = "검색 결과의 정렬 기준(레벨 우선순위)을 적용하고, 사용자의 최근 검색어 리스트를 업데이트하기 위해 로그인이 필요합니다.")
+	@AuthenticatedApi(reason = "읽은 컨텐츠 상세 조회를 위해 로그인 필요")
+	@GetMapping("/{contentId}/read")
+	public SuccessResponse<ReadContentDetailResponse> getReadContentDetail(
+		@CurrentUserId Long userId,
+		@PathVariable Long contentId
+	) {
+		return SuccessResponse.of(
+			SuccessMessage.LOAD_READ_CONTENT_DETAIL_SUCCESS,
+			contentService.getReadContentDetail(userId, contentId)
+		);
+	}
+
+	@AuthenticatedApi(reason = "컨텐츠 검색을 위해 로그인 필요")
 	@GetMapping("/search")
 	public SuccessResponse<List<ContentResponse>> searchContent(
 		@CurrentUserId Long userId,
-		@RequestParam("keyword") String keyword,
-		@RequestParam(value = "page", defaultValue = "0") int page
+		@RequestParam String keyword,
+		@RequestParam(defaultValue = "0") int page
 	) {
-		List<ContentResponse> result = contentService.search(userId, keyword, page);
-		return SuccessResponse.of(SuccessMessage.LOAD_SUCCESS, result);
+		return SuccessResponse.of(
+			SuccessMessage.SEARCH_CONTENT_SUCCESS,
+			contentService.search(userId, keyword, page)
+		);
 	}
 
-	@AuthenticatedApi(reason = "최근 검색어 기록은 로그인한 본인의 데이터만 조회합니다.")
+	@AuthenticatedApi(reason = "최근 검색어 조회를 위해 로그인이 필요합니다")
 	@GetMapping("/search/recent")
 	public SuccessResponse<List<RecentSearchResponse>> getRecentSearches(
 		@CurrentUserId Long userId
 	) {
-		List<RecentSearchResponse> result = contentService.getRecentSearches(userId);
-		return SuccessResponse.of(SuccessMessage.LOAD_SUCCESS, result);
+		return SuccessResponse.of(
+			SuccessMessage.LOAD_RECENT_SEARCH_SUCCESS,
+			contentService.getRecentSearches(userId)
+		);
 	}
 
-	@AuthenticatedApi(reason = "사용자의 난이도 평가 피드백을 수집하여 향후 학습 레벨 조정 및 맞춤형 컨텐츠 추천 알고리즘에 반영합니다.")
-	@PostMapping("/{contentId}/evaluation")
-	public SuccessResponse<DifficultyRecommendResponse> setContentEvaluation(
-		@CurrentUserId Long userId,
-		@PathVariable Long contentId,
-		@RequestBody ContentDifficultyRequest difficulty
-	) {
-		DifficultyRecommendResponse result = contentService.setDifficultyEvaluation(userId, contentId, difficulty);
-		return SuccessResponse.of(SuccessMessage.UPDATE_SUCCESS, result);
-	}
-
-	@AuthenticatedApi(reason = "사용자가 해당 컨텐츠를 열람했음을 기록합니다.")
-	@PostMapping("/{contentId}/read")
-	public SuccessResponse<Void> setContentRead(
+	@AuthenticatedApi(reason = "컨텐츠 접근 권한 확인을 위해 로그인이 필요합니다")
+	@GetMapping("/{contentId}/access")
+	public SuccessResponse<ContentAccessResponse> checkContentAccess(
 		@CurrentUserId Long userId,
 		@PathVariable Long contentId
 	) {
-		contentService.setContentRead(userId, contentId);
-		return SuccessResponse.of(SuccessMessage.UPDATE_SUCCESS);
+		return SuccessResponse.of(
+			SuccessMessage.CHECK_CONTENT_ACCESS_SUCCESS,
+			contentService.checkContentReadAccess(userId, contentId)
+		);
 	}
 
-	@AuthenticatedApi(reason = "실제 학습 시간(staySeconds)과 완독 여부를 기록합니다.")
-	@PostMapping("/{contentId}/status")
-	public SuccessResponse<Void> updateReadStatus(
+	@AuthenticatedApi(reason = "컨텐츠 읽기 상태 업데이트를 위해 로그인이 필요합니다")
+	@PostMapping("/{contentId}/read-status")
+	public SuccessResponse<ReadStatusResponse> updateReadStatus(
 		@CurrentUserId Long userId,
 		@PathVariable Long contentId,
-		@RequestParam Long staySeconds,
-		@RequestParam boolean isCompleted
+		@Valid @RequestBody UpdateReadStatusRequest request
 	) {
-		contentService.updateReadStatus(userId, contentId, staySeconds, isCompleted);
-		return SuccessResponse.of(SuccessMessage.UPDATE_SUCCESS);
+		return SuccessResponse.of(
+			SuccessMessage.UPDATE_READ_STATUS_SUCCESS,
+			contentService.updateReadStatus(
+				userId,
+				contentId,
+				request
+			)
+		);
 	}
 
-	@AuthenticatedApi(reason = "이미 풀이한 퀴즈 기록과 컨텐츠 내용을 함께 조회합니다.")
-	@GetMapping("/{contentId}/read-detail")
-	public SuccessResponse<ReadContentDetailResponse> getReadDetail(
+	@AuthenticatedApi(reason = "포인트 결제를 위해 로그인 필요합니다.")
+	@PostMapping("/{contentId}/purchase/point")
+	public SuccessResponse<Void> purchaseByPoint(
 		@CurrentUserId Long userId,
 		@PathVariable Long contentId
 	) {
-		ReadContentDetailResponse result = contentService.getReadContentDetail(userId, contentId);
-		return SuccessResponse.of(SuccessMessage.LOAD_SUCCESS, result);
+		contentService.purchaseContentByPoint(userId, contentId);
+		return SuccessResponse.of(SuccessMessage.PURCHASE_CONTENT_SUCCESS);
+	}
+
+	@AuthenticatedApi(reason = "광고 시청을 위해 로그인 필요합니다")
+	@PostMapping("/{contentId}/purchase/ad")
+	public SuccessResponse<Void> unlockByWatchingAd(
+		@CurrentUserId Long userId,
+		@PathVariable Long contentId
+	) {
+		contentService.watchAdAndRewardUnLockContent(userId, contentId);
+		return SuccessResponse.of(SuccessMessage.UNLOCK_CONTENT_BY_AD_SUCCESS);
+	}
+
+	@AuthenticatedApi(reason = "난이도 추천을 위해 로그인 필요합니다")
+	@GetMapping("/difficulty/recommend")
+	public SuccessResponse<DifficultyRecommendResponse> recommendDifficulty(
+		@CurrentUserId Long userId
+	) {
+		return SuccessResponse.of(
+			SuccessMessage.RECOMMEND_CONTENT_DIFFICULTY_SUCCESS,
+			contentService.requestRecommendContentLevel(userId)
+		);
+	}
+
+	@AuthenticatedApi(reason = "레벨 변경을 위해 로그인 필요합니다")
+	@PostMapping("/difficulty/change")
+	public SuccessResponse<Void> changeUserLevel(
+		@CurrentUserId Long userId,
+		@RequestParam Level level
+	) {
+		contentService.changeUserLevel(userId, level);
+		return SuccessResponse.of(SuccessMessage.CHANGE_LEVEL_SUCCESS);
+	}
+
+	@AuthenticatedApi(reason = "난이도 평가를 위해 로그인 필요합니다")
+	@PostMapping("/{contentId}/difficulty")
+	public SuccessResponse<Void> evaluateDifficulty(
+		@CurrentUserId Long userId,
+		@PathVariable Long contentId,
+		@RequestParam ContentDifficulty difficulty
+	) {
+		contentService.contentDifficultyAssessment(userId, contentId, difficulty);
+		return SuccessResponse.of(SuccessMessage.EVALUATE_CONTENT_DIFFICULTY_SUCCESS);
 	}
 }

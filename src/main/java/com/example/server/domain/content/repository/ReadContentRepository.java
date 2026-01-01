@@ -12,13 +12,14 @@ import org.springframework.stereotype.Repository;
 
 import com.example.server.domain.content.entity.Content;
 import com.example.server.domain.content.entity.ReadContent;
+import com.example.server.domain.user.entity.User;
 
 @Repository
 public interface ReadContentRepository extends JpaRepository<ReadContent, Long> {
 
-	@Query("SELECT rc.content FROM ReadContent rc " +
-		"WHERE rc.user.id = :userId " +
-		"ORDER BY rc.readContentId DESC")
+	boolean existsByUser_IdAndContent_ContentId(Long userId, Long contentId);
+
+	@Query("SELECT rc FROM ReadContent rc JOIN FETCH rc.user WHERE rc.readContentId = :id")
 	List<Content> findReadContentsByUserId(@Param("userId") Long userId, Pageable pageable);
 
 	Optional<ReadContent> findByUser_IdAndContent_ContentId(Long userId, Long contentId);
@@ -37,6 +38,12 @@ public interface ReadContentRepository extends JpaRepository<ReadContent, Long> 
 		@Param("startOfWeek") LocalDateTime startOfWeek, //시작주
 		@Param("endOfWeek") LocalDateTime endOfWeek
 	);
+
+	//유저 정보 한번에 조회
+	@Query("SELECT rc FROM ReadContent rc JOIN FETCH rc.user WHERE rc.readContentId = :id")
+	Optional<ReadContent> findByIdWithUser(@Param("id") Long id);
+
+	Long user(User user);
 }
 
 

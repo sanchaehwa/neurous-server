@@ -27,10 +27,11 @@ public class UserService {
 	public UserInterestsResponse updateInterest(Long userId, UpdateInterestsRequest updateInterestsRequest) {
 		User user = findByUserId(userId);
 		user.updateInterests(updateInterestsRequest.interests());
+
 		return UserInterestsResponse.from(user.getInterests());
 	}
 
-	// 레벨 변경
+	// 레벨 변경 (초급 / 중급 / 고급)
 	@Transactional
 	public void updateLevel(Long userId, Level level) {
 		User user = findByUserId(userId);

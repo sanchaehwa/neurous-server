@@ -77,8 +77,6 @@ public class ContentService {
 	private final RedisUtil redisUtil;
 	private final StorageConfig storageConfig;
 
-	private final ContentDifficultyService contentDifficultyService;
-
 	/**
 	 * 컨텐츠 조회 / 검색
 	 */
@@ -176,7 +174,7 @@ public class ContentService {
 	}
 
 	//컨텐츠 제목 기반 검색
-
+	@Transactional
 	public List<ContentResponse> search(Long userId, String keyword, int page) {
 		String k = (keyword == null) ? "" : keyword.trim();
 		if (k.isEmpty())
@@ -420,19 +418,12 @@ public class ContentService {
 
 		ReadContent readContent = findReadContentByContentIdAndCheckContentDifficulty(userId, contentId);
 
-		int score = difficulty.getScore();
-
 		ContentDifficultyEvaluation evaluationResult = ContentDifficultyEvaluation.create(
 			readContent,
 			difficulty
 		);
 
 		contentDifficultyEvaluationRepository.save(evaluationResult);
-		contentDifficultyService.processEvaluation(contentId, score);
-
-		if (!difficultyBasetimeRepository.existsById(userId)) {
-			difficultyBasetimeRepository.save(DifficultyBasetime.now(userId, contentId));
-		}
 
 	}
 

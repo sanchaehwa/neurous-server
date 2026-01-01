@@ -73,26 +73,4 @@ public class RedisUtil {
 	public void zRem(RedisKey redisKey, Long userId, String value) {
 		redisTemplate.opsForZSet().remove(redisKey.getFullKey(userId), value);
 	}
-
-	//접수 합산 (컨텐츠 평가)
-	public void calculateContentDifficulty(Long contentId, int score) {
-		String scoreKey = RedisKey.CONTENT_DIFFICULTY_SCORE.getFullKey(contentId);
-		redisTemplate.opsForValue().increment(scoreKey, score);
-		redisTemplate.expire(scoreKey, RedisKey.CONTENT_DIFFICULTY_SCORE.getTtl());
-	}
-
-	//횟수 합산 (컨텐츠 평가)
-	public void countContentDifficulty(Long contentId) {
-		String countKey = RedisKey.CONTENT_DIFFICULTY_TEST_COUNT.getFullKey(contentId);
-		redisTemplate.opsForValue().increment(countKey, 1);
-		redisTemplate.expire(countKey, RedisKey.CONTENT_DIFFICULTY_TEST_COUNT.getTtl());
-	}
-
-	//업데이트 (컨텐츠 평가)
-	public void addUpdateTargetToList(Long contentId) {
-		String listKey = RedisKey.CONTENT_DIFFICULTY_UPDATE_LIST.getPrefix();
-
-		redisTemplate.opsForSet().add(listKey, String.valueOf(contentId));
-		redisTemplate.expire(listKey, RedisKey.CONTENT_DIFFICULTY_UPDATE_LIST.getTtl());
-	}
 }

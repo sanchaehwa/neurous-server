@@ -90,11 +90,11 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private Level level = Level.BEGINNER; //기본값 : 초급
 
-	@Column(nullable = false)
+	@Column(nullable = false, name = "sign_up_complete", columnDefinition = "TINYINT(1)")
 	private boolean signUpComplete; //회원가입 이후 추가 정보까지 입력 여부
 
 	@Builder.Default
-	@Column(nullable = false, name = "notification_status")
+	@Column(nullable = false, name = "notification_status", columnDefinition = "TINYINT(1)")
 	private boolean notificationStatus = false; //알람 여부 미설정
 
 	@Builder.Default

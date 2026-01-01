@@ -47,6 +47,7 @@ public class RewardHistory extends BaseTimeEntity {
 	private int exp = 0;
 
 	@Enumerated(EnumType.STRING)
+	@Column(name = "reason", nullable = false)
 	private HistoryMessage reason;
 
 	public static RewardHistory create(User user, int point, int exp, HistoryMessage reason) {

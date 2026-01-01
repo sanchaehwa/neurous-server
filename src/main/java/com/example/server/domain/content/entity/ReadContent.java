@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.example.server.domain.content.entity.vo.ContentLevel;
 import com.example.server.domain.quiz.entity.QuizSolve;
 import com.example.server.domain.user.entity.User;
+import com.example.server.global.domain.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,7 +26,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 
-public class ReadContent {
+public class ReadContent extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,20 +34,20 @@ public class ReadContent {
 	private Long readContentId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "content_id")
+	@JoinColumn(name = "content_id", nullable = false)
 	private Content content;
 
-	@Column(name = "read_at")
+	@Column(name = "read_at", nullable = false)
 	private LocalDateTime readAt; //언제 읽었는지
 
 	@Column(name = "stay_seconds", nullable = false)
 	private Long staySeconds = 0L; //몇분 동안 콘텐츠 읽었는지
 
-	@Column(name = "is_completed", nullable = false)
+	@Column(name = "is_completed", nullable = false, columnDefinition = "TINYINT(1)")
 	private boolean isCompleted = false;
 
 	// 마이페이지 조회를 위한 양방향 연관관계
@@ -57,16 +58,16 @@ public class ReadContent {
 	@OneToOne(mappedBy = "readContent", fetch = FetchType.LAZY)
 	private ContentDifficultyEvaluation contentDifficultyEvaluation;
 
-	private ReadContent(User user, Content content, LocalDateTime readAt, Long staySeconds, boolean isCompleted) {
+	private ReadContent(User user, Content content, Long staySeconds, boolean isCompleted) {
 		this.user = user;
 		this.content = content;
-		this.readAt = readAt;
-		this.staySeconds = staySeconds;
+		this.readAt = LocalDateTime.now();
+		this.staySeconds = staySeconds != null ? staySeconds : 0L;
 		this.isCompleted = isCompleted;
 	}
 
 	public static ReadContent of(User user, Content content, Long staySeconds, boolean isCompleted) {
-		return new ReadContent(user, content, LocalDateTime.now(), staySeconds, isCompleted);
+		return new ReadContent(user, content, staySeconds, isCompleted);
 	}
 
 	public void setTime(LocalDateTime now) {
@@ -74,7 +75,7 @@ public class ReadContent {
 	}
 
 	//컨텐츠에 남아있었던 시간
-	public void updateStatus(Long staySeconds, boolean isCompleted) {
+	public void updateStatus(Long staySecondsd) {
 		this.staySeconds = staySeconds;
 		this.isCompleted = checkCompletion(this.content.getContentLevel(), staySeconds);
 	}

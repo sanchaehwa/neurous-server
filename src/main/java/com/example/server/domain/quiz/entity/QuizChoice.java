@@ -30,10 +30,10 @@ public class QuizChoice {
 	@Column(name = "choice_text", nullable = false, columnDefinition = "TEXT")
 	private String choiceText;
 
-	@Column(name = "is_correct", nullable = false)
+	@Column(name = "is_correct", nullable = false, columnDefinition = "TINYINT(1)")
 	private boolean isCorrect;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "quiz_id")
+	@JoinColumn(name = "quiz_id", nullable = false)
 	private Quiz quiz;
 }

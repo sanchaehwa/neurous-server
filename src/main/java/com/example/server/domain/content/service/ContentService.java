@@ -283,7 +283,7 @@ public class ContentService {
 			user.addPointAndExp(0, PointExperienceProvisionInformation.COMPLETE_READ_CONTENT_EXP);
 
 			// 상태 업데이트
-			readContent.updateStatus(staySeconds, true);
+			readContent.updateStatus(staySeconds);
 
 			// 레벨업 여부 판단
 			boolean isLevelUp = !previousLevel.equals(user.getLevel());
@@ -304,7 +304,7 @@ public class ContentService {
 				.build();
 
 		} else {
-			readContent.updateStatus(staySeconds, false);
+			readContent.updateStatus(staySeconds);
 			return ReadStatusResponse.builder().isCompleted(false).isLevelUp(false).build();
 		}
 	}
@@ -412,7 +412,7 @@ public class ContentService {
 
 		//레벨 변경
 		user.changeLevel(level);
-		baseTime.reset(LocalDateTime.now());
+		baseTime.updateBaseTime(LocalDateTime.now());
 	}
 
 	//컨텐츠 난이도 평가 (퀴즈 풀이 후 모댤)

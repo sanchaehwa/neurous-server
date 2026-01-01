@@ -25,5 +25,6 @@ public abstract class BaseTimeEntity {
 	@LastModifiedDate
 	private LocalDateTime updatedAt;
 
+	@Column(name = "deleted", columnDefinition = "TINYINT(1)")
 	private boolean deleted = false;
 }

@@ -33,6 +33,12 @@ public interface ContentControllerDocs {
 		@CurrentUserId Long userId
 	);
 
+	@GetExploreContetsByCategoryDocs
+	SuccessResponse<ExploreResponse> getExploreContentByCategory(
+		@CurrentUserId Long userId,
+		@PathVariable ContentCategory category
+	);
+
 	@GetContentDetailDocs
 	SuccessResponse<ContentDetailResponse> getContentDetail(
 		@CurrentUserId Long userId,
@@ -99,5 +105,5 @@ public interface ContentControllerDocs {
 		@PathVariable Long contentId,
 		@RequestParam ContentDifficulty difficulty
 	);
-	
+
 }

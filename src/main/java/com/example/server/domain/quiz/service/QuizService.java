@@ -57,6 +57,14 @@ public class QuizService {
 	public QuizQuestionResponse getQuiz(Long userId, Long contentId) {
 
 		ContentLevel quizDiff = userRepository.findLevelByUserId(userId)
+			.map(levelObj -> {
+				try {
+					// 객체를 문자열로 바꾼 뒤 ContentLevel 열거형으로 매핑
+					return ContentLevel.valueOf(levelObj.toString());
+				} catch (Exception e) {
+					return ContentLevel.BEGINNER; // 매핑 실패 시 기본값
+				}
+			})
 			.orElse(ContentLevel.BEGINNER);
 
 		Quiz quiz = quizRepository.findQuiz(contentId, quizDiff)

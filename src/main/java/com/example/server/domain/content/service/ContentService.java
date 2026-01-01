@@ -1,6 +1,5 @@
 package com.example.server.domain.content.service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -80,47 +79,57 @@ public class ContentService {
 	/**
 	 * 컨텐츠 조회 / 검색
 	 */
-
-	// 탐색 페이지 컨텐츠 조회 (전체 / 카테고리)
+	//<전체 탐색>
 	public Map<ContentCategory, ExploreResponse> getExplore(Long userId) {
-
-		ContentLevel level = userRepository.findLevelByUserId(userId)
-			.orElse(ContentLevel.BEGINNER);
-
+		ContentLevel userLevel = getUserContentLevel(userId);
 		LocalDateTime latestBatchTime = contentRepository.findLatestBatchTime();
-		if (latestBatchTime == null) {
-			return Collections.emptyMap();
-		}
 
-		long remainingMinutes = calculateRemainingMinutes(latestBatchTime);
+		if (latestBatchTime == null)
+			return Collections.emptyMap();
+
+		// 루프 밖에서 공통 값 계산
+		LocalDateTime nextBatchTime = latestBatchTime.plusHours(6);
+		boolean isJustUpdated = latestBatchTime.isAfter(LocalDateTime.now().minusMinutes(30));
 
 		Map<ContentCategory, ExploreResponse> result = new LinkedHashMap<>();
 
 		for (ContentCategory category : ContentCategory.values()) {
 			List<Content> contents = contentRepository.findLatestBatchContents(
-				level,
-				category,
-				latestBatchTime,
-				PageRequest.of(0, 10)
+				userLevel, category, latestBatchTime, PageRequest.of(0, 10)
 			);
 
-			List<ContentResponse> responses = contents.stream()
-				.map(c -> ContentResponse.from(c, redisUtil.getHits(c.getContentId())))
-				.toList();
-
 			result.put(category, ExploreResponse.builder()
-				.contents(responses)
-				.remainingMinutes(remainingMinutes)
+				.contents(
+					contents.stream().map(c -> ContentResponse.from(c, redisUtil.getHits(c.getContentId()))).toList())
+				.nextBatchTime(nextBatchTime)
+				.isUpdatedContent(isJustUpdated)
 				.build());
 		}
 		return result;
 	}
 
-	//배치 타임 계산
-	private long calculateRemainingMinutes(LocalDateTime batchTime) {
-		LocalDateTime nextBatch = batchTime.plusHours(6);
-		long minutes = Duration.between(LocalDateTime.now(), nextBatch).toMinutes();
-		return Math.max(0, minutes); // 음수 방지
+	//사용자가 컨텐츠 * 카테고리 칩 눌렀을때 해당 카테고리의 데이터만 반환
+	public ExploreResponse getExploreByCategory(Long userId, ContentCategory category) {
+		ContentLevel userLevel = getUserContentLevel(userId);
+		LocalDateTime latestBatchTime = contentRepository.findLatestBatchTime();
+
+		//데이터가없으면 빈응답
+		if (latestBatchTime == null) {
+			return ExploreResponse.builder()
+				.contents(Collections.emptyList())
+				.nextBatchTime(null)
+				.isUpdatedContent(false)
+				.build();
+		}
+		List<Content> contents = contentRepository.findLatestBatchContents(
+			userLevel, category, latestBatchTime, PageRequest.of(0, 10)
+		);
+
+		return ExploreResponse.builder()
+			.contents(contents.stream().map(c -> ContentResponse.from(c, redisUtil.getHits(c.getContentId()))).toList())
+			.nextBatchTime(latestBatchTime.plusHours(6))
+			.isUpdatedContent(latestBatchTime.isAfter(LocalDateTime.now().minusMinutes(30)))
+			.build();
 	}
 
 	// 컨텐츠 상세 정보 조회 + 조회수
@@ -179,8 +188,7 @@ public class ContentService {
 		if (k.isEmpty())
 			return List.of();
 
-		ContentLevel level = userRepository.findLevelByUserId(userId)
-			.orElse(ContentLevel.BEGINNER);
+		ContentLevel level = getUserContentLevel(userId);
 
 		List<Content> searchResults = contentRepository.searchByTitle(
 			level, k, PageRequest.of(page, 10));
@@ -450,15 +458,6 @@ public class ContentService {
 		return readContentRepository.existsByUser_IdAndContent_ContentId(userId, contentId);
 	}
 
-	//포인트 사용 가능 여부 확인
-	private boolean isEnableUsePoint(User user) {
-		if (user.getPoint() >= PointExperienceProvisionInformation.NEED_READ_CONTENT_POINT) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	//Content 조회
 	private Content findContentById(Long contentId) {
 		return contentRepository.findById(contentId)
@@ -471,4 +470,16 @@ public class ContentService {
 			.orElseThrow(() -> new NotFoundException(ErrorMessage.READ_RECORD_NOT_FOUND));
 	}
 
+	//객체 타입 일치
+	private ContentLevel getUserContentLevel(Long userId) {
+		return userRepository.findLevelByUserId(userId)
+			.map(obj -> {
+				try {
+					return ContentLevel.valueOf(obj.toString());
+				} catch (Exception e) {
+					return ContentLevel.BEGINNER; // 매핑 실패 시 기본값
+				}
+			})
+			.orElse(ContentLevel.BEGINNER);
+	}
 }

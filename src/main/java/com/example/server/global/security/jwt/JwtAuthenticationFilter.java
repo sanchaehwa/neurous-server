@@ -11,6 +11,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.server.domain.user.entity.User;
 import com.example.server.domain.user.repository.UserRepository;
+import com.example.server.global.security.principal.UserPrincipal;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -37,7 +38,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		try {
 			authenticateRequest(request);
 		} catch (Exception e) {
-			log.error("사용자 인증 정보를 SecurityContext에 설정할 수 없습니다.", e);
+			log.error("JWT 인증 실패", e);
+			SecurityContextHolder.clearContext();
+			throw e;
 		}
 
 		filterChain.doFilter(request, response);
@@ -46,19 +49,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private void authenticateRequest(HttpServletRequest request) {
 		String token = extractTokenFromRequest(request);
 
-		if (isTokenAbsent(token)) {
+		if (token == null) {
+			log.debug("[JWT] Authorization 헤더 없음");
+			return;
+		}
+
+		if (!jwtTokenProvider.validateToken(token)) {
+			log.warn("[JWT] 토큰 검증 실패");
 			return;
 		}
 
 		User user = getUserFromToken(token);
 
-		if (isUserAbsent(user)) {
+		if (user == null) {
+			log.warn("[JWT] 토큰은 유효하지만 사용자 없음");
 			return;
 		}
 
+		log.debug("[JWT] 인증 성공 userId={}", user.getId());
 		setAuthentication(user);
 	}
-
+	
 	private String extractTokenFromRequest(HttpServletRequest request) {
 		String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
 
@@ -99,8 +110,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	private void setAuthentication(User user) {
+		// User 엔티티를 UserPrincipal로 변환하여 저장
+		UserPrincipal principal = UserPrincipal.from(user); // UserPrincipal에 static factory 메서드가 있다고 가정
+
 		UsernamePasswordAuthenticationToken authentication =
-			new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
+			new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}

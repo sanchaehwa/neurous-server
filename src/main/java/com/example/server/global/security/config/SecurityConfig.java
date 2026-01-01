@@ -38,7 +38,6 @@ public class SecurityConfig {
 			)
 			.exceptionHandling(exception -> exception
 				.authenticationEntryPoint((request, response, authException) -> {
-					// 인증되지 않은 사용자가 @AuthenticatedApi 접근 시 401 반환
 					response.sendError(401, "Unauthorized");
 				})
 			)
@@ -52,9 +51,15 @@ public class SecurityConfig {
 					"/swagger-resources/**",
 					"/api/test/**"
 				).permitAll()
-				.anyRequest().permitAll()
+				.anyRequest().authenticated() // 나머지 요청은 인증 필요
 			)
+			// JWT 필터 추가
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+			// OAuth2 로그인 설정 추가
+			.oauth2Login(oauth2 -> oauth2
+				.defaultSuccessUrl("/login-success") // 로그인 성공 후 리디렉션
+				.failureUrl("/login-failure")       // 실패 시
+			)
 			.build();
 	}
 

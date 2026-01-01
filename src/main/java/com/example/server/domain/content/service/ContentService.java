@@ -140,7 +140,6 @@ public class ContentService {
 	}
 
 	// 읽은 글 상세
-
 	public ReadContentDetailResponse getReadContentDetail(Long userId, Long contentId) {
 
 		ContentDetailResponse contentDetail = getContentDetailWithCount(userId, contentId);
@@ -196,7 +195,6 @@ public class ContentService {
 	}
 
 	//최근 검색어 저장 로직
-
 	private void saveRecentSearch(Long userId, String keyword) {
 
 		redisUtil.zAdd(RedisKey.RECENT_SEARCH, userId, keyword, (double)System.currentTimeMillis());
@@ -204,7 +202,6 @@ public class ContentService {
 	}
 
 	//최근 검색어 목록 조회 (DTO 변환 포함)
-
 	public List<RecentSearchResponse> getRecentSearches(Long userId) {
 		// 3줄 이내 노출을 위한 상위 10개 조회 및 DTO 변환
 		return redisUtil.zRevRange(RedisKey.RECENT_SEARCH, userId, 0, 9).stream()
@@ -213,7 +210,6 @@ public class ContentService {
 	}
 
 	//컨텐츠 읽기 권한 확인
-
 	public ContentAccessResponse checkContentReadAccess(Long userId, Long contentId) {
 		User user = findUserById(userId);
 		int todayReadCount = user.getCountReadContent();
@@ -249,7 +245,6 @@ public class ContentService {
 	}
 
 	// 콘텐츠 다 읽고 나갈때 (체류 시간) * 프론트 에서 값을 넘겨주는 형식 - 완독 하면 포인트 주는 로직
-
 	@Transactional
 	public ReadStatusResponse updateReadStatus(Long userId, Long contentId,
 		UpdateReadStatusRequest updateReadStatusRequest) {

@@ -5,7 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.example.server.domain.quiz.entity.Quiz;
+import com.example.server.domain.quiz.dto.response.QuizQuestionResponse;
+import com.example.server.global.exception.dto.ErrorResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,20 +22,29 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 @ApiResponse(
 	responseCode = "200",
 	description = "퀴즈를 성공적으로 가져왔습니다",
-	content = @Content(schema = @Schema(implementation = Quiz.class)
+	content = @Content(schema = @Schema(implementation = QuizQuestionResponse.class)
 	)
 )
 @ApiResponse(
 	responseCode = "401",
-	description = "인증 실패/세션 만료"
+	description = "인증 실패/세션 만료",
+	content = @Content(
+		schema = @Schema(implementation = ErrorResponse.class)
+	)
 )
 @ApiResponse(
 	responseCode = "404",
-	description = "해당 컨텐츠에 난이도별 퀴즈가 없음"
+	description = "해당 컨텐츠에 난이도별 퀴즈가 없습니다",
+	content = @Content(
+		schema = @Schema(implementation = ErrorResponse.class)
+	)
 )
 @ApiResponse(
 	responseCode = "500",
-	description = "서버 내부 오류"
+	description = "서버 내부 오류",
+	content = @Content(
+		schema = @Schema(implementation = ErrorResponse.class)
+	)
 )
 public @interface GetQuizDocs {
 }

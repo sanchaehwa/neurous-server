@@ -26,7 +26,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 )
 @ApiResponse(
 	responseCode = "404",
-	description = "읽기 기록 없음",
+	description = "컨텐츠 읽은 기록이 없습니다",
+	content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+)
+@ApiResponse(
+	responseCode = "404",
+	description = "유저를 찾을 수없습니다",
 	content = @Content(schema = @Schema(implementation = ErrorResponse.class))
 )
 public @interface UpdateReadStatusDocs {

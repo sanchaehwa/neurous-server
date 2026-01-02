@@ -1,7 +1,6 @@
 package com.example.server.domain.auth.service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,27 +53,34 @@ public class AuthService {
 		saveRefreshToken(user, refreshToken);
 
 		UserInfo userInfo = UserInfo.from(user);
+
 		boolean isSignUpComplete = user.isSignUpComplete();
+
+		user.updateLastLoginAt(LocalDateTime.now());
 
 		return LoginResponse.of(accessToken, refreshToken, userInfo, isSignUpComplete);
 	}
 
 	@Transactional
 	public RefreshResponse refresh(String refreshTokenValue) {
+
+		//가짜 토큰 판별 * 걸러내기
+		if (!jwtTokenProvider.validateToken(refreshTokenValue)) {
+			throw new NeurousException(ErrorMessage.INVALID_TOKEN);
+		}
+
+		// DB 토큰 존재 여부 확인
 		TokenManager refreshToken = findRefreshToken(refreshTokenValue);
+
+		//비즈니스 로직 만료 야부 확인
 		validateRefreshToken(refreshToken);
 
 		User user = refreshToken.getUser();
-
 		String newAccessToken = jwtTokenProvider.generateToken(String.valueOf(user.getId()));
 
 		if (isRefreshTokenExpired(refreshToken)) {
 			String newRefreshToken = jwtTokenProvider.generateRefreshToken(String.valueOf(user.getId()));
-
 			updateRefreshToken(refreshToken, newRefreshToken);
-			log.info("Refresh Token 갱신: userId={}, remainingDays={}",
-				user.getId(), getRemainingDay(refreshToken));
-
 			return RefreshResponse.of(newAccessToken, newRefreshToken);
 		}
 
@@ -91,22 +97,12 @@ public class AuthService {
 	}
 
 	private User findOrCreateUser(OAuthProvider provider, OAuthUserInfo oauthUserInfo) {
-		//기존 사용자 조회
-		Optional<User> existingUser = userRepository
-			.findByProviderAndProviderId(provider, oauthUserInfo.getProviderId());
-
-		if (existingUser.isEmpty()) {
-			return createUser(provider, oauthUserInfo);
-		}
-
-		User user = existingUser.get();
-
-		if (user.isDeleted()) {
-			String name = oauthUserInfo.getName();
-			//todo: 탈퇴 유저 복구 처리
-		}
-
-		return user;
+		return userRepository.findByProviderAndProviderId(provider, oauthUserInfo.getProviderId())
+			.map(user -> {
+				user.updateSocialInfo(oauthUserInfo.getName(), oauthUserInfo.getEmail());
+				return user;
+			})
+			.orElseGet(() -> createUser(provider, oauthUserInfo));
 	}
 
 	//유저 생성 (*추가정보 제외)

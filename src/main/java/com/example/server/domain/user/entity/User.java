@@ -91,8 +91,9 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private Level level = Level.BEGINNER; //기본값 : 초급 (컨텐츠 반영 레벨)
 
+	@Builder.Default
 	@Column(nullable = false, name = "sign_up_complete", columnDefinition = "TINYINT(1)")
-	private boolean signUpComplete; //회원가입 이후 추가 정보까지 입력 여부
+	private boolean signUpComplete = false; //회원가입 이후 추가 정보까지 입력 여부
 
 	@Builder.Default
 	@Column(nullable = false, name = "notification_status", columnDefinition = "TINYINT(1)")
@@ -137,12 +138,24 @@ public class User extends BaseTimeEntity {
 			.provider(provider)
 			.providerId(oauthUserInfo.getProviderId())
 			.email(oauthUserInfo.getEmail())
-			// 다른 필드들은 @Builder.Default에 의해 자동으로 기본값이 들어감
 			.build();
 	}
 
+	public void updateSocialInfo(String name, String email) {
+		this.name = name;
+		this.email = email;
+	}
+
+	public void updateLastLoginAt(LocalDateTime lastLoginAt) {
+		this.lastLoginAt = lastLoginAt;
+	}
+
 	public boolean isSignUpComplete() {
-		return !signUpComplete;
+		return signUpComplete;
+	}
+
+	public void completeSignUp() {
+		this.signUpComplete = true;
 	}
 
 	public void updateInterests(List<UserField> fields) {

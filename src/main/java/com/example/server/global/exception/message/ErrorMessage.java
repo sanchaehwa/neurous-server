@@ -37,7 +37,7 @@ public enum ErrorMessage {
 	USER_INVALID_INTEREST_COUNT(400, "USER3002", "관심분야는 3가지만 선택할 수 있습니다."),
 	USER_DUPLICATED_INTEREST(400, "USER3003", "중복된 관심분야 항목이 있습니다"),
 	NOT_FOUND_USER_INTEREST(404, "USER3004", "등록된 관심분야가 없습니다"),
-	ALEADY_LEVEL_CHANGE(400, "USER3004", "이미 난이도를 변경했습니다"),
+	ALREADY_LEVEL_CHANGE(400, "USER3004", "이미 난이도를 변경했습니다"),
 
 	//컨텐츠 관련
 	NOT_FOUND_LEVEL_DESCRIPTION(404, "CNT4001", "선택한 레벨에 대한 정보가 없습니다"),

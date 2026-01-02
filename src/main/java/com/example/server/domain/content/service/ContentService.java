@@ -415,7 +415,7 @@ public class ContentService {
 
 		//중복 클릭 방지
 		if (baseTime.getBaseTime().isAfter(LocalDateTime.now().minusSeconds(5))) {
-			throw new BadRequestException(ErrorMessage.ALEADY_LEVEL_CHANGE);
+			throw new BadRequestException(ErrorMessage.ALREADY_LEVEL_CHANGE);
 		}
 
 		//레벨 변경

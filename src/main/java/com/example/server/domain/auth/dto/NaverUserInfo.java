@@ -9,6 +9,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class NaverUserInfo implements OAuthUserInfo {
 
+	@JsonProperty("resultcode")
+	private String resultCode;
+
+	@JsonProperty("message")
+	private String message;
+
 	@JsonProperty("response")
 	private NaverAccount naverAccount;
 
@@ -17,7 +23,12 @@ public class NaverUserInfo implements OAuthUserInfo {
 	public static class NaverAccount {
 		private String id;
 		private String name;
+		private String nickname;
 		private String email;
+	}
+
+	public boolean isSuccess() {
+		return "00".equals(resultCode);
 	}
 
 	@Override
@@ -28,8 +39,15 @@ public class NaverUserInfo implements OAuthUserInfo {
 
 	@Override
 	public String getName() {
-		// null이면 "Unknown" 반환
-		return naverAccount != null && naverAccount.getName() != null ? naverAccount.getName() : "Unknown";
+		if (naverAccount == null)
+			return generateFallbackName();
+
+		if (hasValue(naverAccount.getNickname()))
+			return naverAccount.getNickname();
+
+		if (hasValue(naverAccount.getName()))
+			return naverAccount.getName();
+		return generateFallbackName();
 	}
 
 	@Override

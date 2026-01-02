@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.example.server.domain.auth.dto.KakaoUserInfo;
 import com.example.server.domain.auth.dto.OAuthUserInfo;
+import com.example.server.domain.auth.enums.OAuthProvider;
 import com.example.server.global.exception.message.ErrorMessage;
 import com.example.server.global.exception.model.NeurousException;
 import com.example.server.global.security.oauth.OAuthProperties;
@@ -25,6 +26,11 @@ public class KakaoApiClient implements OAuthClient {
 	private final OAuthProperties oAuthProperties;
 
 	@Override
+	public OAuthProvider getProvider() {
+		return OAuthProvider.KAKAO;
+	}
+
+	@Override
 	public OAuthUserInfo getUserInfo(String accessToken) {
 		try {
 			return callKakaoUserInfoApi(accessToken);
@@ -39,19 +45,23 @@ public class KakaoApiClient implements OAuthClient {
 		HttpHeaders headers = createAuthHeaders(accessToken);
 		HttpEntity<Void> request = new HttpEntity<>(headers);
 
-		ResponseEntity<KakaoUserInfo> response = restTemplate.exchange(
-			url,
-			HttpMethod.GET,
-			request,
-			KakaoUserInfo.class
-		);
+		ResponseEntity<KakaoUserInfo> response = restTemplate.exchange(url, HttpMethod.GET, request,
+			KakaoUserInfo.class);
 
-		return response.getBody();
+		KakaoUserInfo body = response.getBody();
+		if (body == null) {
+			log.error("카카오 API 응답 바디가 비어있습니다.");
+			throw new NeurousException(ErrorMessage.OAUTH2_KAKAO_API_ERROR);
+		}
+		return body;
 	}
 
 	private HttpHeaders createAuthHeaders(String accessToken) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", "Bearer " + accessToken);
+
+		headers.set("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
 		return headers;
 	}
 }

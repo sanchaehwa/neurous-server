@@ -17,13 +17,16 @@ public class GoogleUserInfo implements OAuthUserInfo {
 	}
 
 	@Override
-	public String getName() {
-		return name;
+	public String getEmail() {
+		return email;
 	}
 
 	@Override
-	public String getEmail() {
-		return email;
+	public String getName() {
+		if (hasValue(this.name)) {
+			return this.name;
+		}
+		return generateFallbackName();
 	}
 
 }

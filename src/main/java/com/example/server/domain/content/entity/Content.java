@@ -55,7 +55,7 @@ public class Content extends BaseTimeEntity {
 
 	@Column(name = "batch_time", nullable = false)
 	private LocalDateTime batchTime;
-
+	
 	@Builder.Default
 	@Column(name = "hits", nullable = false, columnDefinition = "INT DEFAULT 0")
 	private int hits = 0;

@@ -128,14 +128,16 @@ public class ContentController implements ContentControllerDocs {
 	public SuccessResponse<ReadStatusResponse> updateReadStatus(
 		@CurrentUserId Long userId,
 		@PathVariable Long contentId,
-		@Valid @RequestBody UpdateReadStatusRequest request
+		@Valid @RequestBody UpdateReadStatusRequest request,
+		@RequestParam(defaultValue = "false") boolean isFromMission
 	) {
 		return SuccessResponse.of(
 			SuccessMessage.UPDATE_READ_STATUS_SUCCESS,
 			contentService.updateReadStatus(
 				userId,
 				contentId,
-				request
+				request,
+				isFromMission
 			)
 		);
 	}

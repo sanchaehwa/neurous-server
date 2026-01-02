@@ -17,8 +17,11 @@ public enum RedisKey {
 	CHARACTER_LIST("metadata:character:all", Duration.ofDays(1)),
 	CHARACTER_ITEM("metadata:character:", Duration.ofDays(1)),
 	REWARD_DATA_LIST("metadata:reward:data:all", Duration.ofDays(1)),
-	REWARD_INFO_LIST("metadata:reward:info:all", Duration.ofDays(1));
-	
+	REWARD_INFO_LIST("metadata:reward:info:all", Duration.ofDays(1)),
+
+	//미션 개수
+	DAILY_MISSION("mission:daily:", null);
+
 	private final String prefix;
 	private final Duration ttl;
 

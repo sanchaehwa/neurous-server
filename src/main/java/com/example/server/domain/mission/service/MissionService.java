@@ -20,6 +20,7 @@ import com.example.server.domain.user.entity.vo.UserInterest;
 import com.example.server.domain.user.repository.UserRepository;
 import com.example.server.global.exception.message.ErrorMessage;
 import com.example.server.global.exception.model.NotFoundException;
+import com.example.server.global.redis.RedisUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,16 +33,23 @@ public class MissionService {
 	private final ContentRepository contentRepository;
 	private final MissionRepository missionRepository;
 
+	private final RedisUtil redisUtil;
+
 	public MissionResponse loadMissionPage(Long userId) {
 		User user = findByUserId(userId);
 
-		// 1. 유저 맞춤 콘텐츠 5개 추출
+		// 유저 맞춤 콘텐츠 5개 추출
 		List<MissionContentResponse> contents = findMissionContent(userId);
 
-		// 2. 미션 진행 상태 조회 (기존에 작성한 MissionProgressResponse 활용)
+		// 미션 진행 상태 조회 (기존에 작성한 MissionProgressResponse 활용)
 		List<MissionProgressResponse> progresses = missionRepository.findAllByUser(user)
 			.stream()
-			.map(MissionProgressResponse::from)
+			.map(mission -> {
+				int currentCount = redisUtil.getMissionCount(userId, mission.getMissionType());
+
+				// Redis 데이터를 기반으로 응답 객체 생성
+				return MissionProgressResponse.from(mission, currentCount);
+			})
 			.toList();
 
 		return MissionResponse.of(contents, progresses);

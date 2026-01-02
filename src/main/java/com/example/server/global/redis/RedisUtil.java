@@ -1,6 +1,8 @@
 package com.example.server.global.redis;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.Set;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+
+import com.example.server.domain.mission.entity.vo.MissionType;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -97,5 +101,38 @@ public class RedisUtil {
 		} catch (Exception e) {
 			throw new RuntimeException("Redis 조회 실패", e);
 		}
+	}
+
+	//미션 카운팅 관련
+
+	public Integer incrementMissionCount(Long userId, MissionType missionType) {
+		String key = RedisKey.DAILY_MISSION.getPrefix() + userId + ":" + missionType.name();
+
+		Long updatedCount = redisTemplate.opsForValue().increment(key);
+
+		if (updatedCount == null)
+			return 0;
+
+		if (updatedCount == 1) {
+			redisTemplate.expire(key, getDurationUntilMidnight());
+		}
+
+		if (updatedCount > missionType.getDefaultGoalCount()) {
+			return updatedCount.intValue();
+		}
+
+		return updatedCount.intValue();
+	}
+
+	public int getMissionCount(Long userId, MissionType missionType) {
+		String key = RedisKey.DAILY_MISSION.getPrefix() + userId + ":" + missionType.name();
+		String val = redisTemplate.opsForValue().get(key);
+		return (val != null) ? Integer.parseInt(val) : 0;
+	}
+
+	private Duration getDurationUntilMidnight() {
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime midnight = now.toLocalDate().atTime(LocalTime.MAX);
+		return Duration.between(now, midnight);
 	}
 }

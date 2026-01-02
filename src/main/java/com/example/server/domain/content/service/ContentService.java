@@ -34,6 +34,7 @@ import com.example.server.domain.content.repository.ReadContentRepository;
 import com.example.server.domain.content.service.command.DifficultyRecommendConfig;
 import com.example.server.domain.content.service.command.ReadableContentLimitsInfo;
 import com.example.server.domain.content.service.command.RequestRecommendContentMessage;
+import com.example.server.domain.mission.entity.vo.MissionType;
 import com.example.server.domain.quiz.dto.response.QuizChoiceResponse;
 import com.example.server.domain.quiz.dto.response.ReadContentDetailResponse;
 import com.example.server.domain.quiz.dto.response.SolvedQuizResponse;
@@ -265,7 +266,7 @@ public class ContentService {
 	// 콘텐츠 다 읽고 나갈때 (체류 시간) * 프론트 에서 값을 넘겨주는 형식 - 완독 하면 포인트 주는 로직
 	@Transactional
 	public ReadStatusResponse updateReadStatus(Long userId, Long contentId,
-		UpdateReadStatusRequest updateReadStatusRequest) {
+		UpdateReadStatusRequest updateReadStatusRequest, boolean isFromMission) {
 
 		ReadContent readContent = findReadContentById(userId, contentId);
 		User user = findUserById(userId);
@@ -279,7 +280,7 @@ public class ContentService {
 		if (readContent.isCompleted() && updateReadStatusRequest.isCompleted()) {
 			Level previousLevel = user.getLevel();
 
-			rewardReadContent(user);
+			rewardReadContent(user, isFromMission);
 
 			boolean isLevelUp = !previousLevel.equals(user.getLevel());
 			LevelUpInfo levelUpInfo = isLevelUp ? LevelUpInfo.of(
@@ -303,13 +304,20 @@ public class ContentService {
 
 	//완독 여부에 따른 포인트 지급 및 지급 여부 기록
 	@Transactional
-	public void rewardReadContent(User user) {
+	public void rewardReadContent(User user, boolean isFromMission) {
 		int rewardReadContentExp = PointExperienceProvisionInformation.COMPLETE_READ_CONTENT_EXP;
 
 		user.addPointAndExp(0, rewardReadContentExp);
 
 		RewardHistory rewardHistory = RewardHistory.create(user, 0, rewardReadContentExp,
 			HistoryMessage.READ_THE_CONTENT);
+
+		redisUtil.incrementMissionCount(user.getId(), MissionType.EXPLORE_READ);
+
+		//미션 탭에서 들어온 경우 -> 홈 카운트 증가
+		if (isFromMission) {
+			redisUtil.incrementMissionCount(user.getId(), MissionType.HOME_READ);
+		}
 
 		rewardHistoryRepository.save(rewardHistory);
 	}

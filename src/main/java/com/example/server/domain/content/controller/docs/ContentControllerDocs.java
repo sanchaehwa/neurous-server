@@ -73,7 +73,8 @@ public interface ContentControllerDocs {
 	SuccessResponse<ReadStatusResponse> updateReadStatus(
 		@CurrentUserId Long userId,
 		@PathVariable Long contentId,
-		@Valid @RequestBody UpdateReadStatusRequest request
+		@Valid @RequestBody UpdateReadStatusRequest request,
+		@RequestParam(defaultValue = "false") boolean isFromMission
 	);
 
 	@PurchaseContentByPointDocs

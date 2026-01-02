@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.server.domain.content.entity.ReadContent;
 import com.example.server.domain.content.entity.vo.ContentLevel;
 import com.example.server.domain.content.repository.ReadContentRepository;
+import com.example.server.domain.mission.entity.vo.MissionType;
 import com.example.server.domain.quiz.dto.request.QuizSubmitRequest;
 import com.example.server.domain.quiz.dto.response.QuizChoiceResponse;
 import com.example.server.domain.quiz.dto.response.QuizQuestionResponse;
@@ -34,6 +35,7 @@ import com.example.server.global.exception.model.BadRequestException;
 import com.example.server.global.exception.model.ConflictException;
 import com.example.server.global.exception.model.NeurousException;
 import com.example.server.global.exception.model.NotFoundException;
+import com.example.server.global.redis.RedisUtil;
 import com.example.server.global.storage.StorageConfig;
 
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,8 @@ public class QuizService {
 	private final ReadContentRepository readContentRepository;
 	private final RewardHistoryRepository rewardHistoryRepository;
 	private final StorageConfig storageConfig;
+
+	private final RedisUtil redisUtil;
 
 	/**
 	 * 퀴즈 문제지 출제
@@ -103,6 +107,8 @@ public class QuizService {
 		quizSolveRepository.save(QuizSolve.of(
 			user, readContent, quiz.getQuizId(), request.getSelectedNo(), isAnswerCorrect, LocalDateTime.now()
 		));
+
+		redisUtil.incrementMissionCount(userId, MissionType.QUIZ_SOLVE);
 
 		QuizChoice correct = quizChoiceRepository.findByQuiz_QuizIdAndIsCorrectTrue(request.getQuizId())
 			.orElseThrow(() -> new NeurousException(ErrorMessage.QUIZ_CORRECT_ANSWER_NOT_CONFIGURED));

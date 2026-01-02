@@ -1,5 +1,6 @@
 package com.example.server.global.redis;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RedisUtil {
 
 	private final RedisTemplate<String, String> redisTemplate;
+	private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
 	//Redis 초기화
 	@PostConstruct
@@ -72,5 +74,28 @@ public class RedisUtil {
 	// 개별 삭제
 	public void zRem(RedisKey redisKey, Long userId, String value) {
 		redisTemplate.opsForZSet().remove(redisKey.getFullKey(userId), value);
+	}
+
+	//메타데이터 캐싱 관련
+	// 객체를 JSON으로 바꿔 저장하는 메서드
+	public void set(String key, Object value, Duration ttl) {
+		try {
+			String json = objectMapper.writeValueAsString(value); // 객체 -> JSON 문자열
+			redisTemplate.opsForValue().set(key, json, ttl);
+		} catch (Exception e) {
+			throw new RuntimeException("Redis 저장 실패", e);
+		}
+	}
+
+	// JSON을 다시 객체로 바꿔 가져오는 메서드
+	public <T> T get(String key, Class<T> clazz) {
+		String json = redisTemplate.opsForValue().get(key);
+		if (json == null)
+			return null;
+		try {
+			return objectMapper.readValue(json, clazz); // JSON 문자열 -> 객체
+		} catch (Exception e) {
+			throw new RuntimeException("Redis 조회 실패", e);
+		}
 	}
 }

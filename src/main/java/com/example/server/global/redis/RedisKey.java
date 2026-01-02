@@ -11,8 +11,14 @@ public enum RedisKey {
 	CONTENT_HITS("contents:hits", Duration.ofDays(1)),
 
 	//최근 검색어
-	RECENT_SEARCH("recent_search:", Duration.ofDays(30));
+	RECENT_SEARCH("recent_search:", Duration.ofDays(30)),
 
+	//metadata 캐싱 설정
+	CHARACTER_LIST("metadata:character:all", Duration.ofDays(1)),
+	CHARACTER_ITEM("metadata:character:", Duration.ofDays(1)),
+	REWARD_DATA_LIST("metadata:reward:data:all", Duration.ofDays(1)),
+	REWARD_INFO_LIST("metadata:reward:info:all", Duration.ofDays(1));
+	
 	private final String prefix;
 	private final Duration ttl;
 

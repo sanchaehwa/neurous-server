@@ -66,7 +66,7 @@ public class Mission extends BaseTimeEntity {
 			.targetGoal(targetGoal)
 			.currentProgress(0)
 			.isCompleted(false)
-			.isLockedMissionType(missionType != MissionType.SOLVE_QUIZ)
+			.isLockedMissionType(missionType != MissionType.QUIZ_SOLVE)
 			.build();
 	}
 

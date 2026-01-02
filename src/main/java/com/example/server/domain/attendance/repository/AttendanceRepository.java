@@ -1,7 +1,7 @@
 package com.example.server.domain.attendance.repository;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,6 +12,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	//오늘 출석 여부 확인
 	boolean existsByUserIdAndAttendanceDate(Long userId, LocalDate attendanceDate);
 
-	//출석 정보
-	Optional<Attendance> findByUserIdAndAttendanceDate(Long userId, LocalDate attendanceDate);
+	//일주일 출석 데이터
+	List<Attendance> findAllByUserIdAndAttendanceDateBetween(
+		Long userId, LocalDate startDate, LocalDate endDate
+	);
 }

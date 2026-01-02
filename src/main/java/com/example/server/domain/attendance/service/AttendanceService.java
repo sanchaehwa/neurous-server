@@ -1,10 +1,17 @@
 package com.example.server.domain.attendance.service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.server.domain.attendance.dto.WeeklyAttendanceResponse;
 import com.example.server.domain.attendance.entity.Attendance;
 import com.example.server.domain.attendance.repository.AttendanceRepository;
 import com.example.server.domain.reward.entity.RewardHistory;
@@ -45,8 +52,7 @@ public class AttendanceService {
 
 		attendanceRepository.save(Attendance.create(user, attendanceTime.toLocalDate()));
 
-		user.addPointAndExp(TODAY_ATTENDANCE_REWARD_POINT, TODAY_ATTENDANCE_REWARD_EXP);
-		user.updateAttendanceForOneWeek(attendanceTime);
+		rewardAboutTodayAttendance(user, attendanceTime);
 
 		RewardHistory rewardHistory = RewardHistory.create(
 			user,
@@ -59,14 +65,30 @@ public class AttendanceService {
 
 	// 오늘 출석 리워드 + 포인트 제공
 	@Transactional
-	public void rewardAboutTodayAttendance(LocalDateTime attendanceDate, Long userId) {
-
-		User user = findUserById(userId);
+	public void rewardAboutTodayAttendance(User user, LocalDateTime attendanceDate) {
 
 		user.addPointAndExp(TODAY_ATTENDANCE_REWARD_POINT, TODAY_ATTENDANCE_REWARD_EXP);
 
 		//연속 출석 수 증가
 		user.updateAttendanceForOneWeek(attendanceDate);
+	}
+
+	//주간 사용자 출석 기록
+	public WeeklyAttendanceResponse getWeeklyAttendanceStatus(Long userId) {
+
+		LocalDate today = LocalDate.now();
+		LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		LocalDate endOfWeek = startOfWeek.plusDays(6);
+
+		List<Attendance> attendanceList = attendanceRepository.findAllByUserIdAndAttendanceDateBetween(
+			userId, startOfWeek, endOfWeek
+		);
+
+		Set<LocalDate> attendedDates = attendanceList.stream()
+			.map(Attendance::getAttendanceDate)
+			.collect(Collectors.toSet());
+
+		return WeeklyAttendanceResponse.of(attendedDates, startOfWeek);
 	}
 
 	public User findUserById(Long userId) {

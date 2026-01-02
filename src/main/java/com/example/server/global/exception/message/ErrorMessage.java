@@ -23,6 +23,7 @@ public enum ErrorMessage {
 	UNSUPPORTED_LOGIN_METHOD(400, "AUTH1005", "지원하지않는 로그인 방식입니다"),
 	TOKEN_DECODE_FAILED(400, "AUTH1006", "토큰 디코딩에 실패했습니다"),
 	TOKEN_PARSE_FAILED(400, "AUTH1006", "토큰 파싱에 실패했습니다"),
+	NEED_CERTIFICATION(400, "AUTH1008", "인증이 필요합니다"),
 	//JWT
 	INVALID_JWT_STRUCTURE(400, "AUTH1007", "JWT 구조가 올바르지 않습니다"),
 	// OAuth2 관련

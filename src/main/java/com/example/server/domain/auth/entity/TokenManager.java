@@ -50,6 +50,7 @@ public class TokenManager extends BaseTimeEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
+	@Column(unique = true)
 	private User user;
 
 	public static TokenManager of(User user, String tokenValue, LocalDateTime expiredAt) {
@@ -69,6 +70,15 @@ public class TokenManager extends BaseTimeEntity {
 	public void updateToken(String newToken, LocalDateTime expireAt) {
 		this.tokenValue = newToken;
 		this.expiredAt = expireAt;
+	}
+
+	public boolean isInvalid() {
+		return LocalDateTime.now().isAfter(expiredAt) || revoked;
+	}
+
+	//  로그아웃시 사용
+	public void revoke() {
+		this.revoked = true;
 	}
 
 }

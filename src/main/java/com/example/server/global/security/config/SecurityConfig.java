@@ -14,6 +14,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import com.example.server.global.exception.dto.ErrorResponse;
+import com.example.server.global.exception.message.ErrorMessage;
 import com.example.server.global.security.jwt.JwtAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
@@ -38,7 +40,12 @@ public class SecurityConfig {
 			)
 			.exceptionHandling(exception -> exception
 				.authenticationEntryPoint((request, response, authException) -> {
-					response.sendError(401, "Unauthorized");
+					ErrorResponse errorResponse = ErrorResponse.of(ErrorMessage.NEED_CERTIFICATION);
+					response.setContentType("application/json;charset=UTF-8");
+					response.setStatus(401);
+					String json = new com.fasterxml.jackson.databind.ObjectMapper()
+						.writeValueAsString(errorResponse);
+					response.getWriter().write(json);
 				})
 			)
 			.authorizeHttpRequests(auth -> auth
@@ -55,11 +62,6 @@ public class SecurityConfig {
 			)
 			// JWT 필터 추가
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-			// OAuth2 로그인 설정 추가
-			.oauth2Login(oauth2 -> oauth2
-				.defaultSuccessUrl("/login-success") // 로그인 성공 후 리디렉션
-				.failureUrl("/login-failure")       // 실패 시
-			)
 			.build();
 	}
 

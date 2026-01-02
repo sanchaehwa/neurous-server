@@ -47,8 +47,8 @@ public class AuthService {
 
 		User user = findOrCreateUser(provider, oauthUserInfo);
 
-		String accessToken = jwtTokenProvider.generateToken(String.valueOf(user.getId()));
-		String refreshToken = jwtTokenProvider.generateRefreshToken(String.valueOf(user.getId()));
+		String accessToken = jwtTokenProvider.generateToken(String.valueOf(user.getId()), user.getEmail());
+		String refreshToken = jwtTokenProvider.generateRefreshToken(String.valueOf(user.getId()), user.getEmail());
 
 		saveRefreshToken(user, refreshToken);
 
@@ -76,10 +76,12 @@ public class AuthService {
 		validateRefreshToken(refreshToken);
 
 		User user = refreshToken.getUser();
-		String newAccessToken = jwtTokenProvider.generateToken(String.valueOf(user.getId()));
+
+		String newAccessToken = jwtTokenProvider.generateToken(String.valueOf(user.getId()), user.getEmail());
 
 		if (isRefreshTokenExpired(refreshToken)) {
-			String newRefreshToken = jwtTokenProvider.generateRefreshToken(String.valueOf(user.getId()));
+			String newRefreshToken = jwtTokenProvider.generateRefreshToken(String.valueOf(user.getId()),
+				user.getEmail());
 			updateRefreshToken(refreshToken, newRefreshToken);
 			return RefreshResponse.of(newAccessToken, newRefreshToken);
 		}
@@ -94,6 +96,7 @@ public class AuthService {
 
 		refreshTokenRepository.findByUser(user)
 			.ifPresent(refreshTokenRepository::delete);
+
 	}
 
 	private User findOrCreateUser(OAuthProvider provider, OAuthUserInfo oauthUserInfo) {
@@ -141,9 +144,11 @@ public class AuthService {
 
 	//토큰 유효성 검증
 	private void validateRefreshToken(TokenManager refreshToken) {
-		if (refreshToken.isExpired()) {
+		if (refreshToken.isInvalid()) {
 			refreshTokenRepository.delete(refreshToken);
-			log.info("만료된 Refresh Token 삭제: token={}", refreshToken.getId());
+			log.info("유효하지 않은 Refresh Token 삭제: id={}, 사유={}",
+				refreshToken.getId(),
+				refreshToken.isExpired() ? "기간만료" : "폐기됨");
 
 			throw new NeurousException(ErrorMessage.EXPIRED_TOKEN);
 		}

@@ -1,6 +1,6 @@
-package com.example.server.domain.mission.entity;
+package com.example.server.domain.reward.entity;
 
-import com.example.server.domain.mission.entity.vo.HistoryMessage;
+import com.example.server.domain.reward.entity.vo.HistoryMessage;
 import com.example.server.domain.user.entity.User;
 import com.example.server.global.domain.BaseTimeEntity;
 

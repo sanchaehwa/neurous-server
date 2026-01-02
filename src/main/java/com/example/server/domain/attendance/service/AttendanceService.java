@@ -7,10 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.server.domain.attendance.entity.Attendance;
 import com.example.server.domain.attendance.repository.AttendanceRepository;
-import com.example.server.domain.mission.entity.RewardHistory;
-import com.example.server.domain.mission.entity.vo.HistoryMessage;
-import com.example.server.domain.mission.repository.RewardHistoryRepository;
-import com.example.server.domain.mission.service.command.PointExperienceProvisionInformation;
+import com.example.server.domain.reward.entity.RewardHistory;
+import com.example.server.domain.reward.entity.vo.HistoryMessage;
+import com.example.server.domain.reward.repository.RewardHistoryRepository;
+import com.example.server.domain.reward.service.command.PointExperienceProvisionInformation;
 import com.example.server.domain.user.entity.User;
 import com.example.server.domain.user.repository.UserRepository;
 import com.example.server.global.exception.message.ErrorMessage;

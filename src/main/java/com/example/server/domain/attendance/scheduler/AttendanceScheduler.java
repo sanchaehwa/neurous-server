@@ -4,8 +4,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.server.domain.mission.repository.RewardHistoryRepository;
-import com.example.server.domain.mission.service.command.PointExperienceProvisionInformation;
+import com.example.server.domain.reward.repository.RewardHistoryRepository;
+import com.example.server.domain.reward.service.command.PointExperienceProvisionInformation;
 import com.example.server.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;

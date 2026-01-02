@@ -1,11 +1,11 @@
-package com.example.server.domain.mission.repository;
+package com.example.server.domain.reward.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.example.server.domain.mission.entity.RewardHistory;
+import com.example.server.domain.reward.entity.RewardHistory;
 
 public interface RewardHistoryRepository extends JpaRepository<RewardHistory, Long> {
 

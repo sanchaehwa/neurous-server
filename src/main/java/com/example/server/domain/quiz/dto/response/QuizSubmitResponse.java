@@ -1,7 +1,7 @@
 package com.example.server.domain.quiz.dto.response;
 
-import com.example.server.domain.mission.dto.response.LevelUpInfo;
-import com.example.server.domain.mission.dto.response.RewardResponse;
+import com.example.server.domain.reward.dto.response.LevelUpInfo;
+import com.example.server.domain.reward.dto.response.RewardResponse;
 
 import lombok.Builder;
 

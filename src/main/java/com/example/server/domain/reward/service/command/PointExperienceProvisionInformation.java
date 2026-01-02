@@ -1,4 +1,4 @@
-package com.example.server.domain.mission.service.command;
+package com.example.server.domain.reward.service.command;
 
 public final class PointExperienceProvisionInformation {
 

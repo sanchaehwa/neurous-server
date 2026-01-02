@@ -49,8 +49,7 @@ public class TokenManager extends BaseTimeEntity {
 	private Long tokenVersion = 0L;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", nullable = false)
-	@Column(unique = true)
+	@JoinColumn(name = "user_id", nullable = false, unique = true)
 	private User user;
 
 	public static TokenManager of(User user, String tokenValue, LocalDateTime expiredAt) {

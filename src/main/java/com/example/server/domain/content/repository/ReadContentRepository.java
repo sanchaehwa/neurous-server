@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 
 import com.example.server.domain.content.entity.Content;
 import com.example.server.domain.content.entity.ReadContent;
-import com.example.server.domain.user.entity.User;
 
 @Repository
 public interface ReadContentRepository extends JpaRepository<ReadContent, Long> {
@@ -43,7 +42,6 @@ public interface ReadContentRepository extends JpaRepository<ReadContent, Long> 
 	@Query("SELECT rc FROM ReadContent rc JOIN FETCH rc.user WHERE rc.readContentId = :id")
 	Optional<ReadContent> findByIdWithUser(@Param("id") Long id);
 
-	Long user(User user);
 }
 
 

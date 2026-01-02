@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.server.domain.attendance.service.AttendanceService;
 import com.example.server.domain.content.dto.request.UpdateReadStatusRequest;
 import com.example.server.domain.content.dto.response.ContentAccessResponse;
 import com.example.server.domain.content.dto.response.ContentDetailResponse;
@@ -30,7 +31,6 @@ import com.example.server.domain.content.repository.ContentDifficultyEvaluationR
 import com.example.server.domain.content.repository.ContentRepository;
 import com.example.server.domain.content.repository.DifficultyBasetimeRepository;
 import com.example.server.domain.content.repository.ReadContentRepository;
-import com.example.server.domain.content.repository.UserInterestRepository;
 import com.example.server.domain.content.service.command.DifficultyRecommendConfig;
 import com.example.server.domain.content.service.command.ReadableContentLimitsInfo;
 import com.example.server.domain.content.service.command.RequestRecommendContentMessage;
@@ -65,7 +65,6 @@ public class ContentService {
 
 	private final ContentRepository contentRepository;
 	private final UserRepository userRepository;
-	private final UserInterestRepository userInterestRepository;
 	private final ReadContentRepository readContentRepository;
 	private final ContentDifficultyEvaluationRepository contentDifficultyEvaluationRepository;
 	private final DifficultyBasetimeRepository difficultyBasetimeRepository;
@@ -76,11 +75,18 @@ public class ContentService {
 	private final RedisUtil redisUtil;
 	private final StorageConfig storageConfig;
 
+	private final AttendanceService attendanceService;
+
 	/**
 	 * 컨텐츠 조회 / 검색
 	 */
 	//<전체 탐색>
 	public Map<ContentCategory, ExploreResponse> getExplore(Long userId) {
+
+		LocalDateTime now = LocalDateTime.now();
+
+		attendanceService.providedAttendanceRewardToday(now, userId);
+
 		ContentLevel userLevel = getUserContentLevel(userId);
 		LocalDateTime latestBatchTime = contentRepository.findLatestBatchTime();
 

@@ -1,6 +1,9 @@
-package com.example.server.domain.user.entity;
+package com.example.server.domain.attendance.entity;
 
 import java.time.LocalDate;
+
+import com.example.server.domain.user.entity.User;
+import com.example.server.global.domain.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,11 +23,19 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "attendance")
+@Table(
+	name = "attendance",
+	uniqueConstraints = {
+		@UniqueConstraint(
+			name = "uk_user_date",
+			columnNames = {"user_id", "attendance_date"}
+		)
+	}
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class Attendance {
+public class Attendance extends BaseTimeEntity {
 
 	@Id
 	@Column(name = "attendance_id")
@@ -34,8 +46,13 @@ public class Attendance {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
-	//출석 * 날짜만 저장
 	@Column(name = "attendance_date", nullable = false)
 	private LocalDate attendanceDate;
 
+	public static Attendance create(User user, LocalDate attendanceDate) {
+		return Attendance.builder()
+			.user(user)
+			.attendanceDate(attendanceDate)
+			.build();
+	}
 }

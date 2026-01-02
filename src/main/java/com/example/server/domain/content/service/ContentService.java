@@ -44,6 +44,9 @@ import com.example.server.domain.quiz.repository.QuizChoiceRepository;
 import com.example.server.domain.quiz.repository.QuizRepository;
 import com.example.server.domain.quiz.repository.QuizSolveRepository;
 import com.example.server.domain.reward.dto.response.LevelUpInfo;
+import com.example.server.domain.reward.entity.RewardHistory;
+import com.example.server.domain.reward.entity.vo.HistoryMessage;
+import com.example.server.domain.reward.repository.RewardHistoryRepository;
 import com.example.server.domain.reward.service.command.PointExperienceProvisionInformation;
 import com.example.server.domain.user.entity.User;
 import com.example.server.domain.user.entity.vo.Level;
@@ -71,6 +74,8 @@ public class ContentService {
 	private final QuizSolveRepository quizSolveRepository;
 	private final QuizRepository quizRepository;
 	private final QuizChoiceRepository quizChoiceRepository;
+
+	private final RewardHistoryRepository rewardHistoryRepository;
 
 	private final RedisUtil redisUtil;
 	private final StorageConfig storageConfig;
@@ -244,7 +249,6 @@ public class ContentService {
 	}
 
 	//포인트 상태 파악 (부족 -> 광고 , 가능 -> 포인트 사용)
-
 	private ContentAccessResponse resolvePointOrAdResponse(User user) {
 		int currentUserPoint = user.getPoint();
 		int needPoint = PointExperienceProvisionInformation.NEED_READ_CONTENT_POINT;
@@ -263,9 +267,6 @@ public class ContentService {
 	public ReadStatusResponse updateReadStatus(Long userId, Long contentId,
 		UpdateReadStatusRequest updateReadStatusRequest) {
 
-		Long staySeconds = updateReadStatusRequest.staySeconds();
-		boolean isCompleted = updateReadStatusRequest.isCompleted();
-
 		ReadContent readContent = findReadContentById(userId, contentId);
 		User user = findUserById(userId);
 
@@ -273,51 +274,45 @@ public class ContentService {
 			return ReadStatusResponse.builder().isCompleted(true).build();
 		}
 
-		ContentLevel level = readContent.getContent().getContentLevel();
-		boolean isTimeSatisfied = false;
+		readContent.updateStatus(updateReadStatusRequest.staySeconds());
 
-		if (level == ContentLevel.BEGINNER && staySeconds >= 50)
-			isTimeSatisfied = true;
-		else if (level == ContentLevel.INTERMEDIATE && staySeconds >= 90)
-			isTimeSatisfied = true;
-		else if (level == ContentLevel.ADVANCED && staySeconds >= 190)
-			isTimeSatisfied = true;
-
-		if (isTimeSatisfied && isCompleted) {
+		if (readContent.isCompleted() && updateReadStatusRequest.isCompleted()) {
 			Level previousLevel = user.getLevel();
 
-			user.addPointAndExp(0, PointExperienceProvisionInformation.COMPLETE_READ_CONTENT_EXP);
+			rewardReadContent(user);
 
-			// 상태 업데이트
-			readContent.updateStatus(staySeconds);
-
-			// 레벨업 여부 판단
 			boolean isLevelUp = !previousLevel.equals(user.getLevel());
-			LevelUpInfo levelUpInfo = null;
-
-			if (isLevelUp) {
-				levelUpInfo = LevelUpInfo.of(
-					storageConfig.getProfileUrl(user.getProfileImgFileName()),
-					user.getCharacterLevel().toString(),
-					user.getCharacterLevel().getCharacterName()
-				);
-			}
+			LevelUpInfo levelUpInfo = isLevelUp ? LevelUpInfo.of(
+				storageConfig.getProfileUrl(user.getProfileImgFileName()),
+				user.getCharacterLevel().toString(),
+				user.getCharacterLevel().getCharacterName()
+			) : null;
 
 			return ReadStatusResponse.builder()
 				.isCompleted(true)
 				.isLevelUp(isLevelUp)
 				.levelUpInfo(levelUpInfo)
 				.build();
-
-		} else {
-			readContent.updateStatus(staySeconds);
-			return ReadStatusResponse.builder().isCompleted(false).isLevelUp(false).build();
 		}
+
+		return ReadStatusResponse.builder()
+			.isCompleted(false)
+			.isLevelUp(false)
+			.build();
 	}
 
-	/**
-	 * 포인트 지급 (광고 ) - 컨텐츠 결제
-	 */
+	//완독 여부에 따른 포인트 지급 및 지급 여부 기록
+	@Transactional
+	public void rewardReadContent(User user) {
+		int rewardReadContentExp = PointExperienceProvisionInformation.COMPLETE_READ_CONTENT_EXP;
+
+		user.addPointAndExp(0, rewardReadContentExp);
+
+		RewardHistory rewardHistory = RewardHistory.create(user, 0, rewardReadContentExp,
+			HistoryMessage.READ_THE_CONTENT);
+
+		rewardHistoryRepository.save(rewardHistory);
+	}
 
 	@Transactional
 	public void purchaseContentByPoint(Long userId, Long contentId) {
@@ -328,7 +323,14 @@ public class ContentService {
 	public void watchAdAndRewardUnLockContent(Long userId, Long contentId) {
 		User user = findUserById(userId);
 
-		user.addPointAndExp(PointExperienceProvisionInformation.WATCH_AD_REWARDS_POINT, 0);
+		int watchAdRewardsPoint = PointExperienceProvisionInformation.WATCH_AD_REWARDS_POINT;
+
+		user.addPointAndExp(watchAdRewardsPoint, 0);
+
+		RewardHistory watchAdRewardPointHistory = RewardHistory.create(user, watchAdRewardsPoint, 0,
+			HistoryMessage.WATCH_ADS_COMPLETED);
+
+		rewardHistoryRepository.save(watchAdRewardPointHistory);
 
 		purchaseContentProcess(userId, contentId);
 	}

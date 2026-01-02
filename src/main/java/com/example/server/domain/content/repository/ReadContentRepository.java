@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.example.server.domain.content.entity.Content;
 import com.example.server.domain.content.entity.ReadContent;
 
 @Repository
@@ -18,8 +17,8 @@ public interface ReadContentRepository extends JpaRepository<ReadContent, Long> 
 
 	boolean existsByUser_IdAndContent_ContentId(Long userId, Long contentId);
 
-	@Query("SELECT rc FROM ReadContent rc JOIN FETCH rc.user WHERE rc.readContentId = :id")
-	List<Content> findReadContentsByUserId(@Param("userId") Long userId, Pageable pageable);
+	@Query("SELECT rc FROM ReadContent rc JOIN FETCH rc.content WHERE rc.user.id = :userId")
+	List<ReadContent> findReadContentsByUserId(@Param("userId") Long userId, Pageable pageable);
 
 	Optional<ReadContent> findByUser_IdAndContent_ContentId(Long userId, Long contentId);
 

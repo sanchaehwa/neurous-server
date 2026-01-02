@@ -75,9 +75,9 @@ public class ReadContent extends BaseTimeEntity {
 	}
 
 	//컨텐츠에 남아있었던 시간
-	public void updateStatus(Long staySecondsd) {
-		this.staySeconds = staySeconds;
-		this.isCompleted = checkCompletion(this.content.getContentLevel(), staySeconds);
+	public void updateStatus(Long staySeconds) {
+		this.staySeconds = staySeconds;           // 매개변수로 받은 값을 필드에 저장
+		this.isCompleted = checkCompletion(this.content.getContentLevel(), this.staySeconds);
 	}
 
 	//체류 시간에 따른 완료 여부 체크

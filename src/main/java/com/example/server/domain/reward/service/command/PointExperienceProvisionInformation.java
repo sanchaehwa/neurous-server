@@ -19,7 +19,7 @@ public final class PointExperienceProvisionInformation {
 	//광고 시청시 받는 포인트
 	public static final int WATCH_AD_REWARDS_POINT = 60;
 
-	//컨텐츠 읽기 위한 포인트 *차감
+	//컨텐츠 읽기 위한 포인트 * 차감
 	public static final int NEED_READ_CONTENT_POINT = 30;
 
 	//주간 출석 (연속 출석)

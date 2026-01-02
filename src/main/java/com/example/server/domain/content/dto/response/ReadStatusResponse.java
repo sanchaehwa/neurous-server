@@ -1,6 +1,6 @@
 package com.example.server.domain.content.dto.response;
 
-import com.example.server.domain.mission.dto.response.LevelUpInfo;
+import com.example.server.domain.reward.dto.response.LevelUpInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Builder;
@@ -14,7 +14,7 @@ public class ReadStatusResponse {
 	private final boolean isCompleted; //완독 여부
 
 	private final boolean isLevelUp;
-	
+
 	private final LevelUpInfo levelUpInfo;
 
 	public static ReadStatusResponse of(boolean isCompleted, boolean isLevelUp, LevelUpInfo levelUpInfo) {

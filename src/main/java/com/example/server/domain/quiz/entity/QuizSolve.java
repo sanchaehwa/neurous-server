@@ -31,23 +31,23 @@ public class QuizSolve {
 	private Long quizSolveId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "read_content_id")
+	@JoinColumn(name = "read_content_id", nullable = false)
 	private ReadContent readContent;
 
-	@Column(name = "quiz_id")
+	@Column(name = "quiz_id", nullable = false)
 	private Long quizId;
 
-	@Column(name = "selected_no")
+	@Column(name = "selected_no", nullable = false)
 	private int selectedNo;
 
-	@Column(name = "is_answer_correct")
+	@Column(nullable = false, name = "is_answer_correct", columnDefinition = "TINYINT(1)")
 	private boolean isAnswerCorrect;
 
-	@Column(name = "solved_at")
+	@Column(name = "solved_at", nullable = false)
 	private LocalDateTime solvedAt;
 
 	private QuizSolve(User user, ReadContent readContent, Long quizId, int selectedNo, boolean isAnswerCorrect,

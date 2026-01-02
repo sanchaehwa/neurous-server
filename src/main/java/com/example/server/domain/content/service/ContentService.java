@@ -1,6 +1,5 @@
 package com.example.server.domain.content.service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -11,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.server.domain.attendance.service.AttendanceService;
 import com.example.server.domain.content.dto.request.UpdateReadStatusRequest;
 import com.example.server.domain.content.dto.response.ContentAccessResponse;
 import com.example.server.domain.content.dto.response.ContentDetailResponse;
@@ -31,12 +31,10 @@ import com.example.server.domain.content.repository.ContentDifficultyEvaluationR
 import com.example.server.domain.content.repository.ContentRepository;
 import com.example.server.domain.content.repository.DifficultyBasetimeRepository;
 import com.example.server.domain.content.repository.ReadContentRepository;
-import com.example.server.domain.content.repository.UserInterestRepository;
 import com.example.server.domain.content.service.command.DifficultyRecommendConfig;
 import com.example.server.domain.content.service.command.ReadableContentLimitsInfo;
 import com.example.server.domain.content.service.command.RequestRecommendContentMessage;
-import com.example.server.domain.mission.dto.response.LevelUpInfo;
-import com.example.server.domain.mission.service.command.PointExperienceProvisionInformation;
+import com.example.server.domain.mission.entity.vo.MissionType;
 import com.example.server.domain.quiz.dto.response.QuizChoiceResponse;
 import com.example.server.domain.quiz.dto.response.ReadContentDetailResponse;
 import com.example.server.domain.quiz.dto.response.SolvedQuizResponse;
@@ -46,6 +44,11 @@ import com.example.server.domain.quiz.entity.QuizSolve;
 import com.example.server.domain.quiz.repository.QuizChoiceRepository;
 import com.example.server.domain.quiz.repository.QuizRepository;
 import com.example.server.domain.quiz.repository.QuizSolveRepository;
+import com.example.server.domain.reward.dto.response.LevelUpInfo;
+import com.example.server.domain.reward.entity.RewardHistory;
+import com.example.server.domain.reward.entity.vo.HistoryMessage;
+import com.example.server.domain.reward.repository.RewardHistoryRepository;
+import com.example.server.domain.reward.service.command.PointExperienceProvisionInformation;
 import com.example.server.domain.user.entity.User;
 import com.example.server.domain.user.entity.vo.Level;
 import com.example.server.domain.user.repository.UserRepository;
@@ -66,7 +69,6 @@ public class ContentService {
 
 	private final ContentRepository contentRepository;
 	private final UserRepository userRepository;
-	private final UserInterestRepository userInterestRepository;
 	private final ReadContentRepository readContentRepository;
 	private final ContentDifficultyEvaluationRepository contentDifficultyEvaluationRepository;
 	private final DifficultyBasetimeRepository difficultyBasetimeRepository;
@@ -74,55 +76,72 @@ public class ContentService {
 	private final QuizRepository quizRepository;
 	private final QuizChoiceRepository quizChoiceRepository;
 
+	private final RewardHistoryRepository rewardHistoryRepository;
+
 	private final RedisUtil redisUtil;
 	private final StorageConfig storageConfig;
 
-	private final ContentDifficultyService contentDifficultyService;
+	private final AttendanceService attendanceService;
 
 	/**
 	 * 컨텐츠 조회 / 검색
 	 */
-
-	// 탐색 페이지 컨텐츠 조회 (전체 / 카테고리)
+	//<전체 탐색>
 	public Map<ContentCategory, ExploreResponse> getExplore(Long userId) {
 
-		ContentLevel level = userRepository.findLevelByUserId(userId)
-			.orElse(ContentLevel.BEGINNER);
+		LocalDateTime now = LocalDateTime.now();
 
+		attendanceService.providedAttendanceRewardToday(now, userId);
+
+		ContentLevel userLevel = getUserContentLevel(userId);
 		LocalDateTime latestBatchTime = contentRepository.findLatestBatchTime();
-		if (latestBatchTime == null) {
-			return Collections.emptyMap();
-		}
 
-		long remainingMinutes = calculateRemainingMinutes(latestBatchTime);
+		if (latestBatchTime == null)
+			return Collections.emptyMap();
+
+		// 루프 밖에서 공통 값 계산
+		LocalDateTime nextBatchTime = latestBatchTime.plusHours(6);
+		boolean isJustUpdated = latestBatchTime.isAfter(LocalDateTime.now().minusMinutes(30));
 
 		Map<ContentCategory, ExploreResponse> result = new LinkedHashMap<>();
 
 		for (ContentCategory category : ContentCategory.values()) {
 			List<Content> contents = contentRepository.findLatestBatchContents(
-				level,
-				category,
-				latestBatchTime,
-				PageRequest.of(0, 10)
+				userLevel, category, latestBatchTime, PageRequest.of(0, 10)
 			);
 
-			List<ContentResponse> responses = contents.stream()
-				.map(c -> ContentResponse.from(c, redisUtil.getHits(c.getContentId())))
-				.toList();
-
 			result.put(category, ExploreResponse.builder()
-				.contents(responses)
-				.remainingMinutes(remainingMinutes)
+				.contents(
+					contents.stream().map(c -> ContentResponse.from(c, redisUtil.getHits(c.getContentId()))).toList())
+				.nextBatchTime(nextBatchTime)
+				.isUpdatedContent(isJustUpdated)
 				.build());
 		}
 		return result;
 	}
 
-	//배치 타임 계산
-	private long calculateRemainingMinutes(LocalDateTime batchTime) {
-		LocalDateTime nextBatch = batchTime.plusHours(6);
-		long minutes = Duration.between(LocalDateTime.now(), nextBatch).toMinutes();
-		return Math.max(0, minutes); // 음수 방지
+	//사용자가 컨텐츠 * 카테고리 칩 눌렀을때 해당 카테고리의 데이터만 반환
+	public ExploreResponse getExploreByCategory(Long userId, ContentCategory category) {
+		ContentLevel userLevel = getUserContentLevel(userId);
+		LocalDateTime latestBatchTime = contentRepository.findLatestBatchTime();
+
+		//데이터가없으면 빈응답
+		if (latestBatchTime == null) {
+			return ExploreResponse.builder()
+				.contents(Collections.emptyList())
+				.nextBatchTime(null)
+				.isUpdatedContent(false)
+				.build();
+		}
+		List<Content> contents = contentRepository.findLatestBatchContents(
+			userLevel, category, latestBatchTime, PageRequest.of(0, 10)
+		);
+
+		return ExploreResponse.builder()
+			.contents(contents.stream().map(c -> ContentResponse.from(c, redisUtil.getHits(c.getContentId()))).toList())
+			.nextBatchTime(latestBatchTime.plusHours(6))
+			.isUpdatedContent(latestBatchTime.isAfter(LocalDateTime.now().minusMinutes(30)))
+			.build();
 	}
 
 	// 컨텐츠 상세 정보 조회 + 조회수
@@ -142,7 +161,6 @@ public class ContentService {
 	}
 
 	// 읽은 글 상세
-
 	public ReadContentDetailResponse getReadContentDetail(Long userId, Long contentId) {
 
 		ContentDetailResponse contentDetail = getContentDetailWithCount(userId, contentId);
@@ -176,14 +194,13 @@ public class ContentService {
 	}
 
 	//컨텐츠 제목 기반 검색
-
+	@Transactional
 	public List<ContentResponse> search(Long userId, String keyword, int page) {
 		String k = (keyword == null) ? "" : keyword.trim();
 		if (k.isEmpty())
 			return List.of();
 
-		ContentLevel level = userRepository.findLevelByUserId(userId)
-			.orElse(ContentLevel.BEGINNER);
+		ContentLevel level = getUserContentLevel(userId);
 
 		List<Content> searchResults = contentRepository.searchByTitle(
 			level, k, PageRequest.of(page, 10));
@@ -198,7 +215,6 @@ public class ContentService {
 	}
 
 	//최근 검색어 저장 로직
-
 	private void saveRecentSearch(Long userId, String keyword) {
 
 		redisUtil.zAdd(RedisKey.RECENT_SEARCH, userId, keyword, (double)System.currentTimeMillis());
@@ -206,7 +222,6 @@ public class ContentService {
 	}
 
 	//최근 검색어 목록 조회 (DTO 변환 포함)
-
 	public List<RecentSearchResponse> getRecentSearches(Long userId) {
 		// 3줄 이내 노출을 위한 상위 10개 조회 및 DTO 변환
 		return redisUtil.zRevRange(RedisKey.RECENT_SEARCH, userId, 0, 9).stream()
@@ -215,7 +230,6 @@ public class ContentService {
 	}
 
 	//컨텐츠 읽기 권한 확인
-
 	public ContentAccessResponse checkContentReadAccess(Long userId, Long contentId) {
 		User user = findUserById(userId);
 		int todayReadCount = user.getCountReadContent();
@@ -236,7 +250,6 @@ public class ContentService {
 	}
 
 	//포인트 상태 파악 (부족 -> 광고 , 가능 -> 포인트 사용)
-
 	private ContentAccessResponse resolvePointOrAdResponse(User user) {
 		int currentUserPoint = user.getPoint();
 		int needPoint = PointExperienceProvisionInformation.NEED_READ_CONTENT_POINT;
@@ -251,13 +264,9 @@ public class ContentService {
 	}
 
 	// 콘텐츠 다 읽고 나갈때 (체류 시간) * 프론트 에서 값을 넘겨주는 형식 - 완독 하면 포인트 주는 로직
-
 	@Transactional
 	public ReadStatusResponse updateReadStatus(Long userId, Long contentId,
-		UpdateReadStatusRequest updateReadStatusRequest) {
-
-		Long staySeconds = updateReadStatusRequest.staySeconds();
-		boolean isCompleted = updateReadStatusRequest.isCompleted();
+		UpdateReadStatusRequest updateReadStatusRequest, boolean isFromMission) {
 
 		ReadContent readContent = findReadContentById(userId, contentId);
 		User user = findUserById(userId);
@@ -266,51 +275,52 @@ public class ContentService {
 			return ReadStatusResponse.builder().isCompleted(true).build();
 		}
 
-		ContentLevel level = readContent.getContent().getContentLevel();
-		boolean isTimeSatisfied = false;
+		readContent.updateStatus(updateReadStatusRequest.staySeconds());
 
-		if (level == ContentLevel.BEGINNER && staySeconds >= 50)
-			isTimeSatisfied = true;
-		else if (level == ContentLevel.INTERMEDIATE && staySeconds >= 90)
-			isTimeSatisfied = true;
-		else if (level == ContentLevel.ADVANCED && staySeconds >= 190)
-			isTimeSatisfied = true;
-
-		if (isTimeSatisfied && isCompleted) {
+		if (readContent.isCompleted() && updateReadStatusRequest.isCompleted()) {
 			Level previousLevel = user.getLevel();
 
-			user.addPointAndExp(0, PointExperienceProvisionInformation.COMPLETE_READ_CONTENT_EXP);
+			rewardReadContent(user, isFromMission);
 
-			// 상태 업데이트
-			readContent.updateStatus(staySeconds, true);
-
-			// 레벨업 여부 판단
 			boolean isLevelUp = !previousLevel.equals(user.getLevel());
-			LevelUpInfo levelUpInfo = null;
-
-			if (isLevelUp) {
-				levelUpInfo = LevelUpInfo.of(
-					storageConfig.getProfileUrl(user.getProfileImgFileName()),
-					user.getCharacterLevel().toString(),
-					user.getCharacterLevel().getCharacterName()
-				);
-			}
+			LevelUpInfo levelUpInfo = isLevelUp ? LevelUpInfo.of(
+				storageConfig.getProfileUrl(user.getProfileImgFileName()),
+				user.getCharacterLevel().toString(),
+				user.getCharacterLevel().getCharacterName()
+			) : null;
 
 			return ReadStatusResponse.builder()
 				.isCompleted(true)
 				.isLevelUp(isLevelUp)
 				.levelUpInfo(levelUpInfo)
 				.build();
-
-		} else {
-			readContent.updateStatus(staySeconds, false);
-			return ReadStatusResponse.builder().isCompleted(false).isLevelUp(false).build();
 		}
+
+		return ReadStatusResponse.builder()
+			.isCompleted(false)
+			.isLevelUp(false)
+			.build();
 	}
 
-	/**
-	 * 포인트 지급 (광고 ) - 컨텐츠 결제
-	 */
+	//완독 여부에 따른 포인트 지급 및 지급 여부 기록
+	@Transactional
+	public void rewardReadContent(User user, boolean isFromMission) {
+		int rewardReadContentExp = PointExperienceProvisionInformation.COMPLETE_READ_CONTENT_EXP;
+
+		user.addPointAndExp(0, rewardReadContentExp);
+
+		RewardHistory rewardHistory = RewardHistory.create(user, 0, rewardReadContentExp,
+			HistoryMessage.READ_THE_CONTENT);
+
+		redisUtil.incrementMissionCount(user.getId(), MissionType.EXPLORE_READ);
+
+		//미션 탭에서 들어온 경우 -> 홈 카운트 증가
+		if (isFromMission) {
+			redisUtil.incrementMissionCount(user.getId(), MissionType.HOME_READ);
+		}
+
+		rewardHistoryRepository.save(rewardHistory);
+	}
 
 	@Transactional
 	public void purchaseContentByPoint(Long userId, Long contentId) {
@@ -321,7 +331,14 @@ public class ContentService {
 	public void watchAdAndRewardUnLockContent(Long userId, Long contentId) {
 		User user = findUserById(userId);
 
-		user.addPointAndExp(PointExperienceProvisionInformation.WATCH_AD_REWARDS_POINT, 0);
+		int watchAdRewardsPoint = PointExperienceProvisionInformation.WATCH_AD_REWARDS_POINT;
+
+		user.addPointAndExp(watchAdRewardsPoint, 0);
+
+		RewardHistory watchAdRewardPointHistory = RewardHistory.create(user, watchAdRewardsPoint, 0,
+			HistoryMessage.WATCH_ADS_COMPLETED);
+
+		rewardHistoryRepository.save(watchAdRewardPointHistory);
 
 		purchaseContentProcess(userId, contentId);
 	}
@@ -406,12 +423,12 @@ public class ContentService {
 
 		//중복 클릭 방지
 		if (baseTime.getBaseTime().isAfter(LocalDateTime.now().minusSeconds(5))) {
-			throw new BadRequestException(ErrorMessage.ALEADY_LEVEL_CHANGE);
+			throw new BadRequestException(ErrorMessage.ALREADY_LEVEL_CHANGE);
 		}
 
 		//레벨 변경
 		user.changeLevel(level);
-		baseTime.reset(LocalDateTime.now());
+		baseTime.updateBaseTime(LocalDateTime.now());
 	}
 
 	//컨텐츠 난이도 평가 (퀴즈 풀이 후 모댤)
@@ -420,19 +437,12 @@ public class ContentService {
 
 		ReadContent readContent = findReadContentByContentIdAndCheckContentDifficulty(userId, contentId);
 
-		int score = difficulty.getScore();
-
 		ContentDifficultyEvaluation evaluationResult = ContentDifficultyEvaluation.create(
 			readContent,
 			difficulty
 		);
 
 		contentDifficultyEvaluationRepository.save(evaluationResult);
-		contentDifficultyService.processEvaluation(contentId, score);
-
-		if (!difficultyBasetimeRepository.existsById(userId)) {
-			difficultyBasetimeRepository.save(DifficultyBasetime.now(userId, contentId));
-		}
 
 	}
 
@@ -464,15 +474,6 @@ public class ContentService {
 		return readContentRepository.existsByUser_IdAndContent_ContentId(userId, contentId);
 	}
 
-	//포인트 사용 가능 여부 확인
-	private boolean isEnableUsePoint(User user) {
-		if (user.getPoint() >= PointExperienceProvisionInformation.NEED_READ_CONTENT_POINT) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	//Content 조회
 	private Content findContentById(Long contentId) {
 		return contentRepository.findById(contentId)
@@ -485,4 +486,16 @@ public class ContentService {
 			.orElseThrow(() -> new NotFoundException(ErrorMessage.READ_RECORD_NOT_FOUND));
 	}
 
+	//객체 타입 일치
+	private ContentLevel getUserContentLevel(Long userId) {
+		return userRepository.findLevelByUserId(userId)
+			.map(obj -> {
+				try {
+					return ContentLevel.valueOf(obj.toString());
+				} catch (Exception e) {
+					return ContentLevel.BEGINNER; // 매핑 실패 시 기본값
+				}
+			})
+			.orElse(ContentLevel.BEGINNER);
+	}
 }

@@ -50,7 +50,7 @@ public class User extends BaseTimeEntity {
 	private Long id;
 
 	@Column(nullable = false)
-	private String name;
+	private String name; //*소셜로그인 값
 
 	//소셜로그인
 	@Enumerated(EnumType.STRING)
@@ -60,12 +60,13 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String providerId;
 
+	@Builder.Default
 	@Column(name = "profile_img_file_name")
-	private String profileImgFileName;
+	private String profileImgFileName = "lv1_profile.png"; // 기본값 설정
 
 	@Column(unique = true, length = 50)
 	@Email
-	private String email;
+	private String email; //*소셜로그인값
 
 	@Builder.Default
 	@Enumerated(EnumType.STRING)
@@ -88,13 +89,14 @@ public class User extends BaseTimeEntity {
 	@Builder.Default
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private Level level = Level.BEGINNER; //기본값 : 초급
-
-	@Column(nullable = false)
-	private boolean signUpComplete; //회원가입 이후 추가 정보까지 입력 여부
+	private Level level = Level.BEGINNER; //기본값 : 초급 (컨텐츠 반영 레벨)
 
 	@Builder.Default
-	@Column(nullable = false, name = "notification_status")
+	@Column(nullable = false, name = "sign_up_complete", columnDefinition = "TINYINT(1)")
+	private boolean signUpComplete = false; //회원가입 이후 추가 정보까지 입력 여부
+
+	@Builder.Default
+	@Column(nullable = false, name = "notification_status", columnDefinition = "TINYINT(1)")
 	private boolean notificationStatus = false; //알람 여부 미설정
 
 	@Builder.Default
@@ -109,63 +111,51 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private int countReadContent = 0; //읽은 콘텐츠 개수
 
-	//케릭터 레벨
 	@Builder.Default
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private CharacterLevel characterLevel = CharacterLevel.LEVEL_1;
 
-	@Builder.Default
-	@Column(nullable = false, name = "last_read_date")
-	private LocalDate lastReadDate = LocalDate.now(); // 마지막으로 읽은 날짜
+	@Column(name = "last_read_date")
+	private LocalDate lastReadDate;
 
-	private LocalDateTime lastLoginAt;
+	@Builder.Default
+	@Column(nullable = false, name = "attendance_count")
+	private int attendanceCount = 0;
+
+	@Builder.Default
+	@Column(nullable = false)
+	private LocalDateTime lastLoginAt = LocalDateTime.now();
 
 	//알림 여부 변경
 	public void toggleNotification() {
 		this.notificationStatus = !this.notificationStatus;
 	}
 
-	public static User create(
-		String name,
-		OAuthProvider provider,
-		String providerId,
-		String profileImgFileName,
-		String email
-	) {
+	public static User create(OAuthProvider provider, OAuthUserInfo oauthUserInfo) {
 		return User.builder()
-			.name(name)
+			.name(oauthUserInfo.getName())
 			.provider(provider)
-			.providerId(providerId)
-			.profileImgFileName(profileImgFileName)
-			.email(email)
-			.status(UserStatus.NORMAL)
-			.userType(UserType.USER)
-			.interests(new ArrayList<>())
-			.level(Level.BEGINNER)
-			.signUpComplete(false)
-			.notificationStatus(false)
-			.point(0)
-			.exp(0)
-			.countReadContent(0)
-			.characterLevel(CharacterLevel.LEVEL_1)
-			.lastLoginAt(LocalDateTime.now())
+			.providerId(oauthUserInfo.getProviderId())
+			.email(oauthUserInfo.getEmail())
 			.build();
 	}
 
-	public static User create(OAuthProvider provider, OAuthUserInfo oauthUserInfo) {
-		String name = oauthUserInfo.getName();
-		return User.create(
-			name,
-			provider,
-			oauthUserInfo.getProviderId(),
-			"lv1_profile.png", //처음 회원가입 하면 기본 프로필
-			oauthUserInfo.getEmail()
-		);
+	public void updateSocialInfo(String name, String email) {
+		this.name = name;
+		this.email = email;
+	}
+
+	public void updateLastLoginAt(LocalDateTime lastLoginAt) {
+		this.lastLoginAt = lastLoginAt;
 	}
 
 	public boolean isSignUpComplete() {
-		return !signUpComplete;
+		return signUpComplete;
+	}
+
+	public void completeSignUp() {
+		this.signUpComplete = true;
 	}
 
 	public void updateInterests(List<UserField> fields) {
@@ -252,4 +242,24 @@ public class User extends BaseTimeEntity {
 	public void incrementReadCount() {
 		this.countReadContent++;
 	}
+
+	public void updateAttendanceForOneWeek(LocalDateTime todayLoginDateTime) {
+		if (this.lastLoginAt == null) {
+			this.attendanceCount = 1;
+			this.lastLoginAt = todayLoginDateTime;
+			return;
+		}
+
+		LocalDate lastDate = this.lastLoginAt.toLocalDate();
+		LocalDate currentDate = todayLoginDateTime.toLocalDate();
+		long gap = ChronoUnit.DAYS.between(lastDate, currentDate);
+
+		if (gap == 1) {
+			this.attendanceCount++;
+		} else if (gap > 1) {
+			this.attendanceCount = 1;
+		}
+		this.lastLoginAt = todayLoginDateTime;
+	}
+
 }

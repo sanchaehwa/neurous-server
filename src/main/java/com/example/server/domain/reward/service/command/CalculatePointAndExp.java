@@ -1,6 +1,6 @@
-package com.example.server.domain.mission.service.command;
+package com.example.server.domain.reward.service.command;
 
-import com.example.server.domain.mission.dto.response.RewardResponse;
+import com.example.server.domain.reward.dto.response.RewardResponse;
 
 import lombok.Builder;
 

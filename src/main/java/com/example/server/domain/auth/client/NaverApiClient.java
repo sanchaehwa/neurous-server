@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.example.server.domain.auth.dto.NaverUserInfo;
 import com.example.server.domain.auth.dto.OAuthUserInfo;
+import com.example.server.domain.auth.enums.OAuthProvider;
 import com.example.server.global.exception.message.ErrorMessage;
 import com.example.server.global.exception.model.NeurousException;
 import com.example.server.global.security.oauth.OAuthProperties;
@@ -23,6 +24,11 @@ public class NaverApiClient implements OAuthClient {
 
 	private final RestTemplate restTemplate;
 	private final OAuthProperties oAuthProperties;
+
+	@Override
+	public OAuthProvider getProvider() {
+		return OAuthProvider.NAVER;
+	}
 
 	@Override
 	public OAuthUserInfo getUserInfo(String accessToken) {
@@ -46,16 +52,27 @@ public class NaverApiClient implements OAuthClient {
 			NaverUserInfo.class
 		);
 
-		if (response.getBody() == null) {
+		NaverUserInfo body = response.getBody();
+
+		if (body == null) {
 			throw new NeurousException(ErrorMessage.OAUTH2_NAVER_API_ERROR);
 		}
 
-		return response.getBody();
+		if (!"00".equals(body.getResultCode())) {
+			log.error("네이버 API 호출 실패: {}", body.getMessage());
+			throw new NeurousException(ErrorMessage.OAUTH2_NAVER_API_ERROR);
+		}
+
+		return body;
 	}
 
 	private HttpHeaders createAuthHeaders(String accessToken) {
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", "Bearer " + accessToken);
+
+		headers.set("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
 		return headers;
 	}
 }

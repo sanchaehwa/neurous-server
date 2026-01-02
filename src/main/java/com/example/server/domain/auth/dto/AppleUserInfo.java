@@ -1,7 +1,5 @@
 package com.example.server.domain.auth.dto;
 
-import java.util.Optional;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
@@ -26,15 +24,12 @@ public class AppleUserInfo implements OAuthUserInfo {
 
 	@Override
 	public String getName() {
-		return Optional.ofNullable(email)
-			.filter(e -> e.contains("@"))
-			.map(e -> e.substring(0, e.indexOf("@")))
-			.orElse("apple.user");
+		return generateFallbackName();
 	}
 
 	@Override
 	public String getEmail() {
 		return email;
 	}
-	
+
 }

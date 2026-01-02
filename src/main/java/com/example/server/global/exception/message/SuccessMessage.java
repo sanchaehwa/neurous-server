@@ -19,6 +19,7 @@ public enum SuccessMessage {
 	GET_QUIZ_SUCCESS(HttpStatus.OK.value(), "퀴즈를 성공적으로 가져왔습니다"),
 
 	LOAD_CONTENT_EXPLORE_SUCCESS(HttpStatus.OK.value(), "컨텐츠 탐색 페이지 조회가 완료되었습니다"),
+	LOAD_CONTENT_EXPLORE_BY_CATEGORY_SUCCESS(HttpStatus.OK.value(), "카테고리 기반 탐색 페이지 조회가 완료되었습니다"),
 	LOAD_CONTENT_DETAIL_SUCCESS(HttpStatus.OK.value(), "컨텐츠 상세 조회가 완료되었습니다"),
 	PURCHASE_CONTENT_SUCCESS(HttpStatus.NO_CONTENT.value(), "컨텐츠 구매가 완료되었습니다"),
 	REWARD_POINT_BY_AD_PURCHASE_CONTENT_SUCCESS(HttpStatus.NO_CONTENT.value(), "광고 시청 포인트 지급 과 컨텐츠 구매가 완료되었습니다"),
@@ -36,6 +37,8 @@ public enum SuccessMessage {
 
 	CHANGE_LEVEL_SUCCESS(HttpStatus.OK.value(), "유저 학습 레벨이 변경되었습니다"),
 	EVALUATE_CONTENT_DIFFICULTY_SUCCESS(HttpStatus.OK.value(), "컨텐츠 난이도 평가가 완료되었습니다"),
+
+	LOAD_SUCESS_MISSION_CONTENTS(HttpStatus.OK.value(), "미션 컨텐츠 조회가 완료되었습니다"),
 
 	//201
 	ACCESS_TOKEN_REISSUE_SUCCESS(HttpStatus.CREATED.value(), "액세스 토큰 재발급이 완료되었습니다.");

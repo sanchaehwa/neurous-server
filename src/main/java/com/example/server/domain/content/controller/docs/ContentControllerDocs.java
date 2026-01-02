@@ -33,6 +33,12 @@ public interface ContentControllerDocs {
 		@CurrentUserId Long userId
 	);
 
+	@GetExploreContetsByCategoryDocs
+	SuccessResponse<ExploreResponse> getExploreContentByCategory(
+		@CurrentUserId Long userId,
+		@PathVariable ContentCategory category
+	);
+
 	@GetContentDetailDocs
 	SuccessResponse<ContentDetailResponse> getContentDetail(
 		@CurrentUserId Long userId,
@@ -67,7 +73,8 @@ public interface ContentControllerDocs {
 	SuccessResponse<ReadStatusResponse> updateReadStatus(
 		@CurrentUserId Long userId,
 		@PathVariable Long contentId,
-		@Valid @RequestBody UpdateReadStatusRequest request
+		@Valid @RequestBody UpdateReadStatusRequest request,
+		@RequestParam(defaultValue = "false") boolean isFromMission
 	);
 
 	@PurchaseContentByPointDocs
@@ -99,5 +106,5 @@ public interface ContentControllerDocs {
 		@PathVariable Long contentId,
 		@RequestParam ContentDifficulty difficulty
 	);
-	
+
 }

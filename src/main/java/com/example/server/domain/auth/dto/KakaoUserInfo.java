@@ -8,25 +8,21 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class KakaoUserInfo implements OAuthUserInfo {
-
 	private Long id;
-
 	@JsonProperty("kakao_account")
 	private KakaoAccount kakaoAccount;
 
 	@Getter
 	@NoArgsConstructor
 	public static class KakaoAccount {
-
-		private Profile profile;
 		private String email;
+		private Profile profile;
 
 		@Getter
 		@NoArgsConstructor
 		public static class Profile {
 			private String nickname;
 		}
-
 	}
 
 	@Override
@@ -36,17 +32,11 @@ public class KakaoUserInfo implements OAuthUserInfo {
 
 	@Override
 	public String getEmail() {
-		if (kakaoAccount == null)
-			return null;
-		return kakaoAccount.getEmail();
+		return kakaoAccount.email;
 	}
 
 	@Override
 	public String getName() {
-		if (kakaoAccount == null)
-			return "Unknown";
-		if (kakaoAccount.getProfile() == null)
-			return "Unknown";
-		return kakaoAccount.getProfile().getNickname();
+		return kakaoAccount.profile.nickname;
 	}
 }

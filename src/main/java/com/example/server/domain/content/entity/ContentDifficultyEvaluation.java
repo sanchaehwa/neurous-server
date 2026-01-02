@@ -21,10 +21,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "content_difficulty_evaluation") // unique 제약은 ReadContent가 관리하므로 단순화 가능
+@Table(name = "content_difficulty_evaluation")
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class ContentDifficultyEvaluation extends BaseTimeEntity {
 
@@ -33,13 +33,12 @@ public class ContentDifficultyEvaluation extends BaseTimeEntity {
 	@Column(name = "content_difficulty_evaluation_id")
 	private Long contentDifficultyEvaluationId;
 
-	// 누가 언제 읽은 기록에 대한 평가인지 명확히 연결
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "read_content_id")
+	@JoinColumn(name = "read_content_id", nullable = false)
 	private ReadContent readContent;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "content_difficulty")
+	@Column(name = "content_difficulty", nullable = false)
 	private ContentDifficulty contentDifficulty;
 
 	public static ContentDifficultyEvaluation create(ReadContent readContent, ContentDifficulty contentDifficulty) {
@@ -48,5 +47,4 @@ public class ContentDifficultyEvaluation extends BaseTimeEntity {
 			.contentDifficulty(contentDifficulty)
 			.build();
 	}
-
 }

@@ -1,5 +1,8 @@
 package com.example.server.global.redis;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,6 +10,8 @@ import java.util.Set;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+
+import com.example.server.domain.mission.entity.vo.MissionType;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RedisUtil {
 
 	private final RedisTemplate<String, String> redisTemplate;
+	private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
 	//Redis 초기화
 	@PostConstruct
@@ -74,25 +80,59 @@ public class RedisUtil {
 		redisTemplate.opsForZSet().remove(redisKey.getFullKey(userId), value);
 	}
 
-	//접수 합산 (컨텐츠 평가)
-	public void calculateContentDifficulty(Long contentId, int score) {
-		String scoreKey = RedisKey.CONTENT_DIFFICULTY_SCORE.getFullKey(contentId);
-		redisTemplate.opsForValue().increment(scoreKey, score);
-		redisTemplate.expire(scoreKey, RedisKey.CONTENT_DIFFICULTY_SCORE.getTtl());
+	//메타데이터 캐싱 관련
+	// 객체를 JSON으로 바꿔 저장하는 메서드
+	public void set(String key, Object value, Duration ttl) {
+		try {
+			String json = objectMapper.writeValueAsString(value); // 객체 -> JSON 문자열
+			redisTemplate.opsForValue().set(key, json, ttl);
+		} catch (Exception e) {
+			throw new RuntimeException("Redis 저장 실패", e);
+		}
 	}
 
-	//횟수 합산 (컨텐츠 평가)
-	public void countContentDifficulty(Long contentId) {
-		String countKey = RedisKey.CONTENT_DIFFICULTY_TEST_COUNT.getFullKey(contentId);
-		redisTemplate.opsForValue().increment(countKey, 1);
-		redisTemplate.expire(countKey, RedisKey.CONTENT_DIFFICULTY_TEST_COUNT.getTtl());
+	// JSON을 다시 객체로 바꿔 가져오는 메서드
+	public <T> T get(String key, Class<T> clazz) {
+		String json = redisTemplate.opsForValue().get(key);
+		if (json == null)
+			return null;
+		try {
+			return objectMapper.readValue(json, clazz); // JSON 문자열 -> 객체
+		} catch (Exception e) {
+			throw new RuntimeException("Redis 조회 실패", e);
+		}
 	}
 
-	//업데이트 (컨텐츠 평가)
-	public void addUpdateTargetToList(Long contentId) {
-		String listKey = RedisKey.CONTENT_DIFFICULTY_UPDATE_LIST.getPrefix();
+	//미션 카운팅 관련
 
-		redisTemplate.opsForSet().add(listKey, String.valueOf(contentId));
-		redisTemplate.expire(listKey, RedisKey.CONTENT_DIFFICULTY_UPDATE_LIST.getTtl());
+	public Integer incrementMissionCount(Long userId, MissionType missionType) {
+		String key = RedisKey.DAILY_MISSION.getPrefix() + userId + ":" + missionType.name();
+
+		Long updatedCount = redisTemplate.opsForValue().increment(key);
+
+		if (updatedCount == null)
+			return 0;
+
+		if (updatedCount == 1) {
+			redisTemplate.expire(key, getDurationUntilMidnight());
+		}
+
+		if (updatedCount > missionType.getDefaultGoalCount()) {
+			return updatedCount.intValue();
+		}
+
+		return updatedCount.intValue();
+	}
+
+	public int getMissionCount(Long userId, MissionType missionType) {
+		String key = RedisKey.DAILY_MISSION.getPrefix() + userId + ":" + missionType.name();
+		String val = redisTemplate.opsForValue().get(key);
+		return (val != null) ? Integer.parseInt(val) : 0;
+	}
+
+	private Duration getDurationUntilMidnight() {
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime midnight = now.toLocalDate().atTime(LocalTime.MAX);
+		return Duration.between(now, midnight);
 	}
 }

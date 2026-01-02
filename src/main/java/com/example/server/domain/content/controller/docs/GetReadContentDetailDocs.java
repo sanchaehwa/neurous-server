@@ -31,7 +31,22 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 )
 @ApiResponse(
 	responseCode = "404",
-	description = "컨텐츠를 찾을 수 없음",
+	description = "컨텐츠를 찾을 수 없습니다.",
+	content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+)
+@ApiResponse(
+	responseCode = "404",
+	description = "해당 컨텐츠에 대한 퀴즈 풀이 기록이 없습니다.",
+	content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+)
+@ApiResponse(
+	responseCode = "404",
+	description = "존재하지 않는 퀴즈입니다.",
+	content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+)
+@ApiResponse(
+	responseCode = "404",
+	description = "정답 선택지가 설정되지 않았습니다",
 	content = @Content(schema = @Schema(implementation = ErrorResponse.class))
 )
 public @interface GetReadContentDetailDocs {

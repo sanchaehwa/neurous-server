@@ -29,5 +29,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 	description = "인증 실패",
 	content = @Content(schema = @Schema(implementation = ErrorResponse.class))
 )
+@ApiResponse(
+	responseCode = "404",
+	description = "유저를 찾을 수 없습니다",
+	content = @Content(
+		schema = @Schema(implementation = ErrorResponse.class)
+	)
+)
 public @interface CheckContentAccessDocs {
 }

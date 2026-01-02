@@ -30,8 +30,9 @@ public class AuthController implements AuthControllerDocs {
 
 	@PublicApi(reason = "소셜 로그인은 인증 없이 접근 가능해야 합니다")
 	@PostMapping("/login/{provider}")
-	public SuccessResponse<LoginResponse> login(@PathVariable String provider, @RequestBody LoginRequest request) {
-		LoginResponse response = authService.login(OAuthProvider.from(provider), request.accessToken());
+	public SuccessResponse<LoginResponse> login(@PathVariable OAuthProvider provider,
+		@RequestBody LoginRequest request) {
+		LoginResponse response = authService.login(provider, request.accessToken());
 		return SuccessResponse.of(SuccessMessage.LOGIN_SUCCESS, response);
 	}
 

@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.example.server.domain.auth.dto.GoogleUserInfo;
 import com.example.server.domain.auth.dto.OAuthUserInfo;
+import com.example.server.domain.auth.enums.OAuthProvider;
 import com.example.server.global.exception.message.ErrorMessage;
 import com.example.server.global.exception.model.NeurousException;
 import com.example.server.global.security.oauth.OAuthProperties;
@@ -23,6 +24,11 @@ public class GoogleApiClient implements OAuthClient {
 
 	private final RestTemplate restTemplate;
 	private final OAuthProperties oAuthProperties;
+
+	@Override
+	public OAuthProvider getProvider() {
+		return OAuthProvider.GOOGLE;
+	}
 
 	@Override
 	public OAuthUserInfo getUserInfo(String accessToken) {

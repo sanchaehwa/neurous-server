@@ -13,10 +13,14 @@ public enum RedisKey {
 	//최근 검색어
 	RECENT_SEARCH("recent_search:", Duration.ofDays(30)),
 
-	//컨텐츠 난이도 업데이트 (점수 - 평가 수 - 업데이트)
-	CONTENT_DIFFICULTY_SCORE("content:score", Duration.ofDays(1)),
-	CONTENT_DIFFICULTY_TEST_COUNT("content:count", Duration.ofDays(1)),
-	CONTENT_DIFFICULTY_UPDATE_LIST("content:updated:ids", Duration.ofDays(1));
+	//metadata 캐싱 설정
+	CHARACTER_LIST("metadata:character:all", Duration.ofDays(1)),
+	CHARACTER_ITEM("metadata:character:", Duration.ofDays(1)),
+	REWARD_DATA_LIST("metadata:reward:data:all", Duration.ofDays(1)),
+	REWARD_INFO_LIST("metadata:reward:info:all", Duration.ofDays(1)),
+
+	//미션 개수
+	DAILY_MISSION("mission:daily:", null);
 
 	private final String prefix;
 	private final Duration ttl;

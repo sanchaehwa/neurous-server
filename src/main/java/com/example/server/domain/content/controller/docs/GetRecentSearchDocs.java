@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 )
 @ApiResponse(
 	responseCode = "200",
-	description = "최근 검색어 조회 성공",
+	description = "최근 검색어 조회가 완료되었습니다",
 	content = @Content(schema = @Schema(implementation = RecentSearchResponse.class))
 )
 @ApiResponse(

@@ -1,4 +1,4 @@
-package com.example.server.domain.mission.entity.vo;
+package com.example.server.domain.reward.entity.vo;
 
 public enum HistoryMessage {
 

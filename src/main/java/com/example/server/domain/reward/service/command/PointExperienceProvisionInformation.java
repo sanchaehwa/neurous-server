@@ -1,4 +1,4 @@
-package com.example.server.domain.mission.service.command;
+package com.example.server.domain.reward.service.command;
 
 public final class PointExperienceProvisionInformation {
 
@@ -19,7 +19,15 @@ public final class PointExperienceProvisionInformation {
 	//광고 시청시 받는 포인트
 	public static final int WATCH_AD_REWARDS_POINT = 60;
 
-	//컨텐츠 읽기 위한 포인트 *차감
+	//컨텐츠 읽기 위한 포인트 * 차감
 	public static final int NEED_READ_CONTENT_POINT = 30;
+
+	//주간 출석 (연속 출석)
+	public static final int ATTENDANCE_ALL_WEEK_POINT = 30;
+	public static final int ATTENDANCE_ALL_WEEK_EXP = 30;
+
+	//출석
+	public static final int ATTENDANCE_ONE_DAY_POINT = 10;
+	public static final int ATTENDANCE_ONE_DAY_EXP = 5;
 
 }

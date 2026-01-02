@@ -1,5 +1,6 @@
 package com.example.server.domain.user.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.server.domain.auth.enums.OAuthProvider;
 import com.example.server.domain.user.entity.User;
+import com.example.server.domain.user.entity.vo.UserInterest;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -37,5 +39,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Modifying(clearAutomatically = true)
 	@Query(" UPDATE User u SET u.attendanceCount =0")
 	void resetAllAttendance();
+
+	//유저 관심사 추출
+	@Query("""
+		    SELECT ui FROM UserInterest ui 
+		    JOIN FETCH ui.user 
+		    WHERE ui.user.id = :userId 
+		    ORDER BY ui.priority ASC
+		""")
+	List<UserInterest> findAllInterestsByUserId(@Param("userId") Long userId);
 
 }

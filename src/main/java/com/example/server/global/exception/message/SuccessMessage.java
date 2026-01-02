@@ -38,6 +38,8 @@ public enum SuccessMessage {
 	CHANGE_LEVEL_SUCCESS(HttpStatus.OK.value(), "유저 학습 레벨이 변경되었습니다"),
 	EVALUATE_CONTENT_DIFFICULTY_SUCCESS(HttpStatus.OK.value(), "컨텐츠 난이도 평가가 완료되었습니다"),
 
+	LOAD_SUCESS_MISSION_CONTENTS(HttpStatus.OK.value(), "미션 컨텐츠 조회가 완료되었습니다"),
+
 	//201
 	ACCESS_TOKEN_REISSUE_SUCCESS(HttpStatus.CREATED.value(), "액세스 토큰 재발급이 완료되었습니다.");
 

@@ -1,0 +1,95 @@
+package com.example.server.domain.mission.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.server.domain.content.entity.Content;
+import com.example.server.domain.content.entity.vo.ContentCategory;
+import com.example.server.domain.content.entity.vo.ContentLevel;
+import com.example.server.domain.content.repository.ContentRepository;
+import com.example.server.domain.mission.dto.response.MissionContentResponse;
+import com.example.server.domain.mission.dto.response.MissionProgressResponse;
+import com.example.server.domain.mission.dto.response.MissionResponse;
+import com.example.server.domain.mission.repository.MissionRepository;
+import com.example.server.domain.user.entity.User;
+import com.example.server.domain.user.entity.vo.UserInterest;
+import com.example.server.domain.user.repository.UserRepository;
+import com.example.server.global.exception.message.ErrorMessage;
+import com.example.server.global.exception.model.NotFoundException;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class MissionService {
+
+	private final UserRepository userRepository;
+	private final ContentRepository contentRepository;
+	private final MissionRepository missionRepository;
+
+	public MissionResponse loadMissionPage(Long userId) {
+		User user = findByUserId(userId);
+
+		// 1. 유저 맞춤 콘텐츠 5개 추출
+		List<MissionContentResponse> contents = findMissionContent(userId);
+
+		// 2. 미션 진행 상태 조회 (기존에 작성한 MissionProgressResponse 활용)
+		List<MissionProgressResponse> progresses = missionRepository.findAllByUser(user)
+			.stream()
+			.map(MissionProgressResponse::from)
+			.toList();
+
+		return MissionResponse.of(contents, progresses);
+	}
+
+	public List<MissionContentResponse> findMissionContent(Long userId) {
+		User user = findByUserId(userId);
+		List<UserInterest> interests = findUserInterestById(userId);
+		ContentLevel userLevel = ContentLevel.from(user.getLevel().name()); // 유저 레벨 변환
+
+		List<Content> resultContents = new ArrayList<>();
+		int totalCount = interests.size();
+
+		if (totalCount == 1) {
+			// 1순위 키워드에서 5개
+			resultContents.addAll(fetchContents(userLevel, interests.get(0), 5));
+		} else if (totalCount == 2) {
+			// 1순위 3개 / 2순위 2개
+			resultContents.addAll(fetchContents(userLevel, interests.get(0), 3));
+			resultContents.addAll(fetchContents(userLevel, interests.get(1), 2));
+		} else if (totalCount >= 3) {
+			resultContents.addAll(fetchContents(userLevel, interests.get(0), 3));
+			resultContents.addAll(fetchContents(userLevel, interests.get(1), 1));
+			resultContents.addAll(fetchContents(userLevel, interests.get(2), 1));
+		}
+
+		return resultContents.stream()
+			.map(c -> new MissionContentResponse(
+				c.getTitle(),
+				c.getImageUrl(),
+				c.getContentCategory().name(),
+				c.getCreatedAt().toLocalDate()
+			)).toList();
+	}
+
+	//콘텐츠 추출 로직
+	private List<Content> fetchContents(ContentLevel level, UserInterest interest, int size) {
+		ContentCategory category = ContentCategory.valueOf(interest.getInterest().name());
+		return contentRepository.findByCategoryAndLevel(level, category, PageRequest.of(0, size));
+	}
+
+	public User findByUserId(Long userId) {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+	}
+
+	public List<UserInterest> findUserInterestById(Long userId) {
+		return userRepository.findAllInterestsByUserId(userId);
+	}
+
+}

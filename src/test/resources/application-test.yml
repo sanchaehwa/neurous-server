@@ -8,6 +8,11 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+  flyway:
+    enabled: false
+  profiles:
+    active: test
+    default: test
 
 # 환경 변수들에 가짜(Mock) 데이터 주입
 jwt:

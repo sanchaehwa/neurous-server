@@ -30,4 +30,9 @@ public enum CharacterLevel {
 			return LEVEL_2;
 		return LEVEL_1;
 	}
+
+	public CharacterLevel getNextLevel() {
+		int nextOrdinal = this.ordinal() + 1;
+		return (nextOrdinal < values().length) ? values()[nextOrdinal] : LEVEL_1;
+	}
 }

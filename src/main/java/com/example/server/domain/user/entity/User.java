@@ -127,6 +127,10 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private LocalDateTime lastLoginAt = LocalDateTime.now();
 
+	@Builder.Default
+	@Column(nullable = false, columnDefinition = "TINYINT(1)")
+	private boolean pendingModuleLevelUp = false;
+
 	//알림 여부 변경
 	public void toggleNotification() {
 		this.notificationStatus = !this.notificationStatus;
@@ -188,6 +192,10 @@ public class User extends BaseTimeEntity {
 		this.level = level;
 	}
 
+	public void changeCharacterLevel(CharacterLevel level) {
+		this.characterLevel = level;
+	}
+
 	//신규 가입 인지 아닌지
 	public boolean isNewUserBonusPeriod() {
 		if (this.getCreatedAt() == null)
@@ -210,9 +218,32 @@ public class User extends BaseTimeEntity {
 		if (this.characterLevel != nextLevel) {
 			this.characterLevel = nextLevel;
 			updateProfileImgByLevel();
+			this.pendingModuleLevelUp = true;
 			return true;
 		}
 		return false; //레벨업 미발생
+	}
+
+	//모댤 확인 완료 처리 (캐릭터 페이지 진입 시 호출)
+	public void completeLevelUpModuleDisplayInCharacterPage() {
+		this.pendingModuleLevelUp = false;
+	}
+
+	// 현재 레벨 내에서의 진척도 퍼센트 (정수형 0~100)
+	public int calculateLevelProgress() {
+		CharacterLevel currentLevel = this.characterLevel;
+		CharacterLevel nextLevel = currentLevel.getNextLevel();
+
+		if (currentLevel == nextLevel)
+			return 100;
+
+		int range = nextLevel.getThreshold() - currentLevel.getThreshold();
+
+		int currentProgress = this.exp - currentLevel.getThreshold();
+
+		int progressPercent = (currentProgress * 100) / range;
+
+		return Math.min(100, Math.max(0, progressPercent));
 	}
 
 	//프로필 사진 번경 (레벨에 따라)

@@ -21,14 +21,18 @@ public class CharacterData {
 	private Integer level;
 
 	@Column(nullable = false)
-	private String characterLevel;
+	private String characterLevel; //LV1
 
 	@Column(nullable = false)
-	private String characterName;
+	private String characterName; //아메바
 
 	@Column(nullable = false, length = 500)
 	private String characterImageUrl;
 
 	@Column(columnDefinition = "TEXT")
 	private String levelDescription;
+
+	@Column(nullable = false)
+	private Integer exp;
+
 }

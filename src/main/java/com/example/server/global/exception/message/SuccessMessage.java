@@ -40,6 +40,9 @@ public enum SuccessMessage {
 
 	LOAD_SUCESS_MISSION_CONTENTS(HttpStatus.OK.value(), "미션 컨텐츠 조회가 완료되었습니다"),
 
+	LOAD_SUCCESS_CHARACTER_PAGE(HttpStatus.OK.value(), "캐릭터 페이지 정보를 성공적으로 불러왔습니다"),
+	LOAD_SUCCESS_LEVEL_STANDARD(HttpStatus.OK.value(), "레벨 기준 정보를 성공적으로 불러왔습니다"),
+	LOAD_SUCCESS_REWARD_STANDARD(HttpStatus.OK.value(), "보상 기준 정보를 성공적으로 불러왔습니다"),
 	//201
 	ACCESS_TOKEN_REISSUE_SUCCESS(HttpStatus.CREATED.value(), "액세스 토큰 재발급이 완료되었습니다.");
 

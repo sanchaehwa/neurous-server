@@ -51,6 +51,18 @@ public class ContentController implements ContentControllerDocs {
 		);
 	}
 
+	@AuthenticatedApi(reason = "사용자의 학습 레벨과 사용자가 선택한 카테고리 컨텐츠 탐색을 위해 로그인 필요")
+	@GetMapping("/explore/{category}")
+	public SuccessResponse<ExploreResponse> getExploreContentByCategory(
+		@CurrentUserId Long userId,
+		@PathVariable ContentCategory category
+	) {
+		return SuccessResponse.of(
+			SuccessMessage.LOAD_CONTENT_EXPLORE_BY_CATEGORY_SUCCESS,
+			contentService.getExploreByCategory(userId, category)
+		);
+	}
+
 	@AuthenticatedApi(reason = "컨텐츠 상세 조회를 위해 로그인 필요")
 	@GetMapping("/{contentId}")
 	public SuccessResponse<ContentDetailResponse> getContentDetail(
@@ -116,14 +128,16 @@ public class ContentController implements ContentControllerDocs {
 	public SuccessResponse<ReadStatusResponse> updateReadStatus(
 		@CurrentUserId Long userId,
 		@PathVariable Long contentId,
-		@Valid @RequestBody UpdateReadStatusRequest request
+		@Valid @RequestBody UpdateReadStatusRequest request,
+		@RequestParam(defaultValue = "false") boolean isFromMission
 	) {
 		return SuccessResponse.of(
 			SuccessMessage.UPDATE_READ_STATUS_SUCCESS,
 			contentService.updateReadStatus(
 				userId,
 				contentId,
-				request
+				request,
+				isFromMission
 			)
 		);
 	}

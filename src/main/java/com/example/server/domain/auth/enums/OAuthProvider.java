@@ -3,7 +3,7 @@ package com.example.server.domain.auth.enums;
 import java.util.Arrays;
 
 import com.example.server.global.exception.message.ErrorMessage;
-import com.example.server.global.exception.model.NeurousException;
+import com.example.server.global.exception.model.BadRequestException;
 
 public enum OAuthProvider {
 
@@ -14,12 +14,17 @@ public enum OAuthProvider {
 
 	public static OAuthProvider from(String value) {
 		if (value == null || value.isBlank()) {
-			throw new NeurousException(ErrorMessage.OAUTH2_PROVIDER_MISSING);
+			throw new BadRequestException(ErrorMessage.OAUTH2_PROVIDER_MISSING);
 		}
 		return Arrays.stream(values())
 			.filter(oAuthProvider -> oAuthProvider.name().equalsIgnoreCase(value))
 			.findFirst()
-			.orElseThrow(() -> new NeurousException(
+			.orElseThrow(() -> new BadRequestException(
 				ErrorMessage.UNSUPPORTED_LOGIN_METHOD));
+	}
+
+	@com.fasterxml.jackson.annotation.JsonCreator
+	public static OAuthProvider parsing(String value) {
+		return from(value);
 	}
 }

@@ -1,13 +1,12 @@
-package com.example.server.domain.mission.entity;
+package com.example.server.domain.attendance.entity;
 
-import com.example.server.domain.mission.entity.vo.HistoryMessage;
+import java.time.LocalDate;
+
 import com.example.server.domain.user.entity.User;
 import com.example.server.global.domain.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,14 +23,22 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
-@Table(name = "reward_history")
+@Table(
+	name = "attendance",
+	uniqueConstraints = {
+		@UniqueConstraint(
+			name = "uk_user_date",
+			columnNames = {"user_id", "attendance_date"}
+		)
+	}
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class RewardHistory extends BaseTimeEntity {
+@Builder
+public class Attendance extends BaseTimeEntity {
 
 	@Id
-	@Column(name = "reward_history_id")
+	@Column(name = "attendance_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
@@ -38,23 +46,13 @@ public class RewardHistory extends BaseTimeEntity {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
-	@Builder.Default
-	@Column(nullable = false)
-	private int point = 0;
+	@Column(name = "attendance_date", nullable = false)
+	private LocalDate attendanceDate;
 
-	@Builder.Default
-	@Column(nullable = false)
-	private int exp = 0;
-
-	@Enumerated(EnumType.STRING)
-	private HistoryMessage reason;
-
-	public static RewardHistory create(User user, int point, int exp, HistoryMessage reason) {
-		return RewardHistory.builder()
+	public static Attendance create(User user, LocalDate attendanceDate) {
+		return Attendance.builder()
 			.user(user)
-			.point(point)
-			.exp(exp)
-			.reason(reason)
+			.attendanceDate(attendanceDate)
 			.build();
 	}
 }

@@ -24,7 +24,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 )
 @ApiResponse(
 	responseCode = "409",
-	description = "이미 평가한 컨텐츠",
+	description = "이미 평가한 컨텐츠입니다",
+	content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+)
+@ApiResponse(
+	responseCode = "409",
+	description = "컨텐츠 읽은 기록이 없습니다",
 	content = @Content(schema = @Schema(implementation = ErrorResponse.class))
 )
 public @interface EvaluateContentDifficultyDocs {

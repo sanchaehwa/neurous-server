@@ -9,13 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.server.domain.content.entity.ReadContent;
 import com.example.server.domain.content.entity.vo.ContentLevel;
 import com.example.server.domain.content.repository.ReadContentRepository;
-import com.example.server.domain.mission.dto.response.LevelUpInfo;
-import com.example.server.domain.mission.dto.response.RewardResponse;
-import com.example.server.domain.mission.entity.RewardHistory;
-import com.example.server.domain.mission.entity.vo.HistoryMessage;
-import com.example.server.domain.mission.repository.RewardHistoryRepository;
-import com.example.server.domain.mission.service.command.CalculatePointAndExp;
-import com.example.server.domain.mission.service.command.PointExperienceProvisionInformation;
+import com.example.server.domain.mission.entity.vo.MissionType;
 import com.example.server.domain.quiz.dto.request.QuizSubmitRequest;
 import com.example.server.domain.quiz.dto.response.QuizChoiceResponse;
 import com.example.server.domain.quiz.dto.response.QuizQuestionResponse;
@@ -27,6 +21,13 @@ import com.example.server.domain.quiz.entity.QuizSolve;
 import com.example.server.domain.quiz.repository.QuizChoiceRepository;
 import com.example.server.domain.quiz.repository.QuizRepository;
 import com.example.server.domain.quiz.repository.QuizSolveRepository;
+import com.example.server.domain.reward.dto.response.LevelUpInfo;
+import com.example.server.domain.reward.dto.response.RewardResponse;
+import com.example.server.domain.reward.entity.RewardHistory;
+import com.example.server.domain.reward.entity.vo.HistoryMessage;
+import com.example.server.domain.reward.repository.RewardHistoryRepository;
+import com.example.server.domain.reward.service.command.CalculatePointAndExp;
+import com.example.server.domain.reward.service.command.PointExperienceProvisionInformation;
 import com.example.server.domain.user.entity.User;
 import com.example.server.domain.user.repository.UserRepository;
 import com.example.server.global.exception.message.ErrorMessage;
@@ -34,6 +35,7 @@ import com.example.server.global.exception.model.BadRequestException;
 import com.example.server.global.exception.model.ConflictException;
 import com.example.server.global.exception.model.NeurousException;
 import com.example.server.global.exception.model.NotFoundException;
+import com.example.server.global.redis.RedisUtil;
 import com.example.server.global.storage.StorageConfig;
 
 import lombok.RequiredArgsConstructor;
@@ -51,12 +53,22 @@ public class QuizService {
 	private final RewardHistoryRepository rewardHistoryRepository;
 	private final StorageConfig storageConfig;
 
+	private final RedisUtil redisUtil;
+
 	/**
 	 * 퀴즈 문제지 출제
 	 */
 	public QuizQuestionResponse getQuiz(Long userId, Long contentId) {
 
 		ContentLevel quizDiff = userRepository.findLevelByUserId(userId)
+			.map(levelObj -> {
+				try {
+					// 객체를 문자열로 바꾼 뒤 ContentLevel 열거형으로 매핑
+					return ContentLevel.valueOf(levelObj.toString());
+				} catch (Exception e) {
+					return ContentLevel.BEGINNER; // 매핑 실패 시 기본값
+				}
+			})
 			.orElse(ContentLevel.BEGINNER);
 
 		Quiz quiz = quizRepository.findQuiz(contentId, quizDiff)
@@ -95,6 +107,8 @@ public class QuizService {
 		quizSolveRepository.save(QuizSolve.of(
 			user, readContent, quiz.getQuizId(), request.getSelectedNo(), isAnswerCorrect, LocalDateTime.now()
 		));
+
+		redisUtil.incrementMissionCount(userId, MissionType.QUIZ_SOLVE);
 
 		QuizChoice correct = quizChoiceRepository.findByQuiz_QuizIdAndIsCorrectTrue(request.getQuizId())
 			.orElseThrow(() -> new NeurousException(ErrorMessage.QUIZ_CORRECT_ANSWER_NOT_CONFIGURED));

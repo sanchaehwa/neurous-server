@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.example.server.domain.content.entity.vo.ContentCategory;
 import com.example.server.domain.content.entity.vo.ContentLevel;
+import com.example.server.global.domain.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,8 +25,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "content")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-public class Content {
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class Content extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,30 +39,25 @@ public class Content {
 	@Column(name = "content_body", nullable = false, columnDefinition = "TEXT")
 	private String content;
 
-	@Column(name = "content_date") //컨텐츠 발행일
+	@Column(name = "content_date", nullable = false)
 	private LocalDateTime contentDate;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "content_category")
+	@Column(name = "content_category", nullable = false)
 	private ContentCategory contentCategory;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "content_level", nullable = false)
 	private ContentLevel contentLevel;
 
-	@Column(name = "image_url")
+	@Column(name = "image_url", length = 500)
 	private String imageUrl;
 
-	@Column(name = "batch_time")
+	@Column(name = "batch_time", nullable = false)
 	private LocalDateTime batchTime;
-
-	//조회수
+	
 	@Builder.Default
-	@Column(name = "hits", nullable = false)
-	private int hits = 0; //조회수 초기값 0으로 설정
+	@Column(name = "hits", nullable = false, columnDefinition = "INT DEFAULT 0")
+	private int hits = 0;
 
-	public void changeContentLevel(ContentLevel contentLevel) {
-		this.contentLevel = contentLevel;
-	}
 }
-

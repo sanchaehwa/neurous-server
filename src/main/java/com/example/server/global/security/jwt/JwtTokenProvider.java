@@ -20,24 +20,29 @@ public class JwtTokenProvider {
 
 	private final JwtProperties jwtPropertie;
 
-	public String generateToken(String userId) {
-		return createToken(userId, jwtPropertie.getExpiration());
-	}
-
-	public String generateRefreshToken(String userId) {
-		return createToken(userId, jwtPropertie.getRefreshExpiration());
-	}
-
-	private String createToken(String userId, Long expirationMs) {
+	private String createToken(String userId, String email, Long expirationMs) {
 		Date now = new Date();
 		Date expiryDate = new Date(now.getTime() + expirationMs);
 
 		return Jwts.builder()
-			.subject(userId)
-			.issuedAt(now)
-			.expiration(expiryDate)
+			.setSubject(userId)
+			.claim("email", email) // 이메일 추가!
+			.setIssuedAt(now)
+			.setExpiration(expiryDate)
 			.signWith(getSigningKey())
 			.compact();
+	}
+
+	public String generateToken(String userId, String email) {
+		return createToken(userId, email, jwtPropertie.getExpiration());
+	}
+
+	public String generateRefreshToken(String userId, String email) {
+		return createToken(userId, email, jwtPropertie.getRefreshExpiration());
+	}
+
+	public String getEmailFromToken(String token) {
+		return parseClaims(token).get("email", String.class);
 	}
 
 	public Long getUserIdFromToken(String token) {
@@ -55,11 +60,11 @@ public class JwtTokenProvider {
 	}
 
 	private Claims parseClaims(String token) {
-		return Jwts.parser()
-			.verifyWith(getSigningKey())
+		return Jwts.parserBuilder()
+			.setSigningKey(getSigningKey())
 			.build()
-			.parseSignedClaims(token)
-			.getPayload();
+			.parseClaimsJws(token)
+			.getBody();
 	}
 
 	private SecretKey getSigningKey() {

@@ -8,33 +8,31 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class NaverUserInfo implements OAuthUserInfo {
-
-	@JsonProperty("response")
-	private NaverAccount naverAccount;
+	@JsonProperty("resultcode")
+	private String resultCode;
+	private String message;
+	private Response response; // 실제 정보는 여기 담김
 
 	@Getter
 	@NoArgsConstructor
-	public static class NaverAccount {
+	public static class Response {
 		private String id;
-		private String name;
 		private String email;
+		private String name;
 	}
 
 	@Override
 	public String getProviderId() {
-		// null이면 "unknown" 반환
-		return naverAccount != null && naverAccount.getId() != null ? naverAccount.getId() : "unknown";
-	}
-
-	@Override
-	public String getName() {
-		// null이면 "Unknown" 반환
-		return naverAccount != null && naverAccount.getName() != null ? naverAccount.getName() : "Unknown";
+		return response.id;
 	}
 
 	@Override
 	public String getEmail() {
-		// null이면 null 반환 (필요시 기본값 사용 가능)
-		return naverAccount != null ? naverAccount.getEmail() : null;
+		return response.email;
+	}
+
+	@Override
+	public String getName() {
+		return response.name;
 	}
 }

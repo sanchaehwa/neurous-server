@@ -6,6 +6,7 @@ import java.util.List;
 import com.example.server.domain.content.entity.Content;
 import com.example.server.domain.content.entity.vo.ContentLevel;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -41,20 +42,20 @@ public class Quiz {
 	private int quizNum;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "content_id")
+	@JoinColumn(name = "content_id", nullable = false)
 	private Content content;
 
 	@Column(name = "quiz_question", nullable = false, columnDefinition = "TEXT")
 	private String question; //퀴즈 질문
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "quiz_diff")
+	@Column(name = "quiz_diff", nullable = false)
 	private ContentLevel quizDiff;
 
-	@Column(name = "quiz_category")
+	@Column(name = "quiz_category", nullable = false)
 	private String quizCategory;
 
 	@Builder.Default
-	@OneToMany(mappedBy = "quiz")
+	@OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<QuizChoice> choices = new ArrayList<>();
 }

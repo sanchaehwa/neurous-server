@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 import com.example.server.global.exception.dto.ErrorResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 @Target(ElementType.METHOD)
@@ -18,20 +20,34 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 )
 @ApiResponse(
 	responseCode = "200",
-	description = "레벨 변경 성공"
+	description = "유저 학습 레벨이 변경되었습니다"
 )
 @ApiResponse(
 	responseCode = "400",
-	description = "잘못된 레벨 값",
-	content = @io.swagger.v3.oas.annotations.media.Content(
-		schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class)
+	description = "이미 난이도를 변경했습니다",
+	content = @Content(
+		schema = @Schema(implementation = ErrorResponse.class)
+	)
+)
+@ApiResponse(
+	responseCode = "404",
+	description = "평가 기록이 없습니다",
+	content = @Content(
+		schema = @Schema(implementation = ErrorResponse.class)
+	)
+)
+@ApiResponse(
+	responseCode = "404",
+	description = "유저를 찾을 수 없습니다",
+	content = @Content(
+		schema = @Schema(implementation = ErrorResponse.class)
 	)
 )
 @ApiResponse(
 	responseCode = "401",
 	description = "인증 실패",
-	content = @io.swagger.v3.oas.annotations.media.Content(
-		schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ErrorResponse.class)
+	content = @Content(
+		schema = @Schema(implementation = ErrorResponse.class)
 	)
 )
 public @interface ChangeUserLevelDocs {

@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "difficulty_basetime")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class DifficultyBasetime {
 
 	@Id
@@ -34,20 +34,22 @@ public class DifficultyBasetime {
 	@Column(name = "content_id", nullable = false)
 	private Long contentId;
 
-	public DifficultyBasetime(Long userId, Long contentId) {
+	// 초기 생성 시 현재 시간으로 자동 설정
+	private DifficultyBasetime(Long userId, Long contentId) {
 		this.userId = userId;
 		this.contentId = contentId;
 		this.baseTime = LocalDateTime.now();
 	}
 
-	public void reset(LocalDateTime newBaseTime) {
-		this.baseTime = newBaseTime;
-	}
-
-	public static DifficultyBasetime now(Long userId, Long contentId) {
+	public static DifficultyBasetime of(Long userId, Long contentId) {
 		return new DifficultyBasetime(userId, contentId);
 	}
 
+	public void updateBaseTime(LocalDateTime newBaseTime) {
+		this.baseTime = newBaseTime;
+	}
+
+	// 체류 시간 계산 로직
 	public long calculateStaySeconds() {
 		return java.time.Duration.between(this.baseTime, LocalDateTime.now()).getSeconds();
 	}

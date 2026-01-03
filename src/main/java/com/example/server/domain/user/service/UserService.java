@@ -22,7 +22,7 @@ public class UserService {
 
 	private final UserRepository userRepository;
 
-	//관심분야 설정
+	//관심분야 설정 (온보딩)
 	@Transactional
 	public UserInterestsResponse updateInterest(Long userId, UpdateInterestsRequest updateInterestsRequest) {
 		User user = findByUserId(userId);
@@ -31,11 +31,12 @@ public class UserService {
 		return UserInterestsResponse.from(user.getInterests());
 	}
 
-	// 레벨 변경 (초급 / 중급 / 고급)
+	// 레벨 변경 (초급 / 중급 / 고급) (온보딩)
 	@Transactional
 	public void updateLevel(Long userId, Level level) {
 		User user = findByUserId(userId);
 		user.changeLevel(level);
+		user.completeSignUp();
 	}
 
 	public User findByUserId(Long userId) {

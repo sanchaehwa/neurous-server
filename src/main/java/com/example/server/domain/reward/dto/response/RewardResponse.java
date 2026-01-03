@@ -1,4 +1,4 @@
-package com.example.server.domain.mission.dto.response;
+package com.example.server.domain.reward.dto.response;
 
 import lombok.Builder;
 

@@ -14,6 +14,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import com.example.server.global.exception.dto.ErrorResponse;
+import com.example.server.global.exception.message.ErrorMessage;
 import com.example.server.global.security.jwt.JwtAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
@@ -38,8 +40,12 @@ public class SecurityConfig {
 			)
 			.exceptionHandling(exception -> exception
 				.authenticationEntryPoint((request, response, authException) -> {
-					// 인증되지 않은 사용자가 @AuthenticatedApi 접근 시 401 반환
-					response.sendError(401, "Unauthorized");
+					ErrorResponse errorResponse = ErrorResponse.of(ErrorMessage.NEED_CERTIFICATION);
+					response.setContentType("application/json;charset=UTF-8");
+					response.setStatus(401);
+					String json = new com.fasterxml.jackson.databind.ObjectMapper()
+						.writeValueAsString(errorResponse);
+					response.getWriter().write(json);
 				})
 			)
 			.authorizeHttpRequests(auth -> auth
@@ -52,8 +58,9 @@ public class SecurityConfig {
 					"/swagger-resources/**",
 					"/api/test/**"
 				).permitAll()
-				.anyRequest().permitAll()
+				.anyRequest().authenticated() // 나머지 요청은 인증 필요
 			)
+			// JWT 필터 추가
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.build();
 	}

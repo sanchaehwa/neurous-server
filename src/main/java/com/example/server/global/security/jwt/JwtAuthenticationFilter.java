@@ -40,7 +40,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		} catch (Exception e) {
 			log.error("JWT 인증 실패", e);
 			SecurityContextHolder.clearContext();
-			throw e;
 		}
 
 		filterChain.doFilter(request, response);
@@ -49,27 +48,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private void authenticateRequest(HttpServletRequest request) {
 		String token = extractTokenFromRequest(request);
 
-		if (token == null) {
-			log.debug("[JWT] Authorization 헤더 없음");
+		if (token == null || !jwtTokenProvider.validateToken(token)) {
 			return;
 		}
 
-		if (!jwtTokenProvider.validateToken(token)) {
-			log.warn("[JWT] 토큰 검증 실패");
-			return;
-		}
+		Long userId = jwtTokenProvider.getUserIdFromToken(token);
+		String email = jwtTokenProvider.getEmailFromToken(token);
 
-		User user = getUserFromToken(token);
+		UserPrincipal userPrincipal = new UserPrincipal(userId, email);
 
-		if (user == null) {
-			log.warn("[JWT] 토큰은 유효하지만 사용자 없음");
-			return;
-		}
-
-		log.debug("[JWT] 인증 성공 userId={}", user.getId());
-		setAuthentication(user);
+		setAuthentication(userPrincipal);
 	}
-	
+
 	private String extractTokenFromRequest(HttpServletRequest request) {
 		String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
 
@@ -109,10 +99,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		return user == null;
 	}
 
-	private void setAuthentication(User user) {
-		// User 엔티티를 UserPrincipal로 변환하여 저장
-		UserPrincipal principal = UserPrincipal.from(user); // UserPrincipal에 static factory 메서드가 있다고 가정
-
+	private void setAuthentication(UserPrincipal principal) {
 		UsernamePasswordAuthenticationToken authentication =
 			new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
 

@@ -1,5 +1,6 @@
 package com.example.server.domain.content.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.Builder;
@@ -10,5 +11,8 @@ import lombok.Getter;
 public class ExploreResponse {
 
 	private List<ContentResponse> contents; //10개 글
-	private long remainingMinutes; //남은 분 정보 * 업데이트까지
+	//다음 갱신 시간
+	private LocalDateTime nextBatchTime;
+	//갱신 여부
+	private boolean isUpdatedContent;
 }

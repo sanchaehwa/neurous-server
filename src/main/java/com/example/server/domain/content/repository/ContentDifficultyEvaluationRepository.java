@@ -14,8 +14,13 @@ import com.example.server.domain.content.entity.vo.ContentDifficulty;
 @Repository
 public interface ContentDifficultyEvaluationRepository extends JpaRepository<ContentDifficultyEvaluation, Long> {
 
-	Optional<ContentDifficultyEvaluation> findByReadContent_User_IdAndReadContent_Content_ContentId(Long userId,
-		Long contentId);
+	@Query("""
+		   SELECT e FROM ContentDifficultyEvaluation e 
+		   JOIN e.readContent rc 
+		   WHERE rc.user.id = :userId AND rc.content.contentId = :contentId
+		""")
+	Optional<ContentDifficultyEvaluation> findEvaluation(@Param("userId") Long userId,
+		@Param("contentId") Long contentId);
 
 	@Query("""
 		    select count(e)

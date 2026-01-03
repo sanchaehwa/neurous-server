@@ -23,6 +23,7 @@ public enum ErrorMessage {
 	UNSUPPORTED_LOGIN_METHOD(400, "AUTH1005", "지원하지않는 로그인 방식입니다"),
 	TOKEN_DECODE_FAILED(400, "AUTH1006", "토큰 디코딩에 실패했습니다"),
 	TOKEN_PARSE_FAILED(400, "AUTH1006", "토큰 파싱에 실패했습니다"),
+	NEED_CERTIFICATION(400, "AUTH1008", "인증이 필요합니다"),
 	//JWT
 	INVALID_JWT_STRUCTURE(400, "AUTH1007", "JWT 구조가 올바르지 않습니다"),
 	// OAuth2 관련
@@ -36,30 +37,35 @@ public enum ErrorMessage {
 	USER_NOT_FOUND(404, "USER3001", "유저를 찾을 수 없습니다"),
 	USER_INVALID_INTEREST_COUNT(400, "USER3002", "관심분야는 3가지만 선택할 수 있습니다."),
 	USER_DUPLICATED_INTEREST(400, "USER3003", "중복된 관심분야 항목이 있습니다"),
-	ALEADY_LEVEL_CHANGE(400, "USER3004", "이미 난이도를 변경했습니다"),
+	NOT_FOUND_USER_INTEREST(404, "USER3004", "등록된 관심분야가 없습니다"),
+	ALREADY_LEVEL_CHANGE(400, "USER3004", "이미 난이도를 변경했습니다"),
 
 	//컨텐츠 관련
 	NOT_FOUND_LEVEL_DESCRIPTION(404, "CNT4001", "선택한 레벨에 대한 정보가 없습니다"),
 	CONTENT_NOT_FOUND(404, "CNT4002", "존재하지 않는 컨텐츠입니다."),
 	CONTENT_INTEREST_NOT_SET(400, "CNT4003", "관심분야가 설정되지 않았습니다."),
-	CONTENT_TODAY_NOT_AVAILABLE(404, "CNT4004", "추천 가능한 콘텐츠가 없습니다."),
+	CONTENT_TODAY_NOT_AVAILABLE(404, "CNT4004", "추천 가능한 컨텐츠가 없습니다."),
 	CONTENT_ALREADY_EVALUATED(409, "CNT4005", "이미 평가한 컨텐츠입니다."),
 	CONTENT_ALREADY_READ(409, "CNT4006", "이미 읽음 처리된 컨텐츠입니다."),
 	READ_RECORD_NOT_FOUND(404, "CNT4007", "컨텐츠 읽은 기록이 없습니다"),
 	CONTENT_DIFFICULTY_ASSESSMENT_NOT_FOUND(404, "CNT4008", "평가 기록이 없습니다"),
-	INVALID_USER_READ_RECORD(400, "CNT4008", "현재 로그인한 사용자가 읽은 콘텐츠가 아닙니다"),
+	INVALID_USER_READ_RECORD(400, "CNT4008", "현재 로그인한 사용자가 읽은 컨텐츠가 아닙니다"),
+	INVALID_CONTENT_LEVEL(400, "CNT4009", "유효하지 않는 콘텐츠 레벨입니다"),
 
 	// 퀴즈 관련
 	QUIZ_NOT_FOUND_FOR_CONTENT_LEVEL(404, "QUIZ5001", "해당 컨텐츠에 난이도별 퀴즈가 없습니다."),
 	QUIZ_NOT_FOUND(404, "QUIZ5002", "존재하지 않는 퀴즈입니다."),
 	QUIZ_INVALID_CHOICE(400, "QUIZ5003", "존재하지 않는 선택지입니다."),
 	QUIZ_CORRECT_ANSWER_NOT_CONFIGURED(500, "QUIZ5004", "퀴즈 정답 데이터가 설정되지 않았습니다."),
-	QUIZ_SOLVE_NOT_FOUND(404, "QUIZ5005", "해당 콘텐츠에 대한 퀴즈 풀이 기록이 없습니다."),
+	QUIZ_SOLVE_NOT_FOUND(404, "QUIZ5005", "해당 컨텐츠에 대한 퀴즈 풀이 기록이 없습니다."),
 	QUIZ_CORRECT_CHOICE_NOT_FOUND(404, "QUIZ5006", "정답 선택지가 설정되지 않았습니다."),
 	QUIZ_ALREADY_SOLVED(409, "QUIZ5007", "이미 퀴즈를 제출했습니다."),
 
 	//리워드 관련
-	NOT_ENOUGH_POINT(400, "REW5008", "콘텐츠를 구매하기 위한 포인트가 부족합니다"),
+	NOT_ENOUGH_POINT(400, "REW5008", "컨텐츠를 구매하기 위한 포인트가 부족합니다"),
+
+	//메타데이터 캐싱 관련
+	CHARACTER_METADATA_NOT_FOUND(404, "META6001", "해당 캐릭터의 데이터가 없습니다"),
 
 	// 서버 에러
 	INTERNAL_SERVER_ERROR(500, "INT5000", "서버 내부 오류가 발생했습니다.");

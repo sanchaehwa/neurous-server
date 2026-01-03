@@ -1,6 +1,6 @@
-package com.example.server.domain.mission.dto.response;
+package com.example.server.domain.reward.dto.response;
 
-import com.example.server.domain.mission.service.command.LevelUpInfoMessage;
+import com.example.server.domain.reward.service.command.LevelUpInfoMessage;
 
 import lombok.Builder;
 import lombok.Getter;

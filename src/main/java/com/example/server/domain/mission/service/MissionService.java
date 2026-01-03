@@ -46,7 +46,6 @@ public class MissionService {
 			.stream()
 			.map(mission -> {
 				int currentCount = redisUtil.getMissionCount(userId, mission.getMissionType());
-
 				// Redis 데이터를 기반으로 응답 객체 생성
 				return MissionProgressResponse.from(mission, currentCount);
 			})

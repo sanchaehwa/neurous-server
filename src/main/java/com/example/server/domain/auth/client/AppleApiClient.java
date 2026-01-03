@@ -67,7 +67,7 @@ public class AppleApiClient implements OAuthClient {
 	}
 
 	private Claims verifyToken(String identityToken) {
-		return Jwts.parserBuilder()
+		return Jwts.parser()
 			.build()
 			.parseClaimsJwt(identityToken)
 			.getBody();

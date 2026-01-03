@@ -10,9 +10,6 @@ spring:
     show-sql: true
   flyway:
     enabled: false
-  profiles:
-    active: test
-    default: test
   data:
     redis:
       host: localhost

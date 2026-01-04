@@ -2,6 +2,7 @@ package com.example.server.domain.character.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import com.example.server.domain.attendance.service.AttendanceService;
 import com.example.server.domain.character.dto.CharacterPageResponse;
 import com.example.server.domain.character.dto.CheckLevelStandardResponse;
 import com.example.server.domain.character.dto.LevelStandardInformation;
+import com.example.server.domain.character.dto.RewardHistoryResponse;
 import com.example.server.domain.character.dto.RewardInformationResponse;
 import com.example.server.domain.character.dto.UserGrowthInfo;
 import com.example.server.domain.mission.dto.response.MissionProgressResponse;
@@ -144,6 +146,14 @@ public class CharacterService {
 				);
 			})
 			.toList();
+	}
+
+	public List<RewardHistoryResponse> getRewardHistories(Long userId) {
+		// 최신순으로 내역 조회
+		return rewardHistoryRepository.findAllByUserIdOrderByCreatedAtDesc(userId)
+			.stream()
+			.map(RewardHistoryResponse::from)
+			.collect(Collectors.toList());
 	}
 
 	public int getCurrentUserExp(User user) {

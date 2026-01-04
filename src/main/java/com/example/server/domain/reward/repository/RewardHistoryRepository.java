@@ -1,5 +1,7 @@
 package com.example.server.domain.reward.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +22,6 @@ public interface RewardHistoryRepository extends JpaRepository<RewardHistory, Lo
 		@Param("rewardPoint") int rewardPoint,
 		@Param("rewardExp") int rewardExp
 	);
+
+	List<RewardHistory> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 }

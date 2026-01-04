@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.server.domain.character.dto.CharacterPageResponse;
 import com.example.server.domain.character.dto.CheckLevelStandardResponse;
+import com.example.server.domain.character.dto.RewardHistoryResponse;
 import com.example.server.domain.character.dto.RewardInformationResponse;
 import com.example.server.global.annotation.CurrentUserId;
 import com.example.server.global.exception.dto.SuccessResponse;
@@ -25,4 +26,9 @@ public interface CharacterControllerDocs {
 
 	@CheckRewardStandardDocs
 	SuccessResponse<List<RewardInformationResponse>> getRewardStandards();
+
+	@GetRewardHistoriesDocs
+	SuccessResponse<List<RewardHistoryResponse>> getRewardHistories(
+		@CurrentUserId Long userId
+	);
 }

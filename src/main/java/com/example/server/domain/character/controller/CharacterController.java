@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.server.domain.character.controller.docs.CharacterControllerDocs;
 import com.example.server.domain.character.dto.CharacterPageResponse;
 import com.example.server.domain.character.dto.CheckLevelStandardResponse;
+import com.example.server.domain.character.dto.RewardHistoryResponse;
 import com.example.server.domain.character.dto.RewardInformationResponse;
 import com.example.server.domain.character.service.CharacterService;
 import com.example.server.global.annotation.CurrentUserId;
@@ -49,6 +50,17 @@ public class CharacterController implements CharacterControllerDocs {
 		);
 	}
 
+	@AuthenticatedApi(reason = "보상 내역 조회를 위해 로그인 필요")
+	@GetMapping("/history")
+	public SuccessResponse<List<RewardHistoryResponse>> getRewardHistories(
+		@CurrentUserId Long userId
+	) {
+		return SuccessResponse.of(
+			SuccessMessage.LOAD_SUCCESS_REWARD_HISTORY,
+			characterService.getRewardHistories(userId)
+		);
+	}
+
 	@AuthenticatedApi(reason = "보상 기준 데이터 조회를 위해 로그인 필요")
 	@GetMapping("/standards/reward")
 	public SuccessResponse<List<RewardInformationResponse>> getRewardStandards() {
@@ -57,4 +69,5 @@ public class CharacterController implements CharacterControllerDocs {
 			characterService.checkPointExpStandard()
 		);
 	}
+
 }

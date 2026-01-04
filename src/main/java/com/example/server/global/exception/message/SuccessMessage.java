@@ -31,6 +31,8 @@ public enum SuccessMessage {
 	CHECK_CONTENT_ACCESS_SUCCESS(HttpStatus.OK.value(), "컨텐츠 읽기 권한이 성공적으로 확인되었습니다"),
 	UPDATE_READ_STATUS_SUCCESS(HttpStatus.OK.value(), "컨텐츠 완독 여부 상태를 업데이트 하였습니다"),
 
+	UPDATE_SUCCESS_NOTIFICATION_SETTING(HttpStatus.OK.value(), "알림 설정이 완료되었습니다"),
+
 	UNLOCK_CONTENT_BY_AD_SUCCESS(HttpStatus.NO_CONTENT.value(), "광고 시청 후 컨텐츠가 해금되었습니다"),
 
 	RECOMMEND_CONTENT_DIFFICULTY_SUCCESS(HttpStatus.OK.value(), "컨텐츠 난이도 추천 결과 조회가 완료되었습니다"),
@@ -43,6 +45,7 @@ public enum SuccessMessage {
 	LOAD_SUCCESS_CHARACTER_PAGE(HttpStatus.OK.value(), "캐릭터 페이지 정보를 성공적으로 불러왔습니다"),
 	LOAD_SUCCESS_LEVEL_STANDARD(HttpStatus.OK.value(), "레벨 기준 정보를 성공적으로 불러왔습니다"),
 	LOAD_SUCCESS_REWARD_STANDARD(HttpStatus.OK.value(), "보상 기준 정보를 성공적으로 불러왔습니다"),
+	LOAD_SUCCESS_REWARD_HISTORY(HttpStatus.OK.value(), "포인트 / 경험치 내역을 성공적으로 불러왔습니다"),
 	//201
 	ACCESS_TOKEN_REISSUE_SUCCESS(HttpStatus.CREATED.value(), "액세스 토큰 재발급이 완료되었습니다.");
 

@@ -27,5 +27,17 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
+      - name: Check required env (no secrets printed)
+        env:
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+        run: |
+          if [ -z "$NAVER_CLIENT_ID" ]; then echo "NAVER_CLIENT_ID is MISSING" && exit 1; fi
+          if [ -z "$NAVER_CLIENT_SECRET" ]; then echo "NAVER_CLIENT_SECRET is MISSING" && exit 1; fi
+          echo "Required env is set"
+
       - name: Build & Test
-        run: ./gradlew clean test -Dspring.profiles.active=test
+        env:
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+        run: ./gradlew clean test -Dspring.profiles.active=test --stacktrace --info

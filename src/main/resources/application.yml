@@ -44,3 +44,52 @@ ncp:
     bucket-base-url: ${NCP_BUCKET}
     profile-url: ${NCP_PROFILE_BUCKET}
     character-url: ${NCP_CHARACTER_BUCKET}
+    endpoint: "https://kr.object.ncloudstorage.com"
+    region-name: kr-standard
+    bucket: neurous-registry-bucket
+    access-key: ${NCP_ACCESS_KEY}
+    secret-key: ${NCP_SECRET_KEY}
+    prefix: news-images
+
+naver:
+  openapi:
+    client-id: ${NAVER_CLIENT_ID}
+    client-secret: ${NAVER_CLIENT_SECRET}
+    base-url: https://openapi.naver.com
+    display: 10
+    sort: date
+
+news:
+  crawling:
+    per-category-size: 5
+    request-delay-ms: 200
+    user-agent: "Mozilla/5.0 (compatible; NeuroS/1.0; +https://example.com)"
+    category-query:
+      POLITICS: "정치 OR 국회 OR 대통령 OR 여당 OR 야당"
+      ECONOMY: "경제 OR 금리 OR 환율 OR 물가 OR 주식 OR 코스피 OR 코스닥"
+      SOCIETY: "사회 OR 사건 OR 사고 OR 법원 OR 검찰 OR 경찰 OR 교육"
+      LIFE_CULTURE: "생활 OR 문화 OR 공연 OR 전시 OR 여행"
+      IT_SCIENCE: "IT OR 과학 OR AI OR 반도체 OR 로봇 OR 우주"
+      WORLD: "세계 OR 미국 OR 중국 OR 일본 OR 유럽 OR 중동"
+
+clova:
+  base-url: https://clovastudio.stream.ntruss.com/v1/openai
+  model: HCX-003
+  api-key: ${CLOVA_API_KEY}
+  timeout-ms: 20000
+
+content:
+  generation:
+    per-category-size: 10
+    max-retries: 3
+
+google:
+  gemini:
+    api-key: ${GEMINI_API_KEY}
+    base-url: https://generativelanguage.googleapis.com
+    model: gemini-2.5-flash-image
+    timeout-ms: 20000
+    max-rpm: 10
+    max-retries: 3
+    base-backoff-ms: 800
+    max-backoff-ms: 15000

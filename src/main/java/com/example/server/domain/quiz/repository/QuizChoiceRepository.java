@@ -16,4 +16,6 @@ public interface QuizChoiceRepository extends JpaRepository<QuizChoice, Long> {
 	List<QuizChoice> findByQuiz_QuizIdOrderByChoiceNoAsc(Long quizId);
 
 	Optional<QuizChoice> findByQuiz_QuizIdAndIsCorrectTrue(Long quizId);
+
+	List<QuizChoice> findByQuiz_QuizIdOrderByChoiceNo(Long quizId);
 }

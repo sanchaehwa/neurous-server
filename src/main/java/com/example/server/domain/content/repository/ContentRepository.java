@@ -59,4 +59,6 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
 		Pageable pageable
 	);
 
+	boolean existsByNewsArticleIdAndContentLevel(Long newsArticleId, ContentLevel contentLevel);
+
 }

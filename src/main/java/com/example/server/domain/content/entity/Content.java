@@ -36,7 +36,7 @@ public class Content extends BaseTimeEntity {
 	@Column(name = "title", nullable = false, length = 100)
 	private String title;
 
-	@Column(name = "content_body", nullable = false, columnDefinition = "TEXT")
+	@Column(name = "content_body", nullable = false, columnDefinition = "LONGTEXT")
 	private String content;
 
 	@Column(name = "content_date", nullable = false)
@@ -60,4 +60,6 @@ public class Content extends BaseTimeEntity {
 	@Column(name = "hits", nullable = false, columnDefinition = "INT DEFAULT 0")
 	private int hits = 0;
 
+	@Column(name = "news_article_id")
+	private Long newsArticleId;
 }

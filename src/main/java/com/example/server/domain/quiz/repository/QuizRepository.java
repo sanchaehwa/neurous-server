@@ -16,4 +16,14 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 	@Query(" SELECT q FROM Quiz q WHERE q.content.contentId = :contentId AND q.quizDiff = :quizDiff")
 	Optional<Quiz> findQuiz(@Param("contentId") Long contentId, @Param("quizDiff") ContentLevel quizDiff);
 
+	Optional<Quiz> findByContent_ContentIdAndQuizDiff(Long contentId, String quizDiff);
+
+	boolean existsByContent_ContentId(Long contentId);
+
+	@Query("""
+        select coalesce(max(q.quizNum), 0)
+        from Quiz q
+        where q.content.contentId = :contentId
+    """)
+	int findMaxQuizNumByContentId(@Param("contentId") Long contentId);
 }

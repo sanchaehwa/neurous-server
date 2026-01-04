@@ -87,6 +87,7 @@ public class ContentService {
 	 * 컨텐츠 조회 / 검색
 	 */
 	//<전체 탐색>
+	@Transactional
 	public Map<ContentCategory, ExploreResponse> getExplore(Long userId) {
 
 		LocalDateTime now = LocalDateTime.now();
